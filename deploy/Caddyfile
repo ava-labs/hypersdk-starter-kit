@@ -5,7 +5,6 @@
 {$SERVE_DOMAIN} {
     reverse_proxy /faucet/* faucet:8765
     reverse_proxy /ext/* nodes:9650
-    reverse_proxy /* web:80
 
     tls {
         on_demand
