@@ -39,4 +39,4 @@ COPY --from=avalanchego /avalanchego/build/avalanchego /tmp/hypersdk/avalanchego
 
 COPY --from=faucet-builder /hypersdk/examples/morpheusvm/build/morpheus-faucet /morpheus-faucet
 
-ENTRYPOINT ["/bin/bash", "-c", "./scripts/run.sh && echo 'Subnet RPC started, starting faucet' && /morpheus-faucet"]
+ENTRYPOINT ["/bin/bash", "-c", "./scripts/stop.sh; ./scripts/run.sh && echo 'Subnet RPC started, starting faucet' && /morpheus-faucet"]
