@@ -1,11 +1,4 @@
 services:
-  web:
-    build:
-      context: ../
-      dockerfile: ./deploy/Dockerfile.web
-    ports:
-      - "3000:80"
-
   faucet:
     build:
       context: ../
