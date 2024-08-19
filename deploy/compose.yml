@@ -1,15 +1,15 @@
 services:
   web:
     build:
-      context: ../../..
-      dockerfile: examples/morpheusvm/docker/Dockerfile.web
+      context: ../
+      dockerfile: ./deploy/Dockerfile.web
     ports:
       - "3000:80"
 
   faucet:
     build:
-      context: ../../..
-      dockerfile: examples/morpheusvm/docker/Dockerfile.faucet
+      context: ../
+      dockerfile: ./deploy/Dockerfile.faucet
     environment:
       - RPC_ENDPOINT=nodes:9650
     ports:
@@ -17,12 +17,12 @@ services:
 
   nodes:
     build:
-      context: ../../..
-      dockerfile: examples/morpheusvm/docker/Dockerfile.nodes
+      context: ../
+      dockerfile: ./deploy/Dockerfile.nodes
     environment:
       - MODE=run
     ports:
-      - "9650-9654:9650-9654"
+      - "9650:9650"
     volumes:
       - type: volume
         target: /go/pkg/mod
