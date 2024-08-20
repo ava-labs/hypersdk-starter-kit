@@ -4,7 +4,7 @@
 
 {$SERVE_DOMAIN} {
     reverse_proxy /faucet/* faucet:8765
-    reverse_proxy /ext/* nodes:9650
+    reverse_proxy /ext/* devnet:9650
 
     tls {
         on_demand
