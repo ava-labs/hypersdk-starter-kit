@@ -1,28 +1,18 @@
 #####
-# Base layer with hypersdk
-#####
-FROM golang:1.22-bookworm AS hypersdk-downloader
-
-ENV GOMODCACHE /go/pkg/mod
-
-WORKDIR /
-
-# latest commit from https://github.com/ava-labs/hypersdk/tree/containerman17/morpheus-faucet
-RUN git clone https://github.com/ava-labs/hypersdk.git \
-    && cd /hypersdk \
-    && git checkout 45735c4
-
-WORKDIR /hypersdk/examples/morpheusvm
-
-#####
 # Build the faucet
 #####
 
-FROM hypersdk-downloader AS faucet-builder
+FROM golang:1.22-bookworm AS faucet-builder
+
+WORKDIR /build
+COPY ./go.mod ./go.sum ./
+
+RUN go mod download
+COPY ./cmd ./cmd
 
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    go build -o build/morpheus-faucet ./cmd/morpheus-faucet
+    go build -o build/faucet ./cmd/faucet
 
 #####
 # Final layer with faucet, VM and avalanchego
@@ -30,6 +20,6 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 FROM debian:bookworm-slim
 
 ENV RPC_ENDPOINT=devnet:9650
-COPY --from=faucet-builder /hypersdk/examples/morpheusvm/build/morpheus-faucet /morpheus-faucet
+COPY --from=faucet-builder /build/build/faucet /faucet
 
-ENTRYPOINT ["/morpheus-faucet"]
+ENTRYPOINT ["/faucet"]
