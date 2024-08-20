@@ -32,13 +32,6 @@ services:
     depends_on:
       devnet:
         condition: service_healthy
-    # TODO: rewrite healthcheck
-    # healthcheck:
-    #   test: ["CMD", "nc", "-z", "localhost", "8765"]
-    #   interval: 10s
-    #   timeout: 5s
-    #   retries: 5
-    #   start_period: 300s
 
   proxy:
     container_name: proxy
