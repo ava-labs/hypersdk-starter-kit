@@ -3,6 +3,11 @@
 }
 
 {$SERVE_DOMAIN} {
+    @mainPage {
+        path /
+    }
+    redir @mainPage https://reimagined-guacamole-7kvy4w2.pages.github.io/
+
     reverse_proxy /faucet/* faucet:8765
     reverse_proxy /ext/* devnet:9650
 
