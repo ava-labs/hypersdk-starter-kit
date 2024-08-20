@@ -1,49 +1,64 @@
 # HyperSDK Starter
 
-This repository is intended to provide a starter template for HyperSDK developers. Fork this repository and start building your HyperSDK-based Avalanche L1.
+This repository helps you start building your own blockchain using HyperSDK on Avalanche. You can fork this repository to begin.
 
 ## Develop VM locally
-TODO: TBD after HyperSDK API is more stable
+We will add instructions here later when the HyperSDK API is more stable.
 
-## Launch a local devnet
-This will launch a local devnet and a faucet, but not the reverse proxy. So you will be access itt flom locahost.
-1. `cd deploy`
-2. `docker compose up -d --build`
+## Start a local test network (devnet)
+This will start a local test network and a faucet on your computer:
+1. Go to the `deploy` folder: `cd deploy`
+2. Start the services: `docker compose up -d --build`
 
-After around 5 minutes, if everthing is correct, try opening [http://localhost:8765/faucet/morpheus1qqgvs58cq6f0fv876f2lccay8t55fwf6vg4c77h5c3h4gjruqelk5srn9ds](http://localhost:8765/faucet/morpheus1qqgvs58cq6f0fv876f2lccay8t55fwf6vg4c77h5c3h4gjruqelk5srn9ds) to test the faucet. 
+Wait about 5 minutes. If everything works, open this link in your browser:
+[http://localhost:8765/faucet/morpheus1qqgvs58cq6f0fv876f2lccay8t55fwf6vg4c77h5c3h4gjruqelk5srn9ds](http://localhost:8765/faucet/morpheus1qqgvs58cq6f0fv876f2lccay8t55fwf6vg4c77h5c3h4gjruqelk5srn9ds)
 
-Monitor logs using `docker compose logs -f`. Once the devnet is operational, you'll see a message `Devnet started` in the logs.
+To see what's happening, use: `docker compose logs -f`
+You'll see "Devnet started" when it's ready.
 
-Now you can `cd web_wallet` and run `npm install` and `npm run dev` to test the web wallet. It will point to the local devnet. Don't forget to proxy ports 8765 and 9650 if you work in codespaces or devcontainers.
+To test the web wallet:
+1. Go to the `web_wallet` folder: `cd web_wallet`
+2. Install dependencies: `npm install`
+3. Start the wallet: `npm run dev`
 
-## Deploy a devnet on a remote server
-The `deploy` folder already contains all you need to get started. You'll need a VM with at least one vCPU and 2 GB of RAM.
-1. `cd deploy`
-2. `cp .env.example .env`
-3. Set variable `SERVE_DOMAIN` in `.env` file to the domain you want to use for your devnet. 
-4. Make sure the domain in `SERVE_DOMAIN` is pointing to the IP address of the server you're deploying to. If you are using AWS, you can use `ec2-1-2-3-4.region.compute.amazonaws.com` kind of domain, otherwise just point any domain to the server using A record.
-5. Install docker on the remote host
-6. `export DOCKER_HOST=ssh://remoteUser@remoteHost`. Replace `remoteUser` with the user name of the remote host and `remoteHost` with the IP address of the remote host.
-7. `docker compose up -d --build proxy`. This will build the docker image and deploy it to the remote host.
+The wallet will connect to your local test network.
 
-## HyperSDK VM
-The example VM is based on MorpheusVM, but a sample VM code will only be included in this repository once the HyperSDK API is a bit more stable.
+If you're using Codespaces or devcontainers, make sure to forward ports 8765 and 9650.
+
+## Set up a test network on a remote server
+You need a server with at least 1 CPU and 2 GB of RAM.
+
+1. Go to the `deploy` folder: `cd deploy`
+2. Copy the example environment file: `cp .env.example .env`
+3. In the `.env` file, set `SERVE_DOMAIN` to your domain name.
+4. Make sure your domain points to your server's IP address.
+5. Install Docker on your server.
+6. Connect to your server's docker daemon: `export DOCKER_HOST=ssh://remoteUser@remoteHost`
+   Replace `remoteUser` with your username and `remoteHost` with your server's IP.
+7. Build and start the services: `docker compose up -d --build proxy`
+
+The frontend will be deployed using GitHub Actions. Check your repository settings to enable Pages and get the URL.
+
+## About the HyperSDK VM
+We use a VM based on MorpheusVM. We'll add sample VM code later when the HyperSDK API is more stable.
 
 ## Faucet
-To deploy a devnet/testnet you'll need a way to distribute tokens to users.
+The faucet gives out free tokens for testing. It gives 10 tokens to the address in the URL after the `/faucet/` path.
 
-Currently the faucet drips 10 tokens to an address in the URL, for example `http://localhost:8765/faucet/morpheus1qqgvs58cq6f0fv876f2lccay8t55fwf6vg4c77h5c3h4gjruqelk5srn9ds`.
+To run the faucet locally:
+1. Start only the local test network: 
+   - Go to `deploy` folder: `cd deploy`
+   - Run: `docker compose up -d --build devnet`
+2. Stop the Docker faucet if it's running: `docker compose down faucet`
+3. Set the faucet's private key: 
+   `export FAUCET_PRIVATE_KEY_HEX=323b1d8f4eed5f0da9da93071b034f2dce9d2d22692c172f3cb252a64ddfafd01b057de320297c29ad0c1f589ea216869cf1938d88c9fbd70d6748323dbf2fa7`
+4. Start the faucet: `go run ./cmd/faucet/`
+5. Test the faucet: Open this link in your browser:
+   `http://localhost:8766/faucet/morpheus1qqgvs58cq6f0fv876f2lccay8t55fwf6vg4c77h5c3h4gjruqelk5srn9ds`
 
-To launch a faucet locally:
-1. Launch a local devnet only, so `localhost:9650` is accessible. `cd deploy`, then `docker compose up -d --build devnet`
-2. Make sure the docker-based faucet is not running. `docker compose down faucet` from `deploy` folder
-3. `export FAUCET_PRIVATE_KEY_HEX=323b1d8f4eed5f0da9da93071b034f2dce9d2d22692c172f3cb252a64ddfafd01b057de320297c29ad0c1f589ea216869cf1938d88c9fbd70d6748323dbf2fa7`
-4. `go run ./cmd/faucet/`
-5. Open `http://localhost:8766/faucet/morpheus1qqgvs58cq6f0fv876f2lccay8t55fwf6vg4c77h5c3h4gjruqelk5srn9ds`
-
-## TODO:
-- validate minimal requirements of machine
-- The faucet deployment relies on the default Morpheus private key `323b1d8f4eed5f0da9da93071b034f2dce9d2d22692c172f3cb252a64ddfafd01b057de320297c29ad0c1f589ea216869cf1938d88c9fbd70d6748323dbf2fa7`. This should be changed to a randomly generated one later.
-- Simplify web_wallet example to include minimal dependencies, preferably without any compilation and frontend frameworks like react. We have to focus on communcation with chain and wallet. TBD if we need react or not here.
-- limit RPC requests to non-public methods (admin, etc)
-- add a devcontainer with ports 8765 and 9650 exposed
+## Things to do:
+- Check the minimum server requirements
+- Change the default Morpheus private key to a new random one
+- Make the web wallet example simpler
+- Limit RPC requests to non-public methods
+- Add a devcontainer with ports 8765 and 9650 open
