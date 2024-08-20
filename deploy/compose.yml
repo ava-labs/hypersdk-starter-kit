@@ -36,7 +36,7 @@ services:
   proxy:
     container_name: proxy
     restart: always
-    profiles: ["prod"] # this prevents the proxy from being built by default
+    profiles: ["prod"] # this prevents the proxy from being run by default
     build:
       dockerfile: ./Dockerfile.proxy
     ports:
