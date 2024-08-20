@@ -19,7 +19,6 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 #####
 FROM debian:bookworm-slim
 
-ENV RPC_ENDPOINT=devnet:9650
 COPY --from=faucet-builder /build/build/faucet /faucet
 
 ENTRYPOINT ["/faucet"]

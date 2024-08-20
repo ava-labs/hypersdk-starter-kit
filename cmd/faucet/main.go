@@ -48,9 +48,9 @@ func init() {
 
 	rpcEndpoint := os.Getenv("RPC_ENDPOINT")
 	if rpcEndpoint == "" {
-		rpcEndpoint = "localhost:9650"
+		rpcEndpoint = "http://localhost:9650"
 	}
-	url := fmt.Sprintf("http://%s/ext/bc/morpheusvm", rpcEndpoint)
+	url := fmt.Sprintf("%s/ext/bc/morpheusvm", rpcEndpoint)
 	cli = rpc.NewJSONRPCClient(url)
 
 	networkID, subnetID, chainID, err := cli.Network(context.TODO())
