@@ -1,5 +1,6 @@
 services:
   devnet:
+    container_name: devnet
     build:
       dockerfile: ./Dockerfile.devnet
     restart: always
@@ -10,15 +11,15 @@ services:
         target: /go/pkg/mod
       - type: volume
         target: /root/.cache/go-build
-    # TODO: restore healthcheck
-    # healthcheck:
-    #   test: ["CMD", "nc", "-z", "localhost", "9650"]
-    #  interval: 10s
-    #   timeout: 5s
-    #   retries: 5
-    #   start_period: 300s
+    healthcheck:
+      test: ["CMD", "curl", "-X", "POST", "http://localhost:9650/ext/bc/morpheusvm/coreapi", "-H", "Content-Type: application/json", "-d", "{\"jsonrpc\":\"2.0\",\"method\":\"hypersdk.network\",\"params\":{},\"id\":1}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 300s
   
   faucet:
+    container_name: faucet
     build:
       dockerfile: ./deploy/Dockerfile.faucet
       context: ../
@@ -28,19 +29,21 @@ services:
     restart: always
     ports:
       - "127.0.0.1:8765:8765"
-    
-    # TODO: restore healthcheck
+    depends_on:
+      devnet:
+        condition: service_healthy
+    # TODO: rewrite healthcheck
     # healthcheck:
     #   test: ["CMD", "nc", "-z", "localhost", "8765"]
     #   interval: 10s
     #   timeout: 5s
     #   retries: 5
     #   start_period: 300s
-    # depends_on:
-    #   - devnet
 
-  caddy:
+  proxy:
+    container_name: proxy
     restart: always
+    profiles: ["prod"] # this prevents the proxy from being built by default
     build:
       dockerfile: ./Dockerfile.proxy
     ports:
@@ -51,6 +54,9 @@ services:
       - caddy_config:/config
     environment:
       - SERVE_DOMAIN
+    depends_on:
+      - devnet
+      - faucet
 
 volumes:
   caddy_data:
