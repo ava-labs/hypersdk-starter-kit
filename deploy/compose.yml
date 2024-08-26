@@ -1,4 +1,13 @@
 services:
+  frontend:
+    container_name: frontend
+    build:
+      dockerfile: ./deploy/Dockerfile.frontend
+      context: ../
+    restart: always
+    ports:
+      - "127.0.0.1:8080:80"
+
   devnet:
     container_name: devnet
     build:
@@ -50,6 +59,7 @@ services:
     depends_on:
       - devnet
       - faucet
+      - frontend
 
 volumes:
   caddy_data:
