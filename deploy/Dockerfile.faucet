@@ -7,7 +7,6 @@ FROM golang:1.22-bookworm AS faucet-builder
 WORKDIR /build
 COPY ./go.mod ./go.sum ./
 
-RUN go mod download
 COPY ./cmd ./cmd
 
 RUN --mount=type=cache,target=/go/pkg/mod \
