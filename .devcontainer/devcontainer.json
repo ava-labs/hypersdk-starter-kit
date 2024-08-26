@@ -4,6 +4,11 @@
     "features": {
         "ghcr.io/devcontainers/features/node:1": {
             "version": "22"
-        }
-    }
+        },
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    },
+    "appPort": [
+        "8765:8765",
+        "9650:9650"
+    ]
 }
