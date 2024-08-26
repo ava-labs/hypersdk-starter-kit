@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import ConnectWallet from './screens/ConnectWallet'
 import { SignerIface } from './lib/signers'
 import Wallet from './screens/Wallet'
-import { getBalance, requestFaucetTransfer } from './lib/api'
 import { pubKeyToED25519Addr } from 'sample-metamask-snap-for-hypersdk/src/bech32'
 import Loading from './screens/Loading'
 import FullScreenError from './screens/FullScreenError'
 import { HRP } from './const'
+import { morpheusClient } from './lib/client'
 
 function App() {
   const [signers, setSigners] = useState<{ signer1: SignerIface, signer2: SignerIface } | null>(null)
@@ -38,13 +38,13 @@ function App() {
       const addr2 = pubKeyToED25519Addr(signers.signer2.getPublicKey(), HRP)
 
       if (!faucetRequested) {
-        await requestFaucetTransfer(addr1)
+        await morpheusClient.requestFaucetTransfer(addr1)
         setFaucetRequested(true)
       }
 
       await Promise.all([
-        setBalance1(await getBalance(addr1)),
-        setBalance2(await getBalance(addr2))
+        setBalance1(await morpheusClient.getBalance(addr1)),
+        setBalance2(await morpheusClient.getBalance(addr2))
       ])
     } catch (e) {
       setErrors([...errors, (e as Error)?.message || String(e)])

@@ -3,12 +3,14 @@ import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { pubKeyToED25519Addr } from 'sample-metamask-snap-for-hypersdk/src/bech32'
 import { formatBalance, fromFormattedBalance } from '../lib/numberFormat'
 import { COIN_SYMBOL, DECIMAL_PLACES, HRP, MAX_TRANSFER_FEE } from '../const'
-import { getAbi, getBalance, getNetwork, sendTx } from '../lib/api'
 import { idStringToBigInt } from 'sample-metamask-snap-for-hypersdk/src/cb58'
 import { useState } from 'react'
 import { base64 } from '@scure/base'
 import { ActionData, TransactionPayload } from 'sample-metamask-snap-for-hypersdk/src/sign'
 import { SignerIface } from '../lib/signers'
+import { morpheusClient } from '../lib/client'
+
+
 
 export default function Wallet({ otherWalletAddress, signer, balanceBigNumber, onBalanceRefreshRequested, walletName, derivationPath }: { otherWalletAddress: string, signer: SignerIface, balanceBigNumber: bigint, onBalanceRefreshRequested: () => void, walletName: string, derivationPath: string }) {
     const myAddr = pubKeyToED25519Addr(signer.getPublicKey(), HRP)
@@ -30,13 +32,13 @@ export default function Wallet({ otherWalletAddress, signer, balanceBigNumber, o
             log("info", `Sending ${amountString} ${COIN_SYMBOL} to ${otherWalletAddress}`)
             setLoadingCounter(counter => counter + 1)
             const amount = fromFormattedBalance(amountString, DECIMAL_PLACES)
-            const initialBalance = await getBalance(myAddr)
+            const initialBalance = await morpheusClient.getBalance(myAddr)
 
 
             log("info", `Initial balance: ${formatBalance(initialBalance, DECIMAL_PLACES)} ${COIN_SYMBOL}`)
 
 
-            const chainIdStr = (await getNetwork()).chainId
+            const chainIdStr = (await morpheusClient.getNetwork()).chainId
             const chainIdBigNumber = idStringToBigInt(chainIdStr)
 
             const actionData: ActionData = {
@@ -55,13 +57,13 @@ export default function Wallet({ otherWalletAddress, signer, balanceBigNumber, o
                 actions: [actionData]
             }
 
-            const abiString = await getAbi()
+            const abiString = await morpheusClient.getAbi()
 
             const signed = await signer.signTx(txPayload, abiString)
 
             log("success", `Transaction signed`)
 
-            await sendTx(signed)
+            await morpheusClient.sendTx(signed)
             log("success", `Transaction sent, waiting for the balance change`)
 
 
@@ -70,7 +72,7 @@ export default function Wallet({ otherWalletAddress, signer, balanceBigNumber, o
             const timeStarted = Date.now()
 
             for (let i = 0; i < 100000; i++) {//curcuit breaker
-                const balance = await getBalance(myAddr)
+                const balance = await morpheusClient.getBalance(myAddr)
                 if (balance !== initialBalance || Date.now() - timeStarted > totalWaitTime) {
                     balanceChanged = true
                     log("success", `Balance changed to ${parseFloat(formatBalance(balance, DECIMAL_PLACES)).toFixed(6)} ${COIN_SYMBOL} in ${((Date.now() - timeStarted) / 1000).toFixed(2)}s`)
