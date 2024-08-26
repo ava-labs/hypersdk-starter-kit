@@ -1,0 +1,9 @@
+{
+    "name": "Go + Node.js",
+    "image": "mcr.microsoft.com/vscode/devcontainers/go:1.22",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "22"
+        }
+    }
+}
