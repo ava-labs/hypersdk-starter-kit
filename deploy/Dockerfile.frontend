@@ -5,7 +5,8 @@ WORKDIR /app
 
 COPY web_wallet/package.json web_wallet/package-lock.json ./
 
-RUN npm ci --cache .npm --prefer-offline
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --prefer-offline
 
 COPY web_wallet/ ./
 
