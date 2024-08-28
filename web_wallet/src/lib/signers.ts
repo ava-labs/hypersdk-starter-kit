@@ -35,7 +35,6 @@ import MetaMaskSDK, { SDKProvider } from "@metamask/sdk"
 import { DEVELOPMENT_MODE, SNAP_ID } from "../const";
 import { base58 } from '@scure/base';
 import { ed25519 } from "@noble/curves/ed25519";
-import { ED25519_AUTH_ID } from "sample-metamask-snap-for-hypersdk/src/bech32";
 
 type InvokeSnapParams = {
     method: string;
@@ -61,10 +60,6 @@ export class MetamaskSnapSigner implements SignerIface {
 
     constructor(private snapId: string, private lastDerivationSection: number = 0) {
 
-    }
-
-    getAuthId(): number {
-        return ED25519_AUTH_ID
     }
 
     getPublicKey(): Uint8Array {
