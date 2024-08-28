@@ -1,5 +1,5 @@
 import { API_HOST, FAUCET_HOST } from "../const";
-import { HyperSDKBaseClient } from "../shared-client/BaseClient";
+import { HyperSDKBaseClient } from "../shared-client/HyperSDKBaseClient";
 
 class MorpheusClient extends HyperSDKBaseClient {
     constructor(apiHost: string, private readonly faucetHost: string) {

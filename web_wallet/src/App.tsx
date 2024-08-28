@@ -6,7 +6,7 @@ import { pubKeyToED25519Addr } from 'sample-metamask-snap-for-hypersdk/src/bech3
 import Loading from './screens/Loading'
 import FullScreenError from './screens/FullScreenError'
 import { HRP } from './const'
-import { morpheusClient } from './lib/client'
+import { morpheusClient } from './lib/MorpheusClient'
 
 function App() {
   const [signers, setSigners] = useState<{ signer1: SignerIface, signer2: SignerIface } | null>(null)

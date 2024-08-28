@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { base64 } from '@scure/base'
 import { ActionData, TransactionPayload } from 'sample-metamask-snap-for-hypersdk/src/sign'
 import { SignerIface } from '../lib/signers'
-import { morpheusClient } from '../lib/client'
+import { morpheusClient } from '../lib/MorpheusClient'
 
 
 
