@@ -3,7 +3,7 @@ module github.com/ava-labs/hypersdk-starter
 go 1.22.5
 
 require (
-	github.com/ava-labs/hypersdk v0.0.17-0.20240819220927-2d81005ed9e2
+	github.com/ava-labs/hypersdk v0.0.17-0.20240828093327-534e82d64ec5
 	github.com/ava-labs/hypersdk/examples/morpheusvm v0.0.0-20240819220927-2d81005ed9e2
 	github.com/gorilla/mux v1.8.0
 	github.com/rs/cors v1.7.0
@@ -13,7 +13,7 @@ require (
 require (
 	filippo.io/edwards25519 v1.0.0 // indirect
 	github.com/DataDog/zstd v1.5.2 // indirect
-	github.com/ava-labs/avalanchego v1.11.11-0.20240813002618-d729e5c7ef9f // indirect
+	github.com/ava-labs/avalanchego v1.11.11-0.20240827034238-fc892827880a // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.3 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
