@@ -26,7 +26,7 @@ export abstract class HyperSDKBaseClient {
     }
 
     public async getAbi(): Promise<string> {
-        return (await this.makeVmAPIRequest<{ abi: string }>('getABI')).abi
+        return (await this.makeCoreAPIRequest<{ abi: string }>('getABI')).abi
     }
 
     public async sendTx(txBytes: Uint8Array): Promise<void> {
