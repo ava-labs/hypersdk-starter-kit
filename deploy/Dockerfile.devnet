@@ -13,17 +13,12 @@ ENV GOMODCACHE /go/pkg/mod
 
 WORKDIR /
 
-# latest commit from https://github.com/ava-labs/hypersdk/tree/containerman17/morpheus-faucet
+# latest commit from https://github.com/ava-labs/hypersdk/tree/abi
 RUN git clone https://github.com/ava-labs/hypersdk.git \
     && cd /hypersdk \
-    && git checkout 45735c4
+    && git checkout 534e82d
 
 WORKDIR /hypersdk/examples/morpheusvm
-
-#####
-# Final layer with faucet, VM and avalanchego
-#####
-FROM hypersdk-downloader 
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y curl && apt clean && rm -rf /var/lib/apt/lists/*
 
