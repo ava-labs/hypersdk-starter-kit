@@ -3,8 +3,8 @@ module github.com/ava-labs/hypersdk-starter
 go 1.22.5
 
 require (
-	github.com/ava-labs/hypersdk v0.0.17-0.20240828093327-534e82d64ec5
-	github.com/ava-labs/hypersdk/examples/morpheusvm v0.0.0-20240819220927-2d81005ed9e2
+	github.com/ava-labs/hypersdk v0.0.17-0.20240829093030-0a9ecf72a014
+	github.com/ava-labs/hypersdk/examples/morpheusvm v0.0.0-20240829093030-0a9ecf72a014
 	github.com/gorilla/mux v1.8.0
 	github.com/rs/cors v1.7.0
 	golang.org/x/time v0.3.0

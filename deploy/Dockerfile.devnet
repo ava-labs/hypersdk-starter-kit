@@ -16,13 +16,13 @@ WORKDIR /
 # latest commit from https://github.com/ava-labs/hypersdk/tree/abi
 RUN git clone https://github.com/ava-labs/hypersdk.git \
     && cd /hypersdk \
-    && git checkout 534e82d
+    && git checkout 0a9ecf72a014de2b52b1f7c5fba6fc2847ba2cd2
 
 WORKDIR /hypersdk/examples/morpheusvm
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y curl && apt clean && rm -rf /var/lib/apt/lists/*
 
 ARG INSTALL_AVALANCHEGO_VERSION=d729e5c7ef9f008c3e89cd7131148ad3acda2e34
-COPY --from=avalanchego /avalanchego/build/avalanchego /tmp/hypersdk/avalanchego-${INSTALL_AVALANCHEGO_VERSION}/avalanchego
+COPY --from=avalanchego /avalanchego/build/avalanchego /root/.hypersdk/avalanchego-${INSTALL_AVALANCHEGO_VERSION}/avalanchego
 
 ENTRYPOINT ["/bin/bash", "-c", "./scripts/stop.sh; ./scripts/run.sh && echo 'Devnet started' && tail -f /dev/null"]

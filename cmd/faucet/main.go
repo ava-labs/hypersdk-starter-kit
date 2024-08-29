@@ -17,25 +17,25 @@ import (
 	"github.com/rs/cors"
 	"golang.org/x/time/rate"
 
+	"github.com/ava-labs/hypersdk/api/jsonrpc"
 	"github.com/ava-labs/hypersdk/auth"
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/crypto/ed25519"
 	"github.com/ava-labs/hypersdk/examples/morpheusvm/actions"
-	"github.com/ava-labs/hypersdk/rpc"
 	"github.com/ava-labs/hypersdk/utils"
 
 	lconsts "github.com/ava-labs/hypersdk/examples/morpheusvm/consts"
-	lrpc "github.com/ava-labs/hypersdk/examples/morpheusvm/rpc"
+	"github.com/ava-labs/hypersdk/examples/morpheusvm/controller"
 )
 
 const amtStr = "10.00"
 
 var (
-	priv    ed25519.PrivateKey
-	factory chain.AuthFactory
-	cli     *rpc.JSONRPCClient
-	lcli    *lrpc.JSONRPCClient
+	priv        ed25519.PrivateKey
+	factory     chain.AuthFactory
+	morpheusRPC *controller.JSONRPCClient
+	hyperRPC    *jsonrpc.JSONRPCClient
 )
 
 func init() {
@@ -51,15 +51,9 @@ func init() {
 		rpcEndpoint = "http://localhost:9650"
 	}
 	url := fmt.Sprintf("%s/ext/bc/morpheusvm", rpcEndpoint)
-	cli = rpc.NewJSONRPCClient(url)
+	morpheusRPC = controller.NewJSONRPCClient(url)
 
-	networkID, subnetID, chainID, err := cli.Network(context.TODO())
-	if err != nil {
-		log.Fatalf("failed to get network info: %v", err)
-	}
-	fmt.Println(networkID, subnetID, chainID)
-
-	lcli = lrpc.NewJSONRPCClient(url, networkID, chainID)
+	hyperRPC = jsonrpc.NewJSONRPCClient(url)
 }
 
 func transferCoins(to string) (string, error) {
@@ -73,7 +67,7 @@ func transferCoins(to string) (string, error) {
 		return "", fmt.Errorf("failed to parse amount: %w", err)
 	}
 
-	balanceBefore, err := lcli.Balance(context.TODO(), to)
+	balanceBefore, err := morpheusRPC.Balance(context.TODO(), to)
 	if err != nil {
 		return "", fmt.Errorf("failed to get balance: %w", err)
 	}
@@ -86,12 +80,12 @@ func transferCoins(to string) (string, error) {
 		return "Balance is already greater than 1.000, no transfer needed", nil
 	}
 
-	parser, err := lcli.Parser(context.TODO())
+	parser, err := morpheusRPC.Parser(context.TODO())
 	if err != nil {
 		return "", fmt.Errorf("failed to get parser: %w", err)
 	}
 
-	submit, _, _, err := cli.GenerateTransaction(
+	submit, _, _, err := hyperRPC.GenerateTransaction(
 		context.TODO(),
 		parser,
 		[]chain.Action{&actions.Transfer{
@@ -109,7 +103,7 @@ func transferCoins(to string) (string, error) {
 		return "", fmt.Errorf("failed to submit transaction: %w", err)
 	}
 
-	err = lcli.WaitForBalance(context.TODO(), to, amt)
+	err = morpheusRPC.WaitForBalance(context.TODO(), to, amt)
 	if err != nil {
 		return "", fmt.Errorf("failed to wait for balance: %w", err)
 	}
