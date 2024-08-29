@@ -11,15 +11,14 @@ services:
   devnet:
     container_name: devnet
     build:
-      dockerfile: ./Dockerfile.devnet
+      dockerfile: ./deploy/Dockerfile.devnet
+      context: ../
     restart: always
     ports:
       - "127.0.0.1:9650:9650"
     volumes:
-      - type: volume
-        target: /go/pkg/mod
-      - type: volume
-        target: /root/.cache/go-build
+      - devnet_go_mod:/go/pkg/mod
+      - devnet_go_build:/root/.cache/go-build
     healthcheck:
       test: ["CMD", "curl", "-X", "POST", "http://localhost:9650/ext/bc/morpheusvm/coreapi", "-H", "Content-Type: application/json", "-d", "{\"jsonrpc\":\"2.0\",\"method\":\"hypersdk.network\",\"params\":{},\"id\":1}"]
       interval: 10s
@@ -64,3 +63,6 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  devnet_go_mod:
+  devnet_go_build:
+  
