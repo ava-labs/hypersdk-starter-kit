@@ -11,7 +11,7 @@ interface ApiResponse<T> {
     };
 }
 
-type getSignerParams = {
+type signerParams = {
     type: "ephemeral"
 } | {
     type: "private-key",
@@ -23,13 +23,14 @@ type getSignerParams = {
     useLocalSnap?: boolean
 }
 
-export abstract class HyperSDKBaseClient {
+export abstract class HyperSDKBaseClient extends EventTarget {
     constructor(
         protected readonly apiHost: string,//for example: http://localhost:9650
         protected readonly vmName: string,//for example: morpheusvm
         protected readonly vmRPCPrefix: string,//for example: morpheusapi
         protected readonly decimals: number = 9,
     ) {
+        super();
         if (this.vmRPCPrefix.startsWith('/')) {
             this.vmRPCPrefix = vmRPCPrefix.substring(1);
         }
@@ -49,22 +50,29 @@ export abstract class HyperSDKBaseClient {
         return this.makeCoreAPIRequest<void>('submitTx', { tx: bytesBase64 });
     }
 
-    public async getSigner(params: getSignerParams): Promise<SignerIface> {
-        let signer: SignerIface;
+    private signer: SignerIface | null = null;
+    public async connect(params: signerParams): Promise<SignerIface> {
         if (params.type === "ephemeral") {
-            signer = new EphemeralSigner();
+            this.signer = new EphemeralSigner();
         } else if (params.type === "private-key") {
-            signer = new PrivateKeySigner(params.privateKey);
+            this.signer = new PrivateKeySigner(params.privateKey);
         } else if (params.type === "metamask-snap") {
-            signer = new MetamaskSnapSigner(params.snapId ?? DEFAULT_SNAP_ID, params.lastDerivationSection ?? 0, params.useLocalSnap ?? false);
+            this.signer = new MetamaskSnapSigner(params.snapId ?? DEFAULT_SNAP_ID, params.lastDerivationSection ?? 0, params.useLocalSnap ?? false);
         } else {
-            throw new Error("Invalid signer type");
+            throw new Error("Invalid signer type: " + params.type)
         }
 
-        await signer.connect();
-        return signer;
+        await this.signer.connect();
+        this.dispatchEvent(new CustomEvent('signerConnected', { detail: this.signer }));
+        return this.signer;
     }
 
+    public getSigner(): SignerIface {
+        if (!this.signer) {
+            throw new Error("Signer not connected");
+        }
+        return this.signer;
+    }
 
     public fromFormattedBalance = (balance: string): bigint => {
         const float = parseFloat(balance)
