@@ -3,7 +3,7 @@
 This repository helps you start building your own blockchain using HyperSDK on Avalanche. You can fork this repository to begin.
 
 ## Develop VM locally
-We will add instructions here later when the HyperSDK API is more stable.
+We will add instructions here later when the HyperSDK API is more stable
 
 ## Start a local test network (devnet)
 This will start a local test network and a faucet on your computer:
