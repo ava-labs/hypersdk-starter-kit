@@ -1,25 +1,29 @@
-import { SNAP_ID } from '../const'
 import { useState } from 'react'
 import Loading from './Loading'
 import FullScreenError from './FullScreenError'
 import { SignerIface } from '../shared-client/signers'
 import { morpheusClient } from '../MorpheusClient'
 
-
 export default function ConnectWalletWindow({ onSignerInitComplete }: { onSignerInitComplete: (signers: { signer1: SignerIface, signer2: SignerIface }) => void }) {
 
     const [loading, setLoading] = useState(0)
     const [errors, setErrors] = useState<string[]>([])
 
-    async function selectMetamaskSnap() {
+    async function selectSigner(type: "ephemeral" | "metamask-snap") {
         try {
             setLoading(loading + 1)
-            const signer1 = new MetamaskSnapSigner(SNAP_ID)
-            const signer2 = new MetamaskSnapSigner(SNAP_ID, 1)
 
-            await signer1.connect()
-            await signer2.connect()
-            onSignerInitComplete({ signer1: signer1, signer2: signer2 })
+            const signer1 = await morpheusClient.getSigner({ type })
+
+            let signer2: SignerIface
+
+            if (type === "metamask-snap") {
+                signer2 = await morpheusClient.getSigner({ type, lastDerivationSection: 1 })
+            } else {
+                signer2 = await morpheusClient.getSigner({ type })
+            }
+
+            onSignerInitComplete({ signer1, signer2 })
         } catch (e) {
             console.error(e)
             setErrors(errors => [...errors, (e as Error)?.message || String(e)])
@@ -44,14 +48,14 @@ export default function ConnectWalletWindow({ onSignerInitComplete }: { onSigner
                     <button
                         type="button"
                         className="w-48 px-4 py-2 bg-black text-white font-bold rounded hover:bg-gray-800 transition-colors duration-200 transform hover:scale-105"
-                        onClick={() => selectMetamaskSnap()}
+                        onClick={() => selectSigner("metamask-snap")}
                     >
                         Metamask Snap
                     </button>
                     <button
                         type="button"
                         className="w-48 px-4 py-2 bg-white text-black font-bold rounded border border-black hover:bg-gray-100 transition-colors duration-200 transform hover:scale-105"
-                        onClick={async () => onSignerInitComplete({ signer1: await morpheusClient.getSigner({ type: "ephemeral" }), signer2: await morpheusClient.getSigner({ type: "ephemeral" }) })}
+                        onClick={() => selectSigner("ephemeral")}
                     >
                         Temporary key
                     </button>
