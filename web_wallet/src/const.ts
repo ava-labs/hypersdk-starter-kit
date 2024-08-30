@@ -1,4 +1,3 @@
-export const MAX_TRANSFER_FEE = 10000000n
 
 export const DEVELOPMENT_MODE = typeof window === 'undefined' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
 

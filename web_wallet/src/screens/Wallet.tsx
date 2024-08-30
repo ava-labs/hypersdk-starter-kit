@@ -1,7 +1,6 @@
 
 import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { pubKeyToED25519Addr } from 'sample-metamask-snap-for-hypersdk/src/bech32'
-import { MAX_TRANSFER_FEE } from '../const'
 import { idStringToBigInt } from 'sample-metamask-snap-for-hypersdk/src/cb58'
 import { useState } from 'react'
 import { base64 } from '@scure/base'
@@ -9,7 +8,8 @@ import { ActionData, TransactionPayload } from 'sample-metamask-snap-for-hypersd
 import { SignerIface } from '../lib/signers'
 import { morpheusClient } from '../lib/MorpheusClient'
 
-
+//FIXME: we don't have a fee prediction yet, so we just use a big number
+const MAX_TX_FEE_TEMP = 10000000n
 
 export default function Wallet({ otherWalletAddress, signer, balanceBigNumber, onBalanceRefreshRequested, walletName, derivationPath }: { otherWalletAddress: string, signer: SignerIface, balanceBigNumber: bigint, onBalanceRefreshRequested: () => void, walletName: string, derivationPath: string }) {
     const myAddr = pubKeyToED25519Addr(signer.getPublicKey(), morpheusClient.HRP)
@@ -52,7 +52,7 @@ export default function Wallet({ otherWalletAddress, signer, balanceBigNumber, o
             const txPayload: TransactionPayload = {
                 timestamp: String(BigInt(Date.now()) + 59n * 1000n),
                 chainId: String(chainIdBigNumber),
-                maxFee: String(MAX_TRANSFER_FEE),
+                maxFee: String(MAX_TX_FEE_TEMP),
                 actions: [actionData]
             }
 
