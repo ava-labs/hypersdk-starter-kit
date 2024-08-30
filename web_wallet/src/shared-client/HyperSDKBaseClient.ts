@@ -13,7 +13,8 @@ export abstract class HyperSDKBaseClient {
     constructor(
         protected readonly apiHost: string,//for example: http://localhost:9650
         protected readonly vmName: string,//for example: morpheusvm
-        protected readonly vmRPCPrefix: string//for example: morpheusapi
+        protected readonly vmRPCPrefix: string,//for example: morpheusapi
+        protected readonly decimals: number = 9,
     ) {
         if (this.vmRPCPrefix.startsWith('/')) {
             this.vmRPCPrefix = vmRPCPrefix.substring(1);
@@ -32,6 +33,20 @@ export abstract class HyperSDKBaseClient {
     public async sendTx(txBytes: Uint8Array): Promise<void> {
         const bytesBase64 = base64.encode(txBytes);
         return this.makeCoreAPIRequest<void>('submitTx', { tx: bytesBase64 });
+    }
+
+
+    public fromFormattedBalance = (balance: string): bigint => {
+        const float = parseFloat(balance)
+        return BigInt(float * 10 ** this.decimals)
+    }
+
+    public formatBalance = (balance: bigint): string => {
+        const divisor = 10n ** BigInt(this.decimals);
+        const quotient = balance / divisor;
+        const remainder = balance % divisor;
+        const paddedRemainder = remainder.toString().padStart(this.decimals, '0');
+        return `${quotient}.${paddedRemainder}`;
     }
 
     //protected methods intended to be used by subclasses
@@ -77,5 +92,6 @@ export abstract class HyperSDKBaseClient {
             clearTimeout(timeoutId);
         }
     }
+
 
 }

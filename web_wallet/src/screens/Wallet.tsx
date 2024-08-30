@@ -1,8 +1,7 @@
 
 import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { pubKeyToED25519Addr } from 'sample-metamask-snap-for-hypersdk/src/bech32'
-import { formatBalance, fromFormattedBalance } from '../lib/numberFormat'
-import { COIN_SYMBOL, DECIMAL_PLACES, HRP, MAX_TRANSFER_FEE } from '../const'
+import { MAX_TRANSFER_FEE } from '../const'
 import { idStringToBigInt } from 'sample-metamask-snap-for-hypersdk/src/cb58'
 import { useState } from 'react'
 import { base64 } from '@scure/base'
@@ -13,7 +12,7 @@ import { morpheusClient } from '../lib/MorpheusClient'
 
 
 export default function Wallet({ otherWalletAddress, signer, balanceBigNumber, onBalanceRefreshRequested, walletName, derivationPath }: { otherWalletAddress: string, signer: SignerIface, balanceBigNumber: bigint, onBalanceRefreshRequested: () => void, walletName: string, derivationPath: string }) {
-    const myAddr = pubKeyToED25519Addr(signer.getPublicKey(), HRP)
+    const myAddr = pubKeyToED25519Addr(signer.getPublicKey(), morpheusClient.HRP)
 
     const [loadingCounter, setLoadingCounter] = useState(0)
     const [logText, setLogText] = useState("")
@@ -29,13 +28,13 @@ export default function Wallet({ otherWalletAddress, signer, balanceBigNumber, o
     async function sendTokens(amountString: "0.1" | "1") {
         setLogText("")
         try {
-            log("info", `Sending ${amountString} ${COIN_SYMBOL} to ${otherWalletAddress}`)
+            log("info", `Sending ${amountString} ${morpheusClient.COIN_SYMBOL} to ${otherWalletAddress}`)
             setLoadingCounter(counter => counter + 1)
-            const amount = fromFormattedBalance(amountString, DECIMAL_PLACES)
+            const amount = morpheusClient.fromFormattedBalance(amountString)
             const initialBalance = await morpheusClient.getBalance(myAddr)
 
 
-            log("info", `Initial balance: ${formatBalance(initialBalance, DECIMAL_PLACES)} ${COIN_SYMBOL}`)
+            log("info", `Initial balance: ${morpheusClient.formatBalance(initialBalance)} ${morpheusClient.COIN_SYMBOL}`)
 
 
             const chainIdStr = (await morpheusClient.getNetwork()).chainId
@@ -75,7 +74,7 @@ export default function Wallet({ otherWalletAddress, signer, balanceBigNumber, o
                 const balance = await morpheusClient.getBalance(myAddr)
                 if (balance !== initialBalance || Date.now() - timeStarted > totalWaitTime) {
                     balanceChanged = true
-                    log("success", `Balance changed to ${parseFloat(formatBalance(balance, DECIMAL_PLACES)).toFixed(6)} ${COIN_SYMBOL} in ${((Date.now() - timeStarted) / 1000).toFixed(2)}s`)
+                    log("success", `Balance changed to ${parseFloat(morpheusClient.formatBalance(balance)).toFixed(6)} ${morpheusClient.COIN_SYMBOL} in ${((Date.now() - timeStarted) / 1000).toFixed(2)}s`)
                     break
                 } else {
                     await new Promise(resolve => setTimeout(resolve, 100))
@@ -103,7 +102,7 @@ export default function Wallet({ otherWalletAddress, signer, balanceBigNumber, o
         <div className="text-xs mb-4">Derivation path {derivationPath}</div>
         <div className="text-xl font-mono break-all ">{myAddr}</div>
         <div className="flex items-center my-12">
-            <div className='text-8xl font-bold'>{parseFloat(formatBalance(balanceBigNumber, DECIMAL_PLACES)).toFixed(6)} {COIN_SYMBOL}</div>
+            <div className='text-8xl font-bold'>{parseFloat(morpheusClient.formatBalance(balanceBigNumber)).toFixed(6)} {morpheusClient.COIN_SYMBOL}</div>
             <button className="ml-4" onClick={() => onBalanceRefreshRequested()}>
                 <ArrowPathIcon className="h-6 w-6 text-gray-500 hover:text-gray-700" />
             </button>

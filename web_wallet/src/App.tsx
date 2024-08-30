@@ -5,7 +5,6 @@ import Wallet from './screens/Wallet'
 import { pubKeyToED25519Addr } from 'sample-metamask-snap-for-hypersdk/src/bech32'
 import Loading from './screens/Loading'
 import FullScreenError from './screens/FullScreenError'
-import { HRP } from './const'
 import { morpheusClient } from './lib/MorpheusClient'
 
 function App() {
@@ -34,8 +33,8 @@ function App() {
 
     setBalancesLoading(balancesLoading + 1)
     try {
-      const addr1 = pubKeyToED25519Addr(signers.signer1.getPublicKey(), HRP)
-      const addr2 = pubKeyToED25519Addr(signers.signer2.getPublicKey(), HRP)
+      const addr1 = pubKeyToED25519Addr(signers.signer1.getPublicKey(), morpheusClient.HRP)
+      const addr2 = pubKeyToED25519Addr(signers.signer2.getPublicKey(), morpheusClient.HRP)
 
       if (!faucetRequested) {
         await morpheusClient.requestFaucetTransfer(addr1)
@@ -71,11 +70,11 @@ function App() {
     <div className="flex flex-col md:flex-row">
       <div className="w-full md:w-1/2 bg-white p-8">
         <Wallet signer={signers.signer1} derivationPath="m/44'/9000'/0'" balanceBigNumber={balance1} onBalanceRefreshRequested={refreshBalances} walletName={'Address #1'}
-          otherWalletAddress={pubKeyToED25519Addr(signers.signer2.getPublicKey(), HRP)} />
+          otherWalletAddress={pubKeyToED25519Addr(signers.signer2.getPublicKey(), morpheusClient.HRP)} />
       </div>
       <div className="w-full md:w-1/2 bg-gray-200 p-8 min-h-screen">
         <Wallet signer={signers.signer2} derivationPath="m/44'/9000'/1'" balanceBigNumber={balance2} onBalanceRefreshRequested={refreshBalances} walletName={'Address #2'}
-          otherWalletAddress={pubKeyToED25519Addr(signers.signer1.getPublicKey(), HRP)} />
+          otherWalletAddress={pubKeyToED25519Addr(signers.signer1.getPublicKey(), morpheusClient.HRP)} />
       </div>
     </div>
   )

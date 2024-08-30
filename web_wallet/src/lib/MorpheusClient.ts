@@ -2,10 +2,14 @@ import { API_HOST, FAUCET_HOST } from "../const";
 import { HyperSDKBaseClient } from "../shared-client/HyperSDKBaseClient";
 
 class MorpheusClient extends HyperSDKBaseClient {
+    public readonly COIN_SYMBOL = 'RED';
+    public readonly HRP = 'morpheus'
+
     constructor(apiHost: string, private readonly faucetHost: string) {
         const vmName = 'morpheusvm';
         const vmRPCPrefix = 'morpheusapi';
-        super(apiHost, vmName, vmRPCPrefix);
+        const decimals = 9;
+        super(apiHost, vmName, vmRPCPrefix, decimals);
     }
 
     public async getBalance(address: string): Promise<bigint> {
