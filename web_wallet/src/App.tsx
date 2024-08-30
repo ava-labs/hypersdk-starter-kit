@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import ConnectWallet from './screens/ConnectWallet'
-import { SignerIface } from './lib/signers'
+import { SignerIface } from './shared-client/signers'
 import Wallet from './screens/Wallet'
 import { pubKeyToED25519Addr } from 'sample-metamask-snap-for-hypersdk/src/bech32'
 import Loading from './screens/Loading'
 import FullScreenError from './screens/FullScreenError'
-import { morpheusClient } from './lib/MorpheusClient'
+import { morpheusClient } from './MorpheusClient'
 
 function App() {
   const [signers, setSigners] = useState<{ signer1: SignerIface, signer2: SignerIface } | null>(null)

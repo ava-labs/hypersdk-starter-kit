@@ -1,0 +1,17 @@
+{
+  "name": "hypersdkclient",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@metamask/sdk": "^0.27.0",
+    "@scure/base": "^1.1.7",
+    "sample-metamask-snap-for-hypersdk": "^0.2.0"
+  }
+}

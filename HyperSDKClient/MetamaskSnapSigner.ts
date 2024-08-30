@@ -1,40 +1,10 @@
-import { TransactionPayload, signTransactionBytes } from "sample-metamask-snap-for-hypersdk/src/sign"
-import { Marshaler } from "sample-metamask-snap-for-hypersdk/src/Marshaler"
-
-export interface SignerIface {
-    signTx(txPayload: TransactionPayload, abiString: string): Promise<Uint8Array>
-    getPublicKey(): Uint8Array
-}
-
-export class PrivateKeySigner implements SignerIface {
-    constructor(private privateKey: Uint8Array) {
-        if (this.privateKey.length !== 32) {
-            throw new Error("Private key must be 32 bytes");
-        }
-    }
-
-    async signTx(txPayload: TransactionPayload, abiString: string): Promise<Uint8Array> {
-        const marshaler = new Marshaler(abiString);
-        const digest = marshaler.encodeTransaction(txPayload);
-        const signedTxBytes = signTransactionBytes(digest, this.privateKey);
-        return signedTxBytes;
-    }
-
-    getPublicKey(): Uint8Array {
-        return ed25519.getPublicKey(this.privateKey);
-    }
-}
-
-export class EphemeralSigner extends PrivateKeySigner {
-    constructor() {
-        super(ed25519.utils.randomPrivateKey());
-    }
-}
-
-import MetaMaskSDK, { SDKProvider } from "@metamask/sdk"
-import { DEVELOPMENT_MODE, SNAP_ID } from "../const";
 import { base58 } from '@scure/base';
-import { ed25519 } from "@noble/curves/ed25519";
+import MetaMaskSDK, { SDKProvider } from "@metamask/sdk";
+import { TransactionPayload } from "sample-metamask-snap-for-hypersdk/src/sign";
+import { SignerIface } from "./types";
+
+import snapPkgJson from "sample-metamask-snap-for-hypersdk/package.json";
+export const DEFAULT_SNAP_ID = `npm:${snapPkgJson.name}`;
 
 type InvokeSnapParams = {
     method: string;
@@ -58,7 +28,7 @@ async function getProvider(): Promise<SDKProvider> {
 export class MetamaskSnapSigner implements SignerIface {
     private cachedPublicKey: Uint8Array | null = null;
 
-    constructor(private snapId: string, private lastDerivationSection: number = 0) {
+    constructor(private snapId: string, private lastDerivationSection: number = 0, private useLocalSnap: boolean = false) {
 
     }
 
@@ -95,7 +65,7 @@ export class MetamaskSnapSigner implements SignerIface {
             method: 'wallet_getSnaps',
         })) as Record<string, unknown>;
 
-        if (!Object.keys(snaps).includes(SNAP_ID) || DEVELOPMENT_MODE) {
+        if (!Object.keys(snaps).includes(this.snapId) || this.useLocalSnap) {
             await this.reinstallSnap();
         }
 
@@ -120,7 +90,7 @@ export class MetamaskSnapSigner implements SignerIface {
         await provider.request({
             method: 'wallet_requestSnaps',
             params: {
-                [SNAP_ID]: {},
+                [this.snapId]: {},
             },
         });
         console.log('Snap installed');
@@ -129,7 +99,7 @@ export class MetamaskSnapSigner implements SignerIface {
             method: 'wallet_getSnaps',
         })) as Record<string, unknown>;
 
-        if (Object.keys(snaps).includes(SNAP_ID)) {
+        if (Object.keys(snaps).includes(this.snapId)) {
             console.log('Snap installed successfully');
         } else {
             console.error('Snap not installed');

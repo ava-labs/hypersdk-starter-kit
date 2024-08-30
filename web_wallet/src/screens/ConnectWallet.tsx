@@ -2,7 +2,8 @@ import { SNAP_ID } from '../const'
 import { useState } from 'react'
 import Loading from './Loading'
 import FullScreenError from './FullScreenError'
-import { EphemeralSigner, MetamaskSnapSigner, SignerIface } from '../lib/signers'
+import { SignerIface } from '../shared-client/signers'
+import { morpheusClient } from '../MorpheusClient'
 
 
 export default function ConnectWalletWindow({ onSignerInitComplete }: { onSignerInitComplete: (signers: { signer1: SignerIface, signer2: SignerIface }) => void }) {
@@ -50,7 +51,7 @@ export default function ConnectWalletWindow({ onSignerInitComplete }: { onSigner
                     <button
                         type="button"
                         className="w-48 px-4 py-2 bg-white text-black font-bold rounded border border-black hover:bg-gray-100 transition-colors duration-200 transform hover:scale-105"
-                        onClick={() => onSignerInitComplete({ signer1: new EphemeralSigner(), signer2: new EphemeralSigner() })}
+                        onClick={async () => onSignerInitComplete({ signer1: await morpheusClient.getSigner({ type: "ephemeral" }), signer2: await morpheusClient.getSigner({ type: "ephemeral" }) })}
                     >
                         Temporary key
                     </button>

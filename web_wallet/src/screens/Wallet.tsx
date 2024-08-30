@@ -5,8 +5,8 @@ import { idStringToBigInt } from 'sample-metamask-snap-for-hypersdk/src/cb58'
 import { useState } from 'react'
 import { base64 } from '@scure/base'
 import { ActionData, TransactionPayload } from 'sample-metamask-snap-for-hypersdk/src/sign'
-import { SignerIface } from '../lib/signers'
-import { morpheusClient } from '../lib/MorpheusClient'
+import { SignerIface } from '../shared-client/signers'
+import { morpheusClient } from '../MorpheusClient'
 
 //FIXME: we don't have a fee prediction yet, so we just use a big number
 const MAX_TX_FEE_TEMP = 10000000n

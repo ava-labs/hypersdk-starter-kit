@@ -1,5 +1,5 @@
-import { API_HOST, FAUCET_HOST } from "../const";
-import { HyperSDKBaseClient } from "../shared-client/HyperSDKBaseClient";
+import { API_HOST, FAUCET_HOST } from "./const";
+import { HyperSDKBaseClient } from "../../HyperSDKClient"
 
 class MorpheusClient extends HyperSDKBaseClient {
     public readonly COIN_SYMBOL = 'RED';

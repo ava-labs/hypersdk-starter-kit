@@ -1,4 +1,8 @@
 import { base64 } from '@scure/base';
+import { SignerIface } from './types';
+import { EphemeralSigner } from './EphemeralSigner';
+import { PrivateKeySigner } from './PrivateKeySigner';
+import { DEFAULT_SNAP_ID, MetamaskSnapSigner } from './MetamaskSnapSigner';
 
 interface ApiResponse<T> {
     result: T;
@@ -7,9 +11,19 @@ interface ApiResponse<T> {
     };
 }
 
+type getSignerParams = {
+    type: "ephemeral"
+} | {
+    type: "private-key",
+    privateKey: Uint8Array
+} | {
+    type: "metamask-snap",
+    snapId?: string,
+    lastDerivationSection?: number,
+    useLocalSnap?: boolean
+}
 
 export abstract class HyperSDKBaseClient {
-
     constructor(
         protected readonly apiHost: string,//for example: http://localhost:9650
         protected readonly vmName: string,//for example: morpheusvm
@@ -33,6 +47,22 @@ export abstract class HyperSDKBaseClient {
     public async sendTx(txBytes: Uint8Array): Promise<void> {
         const bytesBase64 = base64.encode(txBytes);
         return this.makeCoreAPIRequest<void>('submitTx', { tx: bytesBase64 });
+    }
+
+    public async getSigner(params: getSignerParams): Promise<SignerIface> {
+        let signer: SignerIface;
+        if (params.type === "ephemeral") {
+            signer = new EphemeralSigner();
+        } else if (params.type === "private-key") {
+            signer = new PrivateKeySigner(params.privateKey);
+        } else if (params.type === "metamask-snap") {
+            signer = new MetamaskSnapSigner(params.snapId ?? DEFAULT_SNAP_ID, params.lastDerivationSection ?? 0, params.useLocalSnap ?? false);
+        } else {
+            throw new Error("Invalid signer type");
+        }
+
+        await signer.connect();
+        return signer;
     }
 
 
@@ -92,6 +122,4 @@ export abstract class HyperSDKBaseClient {
             clearTimeout(timeoutId);
         }
     }
-
-
 }
