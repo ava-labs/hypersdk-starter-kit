@@ -1,5 +1,8 @@
 import { API_HOST, FAUCET_HOST } from "./const";
 import { HyperSDKBaseClient } from "../../HyperSDKClient"
+import { ActionData } from 'sample-metamask-snap-for-hypersdk/src/sign'
+import { base64 } from '@scure/base'
+
 
 class MorpheusClient extends HyperSDKBaseClient {
     public readonly COIN_SYMBOL = 'RED';
@@ -24,6 +27,17 @@ class MorpheusClient extends HyperSDKBaseClient {
         });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    }
+
+    public newTransferAction(to: string, amountString: string, memo: string): ActionData {
+        return {
+            actionName: 'Transfer',
+            data: {
+                to,
+                value: this.fromFormattedBalance(amountString),
+                memo: base64.encode(new TextEncoder().encode(memo)),
+            },
         }
     }
 }

@@ -4,6 +4,7 @@ import Wallet from './Wallet'
 import { morpheusClient } from '../MorpheusClient'
 import Faucet from "./Faucet.tsx"
 import { pubKeyToED25519Addr } from 'sample-metamask-snap-for-hypersdk/src/bech32'
+import { SignerIface } from '../../../HyperSDKClient/types.ts'
 
 function App() {
   const [signerConnected, setSignerConnected] = useState<boolean>(false)

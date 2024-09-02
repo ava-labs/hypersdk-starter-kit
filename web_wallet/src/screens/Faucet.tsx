@@ -22,7 +22,23 @@ export default function Faucet({ children, minBalance, myAddr }: FaucetProps) {
             try {
                 const initialBalance = await morpheusClient.getBalance(myAddr)
                 if (initialBalance <= minBalance) {
-                    await morpheusClient.requestFaucetTransfer(myAddr)
+
+
+                    //FIXME: remove this after issues with faucet are fixed
+                    const maxAttempts = 10
+                    for (let i = 0; i < maxAttempts; i++) {
+                        try {
+                            await morpheusClient.requestFaucetTransfer(myAddr)
+                            break
+                        } catch (e) {
+                            console.log(`Error requesting faucet transfer: ${(e instanceof Error && e.message) ? e.message : String(e)}`)
+                            if (i === maxAttempts - 1) {
+                                throw e
+                            }
+                            await new Promise(resolve => setTimeout(resolve, 100))
+                        }
+                    }
+
                     for (let i = 0; i < 100; i++) {
                         const balance = await morpheusClient.getBalance(myAddr)
                         if (balance !== minBalance) {

@@ -1,7 +1,6 @@
 import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { idStringToBigInt } from 'sample-metamask-snap-for-hypersdk/src/cb58'
 import { useState, useCallback, useEffect } from 'react'
-import { base64 } from '@scure/base'
 import { ActionData, TransactionPayload } from 'sample-metamask-snap-for-hypersdk/src/sign'
 import { morpheusClient } from '../MorpheusClient'
 
@@ -42,24 +41,14 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
         try {
             log("info", `Sending ${amountString} ${morpheusClient.COIN_SYMBOL} to ${otherWalletAddress}`)
             setLoading(counter => counter + 1)
-            const amount = morpheusClient.fromFormattedBalance(amountString)
             const initialBalance = await morpheusClient.getBalance(myAddr)
 
-
             log("info", `Initial balance: ${morpheusClient.formatBalance(initialBalance)} ${morpheusClient.COIN_SYMBOL}`)
-
 
             const chainIdStr = (await morpheusClient.getNetwork()).chainId
             const chainIdBigNumber = idStringToBigInt(chainIdStr)
 
-            const actionData: ActionData = {
-                data: {
-                    to: otherWalletAddress,
-                    value: String(amount),
-                    memo: base64.encode(new TextEncoder().encode("Hey there!")),
-                },
-                actionName: "Transfer",
-            }
+            const actionData: ActionData = morpheusClient.newTransferAction(otherWalletAddress, amountString, "test")
 
             const txPayload: TransactionPayload = {
                 timestamp: String(BigInt(Date.now()) + 59n * 1000n),
