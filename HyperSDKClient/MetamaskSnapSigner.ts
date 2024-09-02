@@ -40,6 +40,8 @@ export class MetamaskSnapSigner implements SignerIface {
         return this.cachedPublicKey;
     }
 
+
+
     async signTx(txPayload: TransactionPayload, abiString: string): Promise<Uint8Array> {
         const sig58 = await this._invokeSnap({
             method: 'signTransaction', params: {

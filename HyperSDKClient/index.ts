@@ -3,6 +3,10 @@ import { SignerIface } from './types';
 import { EphemeralSigner } from './EphemeralSigner';
 import { PrivateKeySigner } from './PrivateKeySigner';
 import { DEFAULT_SNAP_ID, MetamaskSnapSigner } from './MetamaskSnapSigner';
+import { idStringToBigInt } from 'sample-metamask-snap-for-hypersdk/src/cb58'
+
+//FIXME: we don't have a fee prediction yet, so we just use a huge number
+const MAX_TX_FEE_TEMP = 10000000n
 
 interface ApiResponse<T> {
     result: T;
@@ -37,15 +41,44 @@ export abstract class HyperSDKBaseClient extends EventTarget {
     }
 
     //public methods
-    public getNetwork(): Promise<{ networkId: number, subnetId: string, chainId: string }> {
-        return this.makeCoreAPIRequest<{ networkId: number, subnetId: string, chainId: string }>('network');
+
+    public async generatePayload(actions: ActionData[]): TransactionPayload {
+        const chainIdStr = (await this.getNetwork()).chainId
+        const chainIdBigNumber = idStringToBigInt(chainIdStr)
+
+        return {
+            timestamp: String(BigInt(Date.now()) + 59n * 1000n),
+            chainId: String(chainIdBigNumber),
+            maxFee: String(MAX_TX_FEE_TEMP),
+            actions: actions
+        }
     }
 
+    private getNetworkCache: { networkId: number, subnetId: string, chainId: string } | null = null;
+    public async getNetwork(): Promise<{ networkId: number, subnetId: string, chainId: string }> {
+        if (!this.getNetworkCache) {
+            this.getNetworkCache = await this.makeCoreAPIRequest<{ networkId: number, subnetId: string, chainId: string }>('network');
+        }
+        return this.getNetworkCache;
+    }
+
+    private abiCache: string | null = null;
     public async getAbi(): Promise<string> {
-        return (await this.makeCoreAPIRequest<{ abi: string }>('getABI')).abi
+        if (!this.abiCache) {
+            this.abiCache = (await this.makeCoreAPIRequest<{ abi: string }>('getABI')).abi
+        }
+        return this.abiCache;
     }
 
-    public async sendTx(txBytes: Uint8Array): Promise<void> {
+    public async sendTx(actions: ActionData[]): Promise<void> {
+        const txPayload = await this.generatePayload(actions);
+        const abiString = await this.getAbi();
+        const signer = this.getSigner();
+        const signed = await signer.signTx(txPayload, abiString);
+        return this.sendRawTx(signed);
+    }
+
+    public async sendRawTx(txBytes: Uint8Array): Promise<void> {
         const bytesBase64 = base64.encode(txBytes);
         return this.makeCoreAPIRequest<void>('submitTx', { tx: bytesBase64 });
     }

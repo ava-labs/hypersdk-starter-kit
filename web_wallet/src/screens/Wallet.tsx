@@ -1,11 +1,9 @@
 import { ArrowPathIcon } from '@heroicons/react/20/solid'
-import { idStringToBigInt } from 'sample-metamask-snap-for-hypersdk/src/cb58'
 import { useState, useCallback, useEffect } from 'react'
-import { ActionData, TransactionPayload } from 'sample-metamask-snap-for-hypersdk/src/sign'
+import { ActionData } from 'sample-metamask-snap-for-hypersdk/src/sign'
 import { morpheusClient } from '../MorpheusClient'
 
-//FIXME: we don't have a fee prediction yet, so we just use a big number
-const MAX_TX_FEE_TEMP = 10000000n
+
 
 const otherWalletAddress = "morpheus1qp8esppm6zgjnxkyy33g7ddn0ku0n4e9ha3q8scv6cf2twshqwf8zz46fz0"
 export default function Wallet({ myAddr }: { myAddr: string }) {
@@ -45,33 +43,15 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
 
             log("info", `Initial balance: ${morpheusClient.formatBalance(initialBalance)} ${morpheusClient.COIN_SYMBOL}`)
 
-            const chainIdStr = (await morpheusClient.getNetwork()).chainId
-            const chainIdBigNumber = idStringToBigInt(chainIdStr)
-
             const actionData: ActionData = morpheusClient.newTransferAction(otherWalletAddress, amountString, "test")
-
-            const txPayload: TransactionPayload = {
-                timestamp: String(BigInt(Date.now()) + 59n * 1000n),
-                chainId: String(chainIdBigNumber),
-                maxFee: String(MAX_TX_FEE_TEMP),
-                actions: [actionData]
-            }
-
-            const abiString = await morpheusClient.getAbi()
-            const signer = morpheusClient.getSigner()
-            const signed = await signer.signTx(txPayload, abiString)
-
-            log("success", `Transaction signed`)
-
-            await morpheusClient.sendTx(signed)
+            await morpheusClient.sendTx([actionData])
             log("success", `Transaction sent, waiting for the balance change`)
-
 
             let balanceChanged = false
             const totalWaitTime = 15 * 1000
             const timeStarted = Date.now()
 
-            for (let i = 0; i < 100000; i++) {//curcuit breaker
+            for (let i = 0; i < 100000; i++) {
                 const balance = await morpheusClient.getBalance(myAddr)
                 if (balance !== initialBalance || Date.now() - timeStarted > totalWaitTime) {
                     balanceChanged = true
