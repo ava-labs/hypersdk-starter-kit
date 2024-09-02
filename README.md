@@ -2,10 +2,12 @@
 
 This repository helps you start building your own blockchain using HyperSDK on Avalanche. You can fork this repository to begin.
 
-## How to add new actions:
+## Customizing your VM:
+Imagine that your blockchain is a class and actions are methods of the class, modifying it's state. RPC methods are like read-only methods of the class.
+
 1. Add an action in `vm/actions/` and storage function in `vm/storage`
 2. Define read-only RPC methods in `vm/controller/server.go` and client methods in `vm/client/client.go`
-3. Define new RPC methods and new action in `web_wallet/src/VMClient.ts`
+3. Define new RPC methods and new action in `web_wallet/src/VMClient.ts`, see `newTransferAction` method as an example.
 
 ## Start a local test network (devnet)
 This will start a local test network and a faucet on your computer:
@@ -61,3 +63,4 @@ To run the faucet locally:
 - Limit RPC requests to non-public methods
 - Add a devcontainer with ports 8765 and 9650 open
 - Finish replacing Morpheus with more generic branding
+- Add info about changing HRP and Symbol
