@@ -2,8 +2,10 @@
 
 This repository helps you start building your own blockchain using HyperSDK on Avalanche. You can fork this repository to begin.
 
-## Develop VM locally
-We will add instructions here later when the HyperSDK API is more stable
+## How to add new actions:
+1. Add an action in `morpheusvm/actions/` and storage function in `morpheusvm/storage`
+2. Define read-only RPC methods in `morpheusvm/controller/server.go` and client methods in `morpheusvm/client/client.go`
+3. Define new RPC methods and new action in `web_wallet/src/MorpheusClient.ts`
 
 ## Start a local test network (devnet)
 This will start a local test network and a faucet on your computer:
@@ -39,9 +41,6 @@ You need a server with at least 1 CPU and 2 GB of RAM.
 
 The frontend will be deployed using GitHub Actions. Check your repository settings to enable Pages and get the URL.
 
-## About the HyperSDK VM
-We use a VM based on MorpheusVM. We'll add sample VM code later when the HyperSDK API is more stable.
-
 ## Faucet
 The faucet gives out free tokens for testing. It gives 10 tokens to the address in the URL after the `/faucet/` path.
 
@@ -56,9 +55,8 @@ To run the faucet locally:
 5. Test the faucet: Open this link in your browser:
    `http://localhost:8766/faucet/morpheus1qqgvs58cq6f0fv876f2lccay8t55fwf6vg4c77h5c3h4gjruqelk5srn9ds`
 
+
 ## Things to do:
-- Check the minimum server requirements
 - Change the default Morpheus private key to a new random one
-- Make the web wallet example simpler
 - Limit RPC requests to non-public methods
 - Add a devcontainer with ports 8765 and 9650 open
