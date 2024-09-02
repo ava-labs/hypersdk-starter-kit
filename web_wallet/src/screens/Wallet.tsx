@@ -111,8 +111,6 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
     return (
         <div className="w-full  bg-white p-8">
             <div className={loading > 0 ? "animate-pulse" : ""}>
-                {/* <h1 className="text-3xl font-bold">{walletName}</h1> */}
-                {/* <div className="text-xs mb-4">Derivation path {derivationPath}</div> */}
                 <div className="text-xl font-mono break-all ">{myAddr}</div>
                 <div className="flex items-center my-12">
                     <div className='text-8xl font-bold'>{parseFloat(morpheusClient.formatBalance(balance)).toFixed(6)} {morpheusClient.COIN_SYMBOL}</div>

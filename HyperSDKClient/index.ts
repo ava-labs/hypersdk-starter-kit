@@ -59,7 +59,7 @@ export abstract class HyperSDKBaseClient extends EventTarget {
         } else if (params.type === "metamask-snap") {
             this.signer = new MetamaskSnapSigner(params.snapId ?? DEFAULT_SNAP_ID, params.lastDerivationSection ?? 0, params.useLocalSnap ?? false);
         } else {
-            throw new Error("Invalid signer type: " + params.type)
+            throw new Error(`Invalid signer type: ${(params as { type: string }).type}`);
         }
 
         await this.signer.connect();

@@ -4,6 +4,7 @@ import { TransactionPayload } from "sample-metamask-snap-for-hypersdk/src/sign";
 import { SignerIface } from "./types";
 
 import snapPkgJson from "sample-metamask-snap-for-hypersdk/package.json";
+//FIXME: a hacky way to make sure the snap is in dependencies
 export const DEFAULT_SNAP_ID = `npm:${snapPkgJson.name}`;
 
 type InvokeSnapParams = {
