@@ -30,9 +30,11 @@ function App() {
   }
 
   return (
-    <Faucet myAddr={myAddr} minBalance={morpheusClient.fromFormattedBalance("1")}>
-      <Wallet myAddr={myAddr} />
-    </Faucet>
+    <div className="flex items-center justify-center min-h-screen">
+      <Faucet myAddr={myAddr} minBalance={morpheusClient.fromFormattedBalance("1")}>
+        <Wallet myAddr={myAddr} />
+      </Faucet>
+    </div>
   )
 }
 

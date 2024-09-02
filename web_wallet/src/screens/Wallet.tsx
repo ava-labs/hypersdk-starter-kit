@@ -109,38 +109,36 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
     }
 
     return (
-        <div className="flex flex-col md:flex-row">
-            <div className="w-full  bg-white p-8">
-                <div className={loading > 0 ? "animate-pulse" : ""}>
-                    {/* <h1 className="text-3xl font-bold">{walletName}</h1> */}
-                    {/* <div className="text-xs mb-4">Derivation path {derivationPath}</div> */}
-                    <div className="text-xl font-mono break-all ">{myAddr}</div>
-                    <div className="flex items-center my-12">
-                        <div className='text-8xl font-bold'>{parseFloat(morpheusClient.formatBalance(balance)).toFixed(6)} {morpheusClient.COIN_SYMBOL}</div>
-                        <button className="ml-4" onClick={() => fetchBalance()}>
-                            <ArrowPathIcon className="h-6 w-6 text-gray-500 hover:text-gray-700" />
-                        </button>
-                    </div>
-                    <div className="flex space-x-4">
-                        <button className={`px-4 py-2 font-bold rounded transition-colors duration-200 ${loading > 0 ? 'bg-gray-400 text-gray-600 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-800 transform hover:scale-105'}`}
-                            onClick={() => sendTokens("0.1")}
-                            disabled={loading > 0}
-                        >
-                            Send 0.1 RED
-                        </button>
-                        <button className={`px-4 py-2 font-bold rounded border transition-colors duration-200 ${loading > 0 ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' : 'bg-white text-black border-black hover:bg-gray-100 transform hover:scale-105'}`}
-                            onClick={() => sendTokens("1")}
-                            disabled={loading > 0}
-                        >
-                            Send 1 RED
-                        </button>
+        <div className="w-full  bg-white p-8">
+            <div className={loading > 0 ? "animate-pulse" : ""}>
+                {/* <h1 className="text-3xl font-bold">{walletName}</h1> */}
+                {/* <div className="text-xs mb-4">Derivation path {derivationPath}</div> */}
+                <div className="text-xl font-mono break-all ">{myAddr}</div>
+                <div className="flex items-center my-12">
+                    <div className='text-8xl font-bold'>{parseFloat(morpheusClient.formatBalance(balance)).toFixed(6)} {morpheusClient.COIN_SYMBOL}</div>
+                    <button className="ml-4" onClick={() => fetchBalance()}>
+                        <ArrowPathIcon className="h-6 w-6 text-gray-500 hover:text-gray-700" />
+                    </button>
+                </div>
+                <div className="flex space-x-4">
+                    <button className={`px-4 py-2 font-bold rounded transition-colors duration-200 ${loading > 0 ? 'bg-gray-400 text-gray-600 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-800 transform hover:scale-105'}`}
+                        onClick={() => sendTokens("0.1")}
+                        disabled={loading > 0}
+                    >
+                        Send 0.1 RED
+                    </button>
+                    <button className={`px-4 py-2 font-bold rounded border transition-colors duration-200 ${loading > 0 ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' : 'bg-white text-black border-black hover:bg-gray-100 transform hover:scale-105'}`}
+                        onClick={() => sendTokens("1")}
+                        disabled={loading > 0}
+                    >
+                        Send 1 RED
+                    </button>
 
-                    </div>
-                    <div className="mt-8 border border-gray-300 rounded p-4 min-h-16">
-                        <pre className="font-mono text-sm">
-                            {logText}
-                        </pre>
-                    </div>
+                </div>
+                <div className="mt-8 border border-gray-300 rounded p-4 min-h-16">
+                    <pre className="font-mono text-sm">
+                        {logText}
+                    </pre>
                 </div>
             </div>
         </div>
