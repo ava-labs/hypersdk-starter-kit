@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { morpheusClient } from '../MorpheusClient'
+import { vmClient } from '../VMClient'
 
 export default function ConnectWallet() {
     const [loading, setLoading] = useState(0)
@@ -8,7 +8,7 @@ export default function ConnectWallet() {
     async function connectWallet(signerType: "metamask-snap" | "ephemeral") {
         try {
             setLoading((prevLoading) => prevLoading + 1);
-            await morpheusClient.connect({ type: signerType })
+            await vmClient.connect({ type: signerType })
         } catch (e) {
             console.error(e);
             setErrors((prevErrors) => [...prevErrors, (e as Error)?.message || String(e)]);

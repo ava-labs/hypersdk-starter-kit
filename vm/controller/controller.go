@@ -4,9 +4,9 @@
 package controller
 
 import (
-	"github.com/ava-labs/hypersdk-starter/morpheusvm/consts"
-	"github.com/ava-labs/hypersdk-starter/morpheusvm/registry"
-	"github.com/ava-labs/hypersdk-starter/morpheusvm/storage"
+	"github.com/ava-labs/hypersdk-starter/vm/consts"
+	"github.com/ava-labs/hypersdk-starter/vm/registry"
+	"github.com/ava-labs/hypersdk-starter/vm/storage"
 	"github.com/ava-labs/hypersdk/api/indexer"
 	"github.com/ava-labs/hypersdk/api/jsonrpc"
 	"github.com/ava-labs/hypersdk/api/ws"

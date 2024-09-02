@@ -10,8 +10,8 @@ import (
 	"github.com/ava-labs/avalanchego/tests/fixture/e2e"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/hypersdk-starter/morpheusvm/consts"
-	"github.com/ava-labs/hypersdk-starter/morpheusvm/tests/workload"
+	"github.com/ava-labs/hypersdk-starter/vm/consts"
+	"github.com/ava-labs/hypersdk-starter/vm/tests/workload"
 	"github.com/ava-labs/hypersdk/tests/fixture"
 
 	he2e "github.com/ava-labs/hypersdk/tests/e2e"

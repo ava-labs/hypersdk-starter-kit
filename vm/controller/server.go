@@ -6,8 +6,8 @@ package controller
 import (
 	"net/http"
 
-	"github.com/ava-labs/hypersdk-starter/morpheusvm/consts"
-	"github.com/ava-labs/hypersdk-starter/morpheusvm/storage"
+	"github.com/ava-labs/hypersdk-starter/vm/consts"
+	"github.com/ava-labs/hypersdk-starter/vm/storage"
 	"github.com/ava-labs/hypersdk/api"
 	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/genesis"

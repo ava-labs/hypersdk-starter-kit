@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { morpheusClient } from '../MorpheusClient'
+import { vmClient } from '../VMClient'
 
 interface FaucetProps {
     balance: bigint
@@ -20,7 +20,7 @@ export default function Faucet({ children, minBalance, myAddr }: FaucetProps) {
         async function performFaucetRequest() {
             setLoading(l => l + 1)
             try {
-                const initialBalance = await morpheusClient.getBalance(myAddr)
+                const initialBalance = await vmClient.getBalance(myAddr)
                 if (initialBalance <= minBalance) {
 
 
@@ -28,7 +28,7 @@ export default function Faucet({ children, minBalance, myAddr }: FaucetProps) {
                     const maxAttempts = 10
                     for (let i = 0; i < maxAttempts; i++) {
                         try {
-                            await morpheusClient.requestFaucetTransfer(myAddr)
+                            await vmClient.requestFaucetTransfer(myAddr)
                             break
                         } catch (e) {
                             console.log(`Error requesting faucet transfer: ${(e instanceof Error && e.message) ? e.message : String(e)}`)
@@ -40,7 +40,7 @@ export default function Faucet({ children, minBalance, myAddr }: FaucetProps) {
                     }
 
                     for (let i = 0; i < 100; i++) {
-                        const balance = await morpheusClient.getBalance(myAddr)
+                        const balance = await vmClient.getBalance(myAddr)
                         if (balance !== minBalance) {
                             console.log(`Balance is ${balance}, changed from ${minBalance}`)
                             break

@@ -10,9 +10,9 @@ import (
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/hypersdk-starter/morpheusvm/actions"
-	"github.com/ava-labs/hypersdk-starter/morpheusvm/consts"
-	"github.com/ava-labs/hypersdk-starter/morpheusvm/controller"
+	"github.com/ava-labs/hypersdk-starter/vm/actions"
+	"github.com/ava-labs/hypersdk-starter/vm/consts"
+	"github.com/ava-labs/hypersdk-starter/vm/controller"
 	"github.com/ava-labs/hypersdk/api/indexer"
 	"github.com/ava-labs/hypersdk/api/jsonrpc"
 	"github.com/ava-labs/hypersdk/auth"

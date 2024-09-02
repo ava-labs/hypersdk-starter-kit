@@ -17,7 +17,7 @@ import (
 	"github.com/rs/cors"
 	"golang.org/x/time/rate"
 
-	"github.com/ava-labs/hypersdk-starter/morpheusvm/actions"
+	"github.com/ava-labs/hypersdk-starter/vm/actions"
 	"github.com/ava-labs/hypersdk/api/jsonrpc"
 	"github.com/ava-labs/hypersdk/auth"
 	"github.com/ava-labs/hypersdk/chain"
@@ -25,8 +25,8 @@ import (
 	"github.com/ava-labs/hypersdk/crypto/ed25519"
 	"github.com/ava-labs/hypersdk/utils"
 
-	lconsts "github.com/ava-labs/hypersdk-starter/morpheusvm/consts"
-	"github.com/ava-labs/hypersdk-starter/morpheusvm/controller"
+	lconsts "github.com/ava-labs/hypersdk-starter/vm/consts"
+	"github.com/ava-labs/hypersdk-starter/vm/controller"
 )
 
 const amtStr = "10.00"

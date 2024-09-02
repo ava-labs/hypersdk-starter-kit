@@ -1,7 +1,7 @@
 import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { useState, useCallback, useEffect } from 'react'
 import { ActionData } from 'sample-metamask-snap-for-hypersdk/src/sign'
-import { morpheusClient } from '../MorpheusClient'
+import { vmClient } from '../VMClient'
 
 
 
@@ -21,7 +21,7 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
     const fetchBalance = useCallback(async () => {
         try {
             setLoading(l => l + 1)
-            const balance = await morpheusClient.getBalance(myAddr)
+            const balance = await vmClient.getBalance(myAddr)
             setBalance(balance)
         } catch (e) {
             log("error", `Failed to fetch balance: ${(e as { message?: string })?.message || String(e)}`);
@@ -37,14 +37,14 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
     async function sendTokens(amountString: "0.1" | "1") {
         setLogText("")
         try {
-            log("info", `Sending ${amountString} ${morpheusClient.COIN_SYMBOL} to ${otherWalletAddress}`)
+            log("info", `Sending ${amountString} ${vmClient.COIN_SYMBOL} to ${otherWalletAddress}`)
             setLoading(counter => counter + 1)
-            const initialBalance = await morpheusClient.getBalance(myAddr)
+            const initialBalance = await vmClient.getBalance(myAddr)
 
-            log("info", `Initial balance: ${morpheusClient.formatBalance(initialBalance)} ${morpheusClient.COIN_SYMBOL}`)
+            log("info", `Initial balance: ${vmClient.formatBalance(initialBalance)} ${vmClient.COIN_SYMBOL}`)
 
-            const actionData: ActionData = morpheusClient.newTransferAction(otherWalletAddress, amountString, "test")
-            await morpheusClient.sendTx([actionData])
+            const actionData: ActionData = vmClient.newTransferAction(otherWalletAddress, amountString, "test")
+            await vmClient.sendTx([actionData])
             log("success", `Transaction sent, waiting for the balance change`)
 
             let balanceChanged = false
@@ -52,10 +52,10 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
             const timeStarted = Date.now()
 
             for (let i = 0; i < 100000; i++) {
-                const balance = await morpheusClient.getBalance(myAddr)
+                const balance = await vmClient.getBalance(myAddr)
                 if (balance !== initialBalance || Date.now() - timeStarted > totalWaitTime) {
                     balanceChanged = true
-                    log("success", `Balance changed to ${parseFloat(morpheusClient.formatBalance(balance)).toFixed(6)} ${morpheusClient.COIN_SYMBOL} in ${((Date.now() - timeStarted) / 1000).toFixed(2)}s`)
+                    log("success", `Balance changed to ${parseFloat(vmClient.formatBalance(balance)).toFixed(6)} ${vmClient.COIN_SYMBOL} in ${((Date.now() - timeStarted) / 1000).toFixed(2)}s`)
                     break
                 } else {
                     await new Promise(resolve => setTimeout(resolve, 100))
@@ -82,7 +82,7 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
             <div className={loading > 0 ? "animate-pulse" : ""}>
                 <div className="text-xl font-mono break-all ">{myAddr}</div>
                 <div className="flex items-center my-12">
-                    <div className='text-8xl font-bold'>{parseFloat(morpheusClient.formatBalance(balance)).toFixed(6)} {morpheusClient.COIN_SYMBOL}</div>
+                    <div className='text-8xl font-bold'>{parseFloat(vmClient.formatBalance(balance)).toFixed(6)} {vmClient.COIN_SYMBOL}</div>
                     <button className="ml-4" onClick={() => fetchBalance()}>
                         <ArrowPathIcon className="h-6 w-6 text-gray-500 hover:text-gray-700" />
                     </button>

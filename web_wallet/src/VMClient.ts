@@ -4,7 +4,7 @@ import { ActionData } from 'sample-metamask-snap-for-hypersdk/src/sign'
 import { base64 } from '@scure/base'
 
 
-class MorpheusClient extends HyperSDKBaseClient {
+class VMClient extends HyperSDKBaseClient {
     public readonly COIN_SYMBOL = 'RED';
     public readonly HRP = 'morpheus'
 
@@ -42,4 +42,4 @@ class MorpheusClient extends HyperSDKBaseClient {
     }
 }
 
-export const morpheusClient = new MorpheusClient(API_HOST, FAUCET_HOST);
+export const vmClient = new VMClient(API_HOST, FAUCET_HOST);
