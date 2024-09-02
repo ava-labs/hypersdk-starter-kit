@@ -1,32 +1,27 @@
-
 import { ArrowPathIcon } from '@heroicons/react/20/solid'
-import { pubKeyToED25519Addr } from 'sample-metamask-snap-for-hypersdk/src/bech32'
 import { idStringToBigInt } from 'sample-metamask-snap-for-hypersdk/src/cb58'
-import { useState } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { base64 } from '@scure/base'
 import { ActionData, TransactionPayload } from 'sample-metamask-snap-for-hypersdk/src/sign'
-import { morpheusClient } from './MorpheusClient'
+import { morpheusClient } from '../MorpheusClient'
 
 //FIXME: we don't have a fee prediction yet, so we just use a big number
 const MAX_TX_FEE_TEMP = 10000000n
 
 const otherWalletAddress = "morpheus1qp8esppm6zgjnxkyy33g7ddn0ku0n4e9ha3q8scv6cf2twshqwf8zz46fz0"
-export default function Wallet() {
-    const myAddr = pubKeyToED25519Addr(morpheusClient.getSigner().getPublicKey(), morpheusClient.HRP)
-
+export default function Wallet({ myAddr }: { myAddr: string }) {
     const [loading, setLoading] = useState(0)
     const [logText, setLogText] = useState("")
+    const [balance, setBalance] = useState(0n)
 
-    function log(level: "success" | "error" | "info", text: string) {
+    const log = useCallback((level: "success" | "error" | "info", text: string) => {
         const now = new Date();
         const time = now.toLocaleTimeString('en-US', { hour12: false });
-        let emoji = '';
-        emoji = level === 'success' ? '✅' : level === 'error' ? '❌' : 'ℹ️';
+        const emoji = level === 'success' ? '✅' : level === 'error' ? '❌' : 'ℹ️';
         setLogText(prevLog => `${prevLog}\n${time} ${emoji} ${text}`);
-    }
+    }, []);
 
-    const [balance, setBalance] = useState(0n)
-    async function fetchBalance() {
+    const fetchBalance = useCallback(async () => {
         try {
             setLoading(l => l + 1)
             const balance = await morpheusClient.getBalance(myAddr)
@@ -36,23 +31,11 @@ export default function Wallet() {
         } finally {
             setLoading(l => l - 1)
         }
-    }
+    }, [myAddr, log]);
 
-    async function requestFaucet() {
-        setLogText("")
-        try {
-            log("info", "Requesting faucet transfer")
-            setLoading(counter => counter + 1)
-            await morpheusClient.requestFaucetTransfer(myAddr)
-            log("success", "Faucet transfer requested successfully")
-            await fetchBalance()
-        } catch (e: unknown) {
-            log("error", `Faucet transfer request failed: ${(e as { message?: string })?.message || String(e)}`);
-            console.error(e)
-        } finally {
-            setLoading(counter => counter - 1)
-        }
-    }
+    useEffect(() => {
+        fetchBalance()
+    }, [fetchBalance])
 
     async function sendTokens(amountString: "0.1" | "1") {
         setLogText("")
@@ -151,12 +134,7 @@ export default function Wallet() {
                         >
                             Send 1 RED
                         </button>
-                        <button className={`px-4 py-2 font-bold rounded border transition-colors duration-200 ${loading > 0 ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' : 'bg-white text-black border-black hover:bg-gray-100 transform hover:scale-105'}`}
-                            onClick={requestFaucet}
-                            disabled={loading > 0}
-                        >
-                            Request Faucet
-                        </button>
+
                     </div>
                     <div className="mt-8 border border-gray-300 rounded p-4 min-h-16">
                         <pre className="font-mono text-sm">
