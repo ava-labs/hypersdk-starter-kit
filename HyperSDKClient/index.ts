@@ -4,6 +4,7 @@ import { EphemeralSigner } from './EphemeralSigner';
 import { PrivateKeySigner } from './PrivateKeySigner';
 import { DEFAULT_SNAP_ID, MetamaskSnapSigner } from './MetamaskSnapSigner';
 import { idStringToBigInt } from 'sample-metamask-snap-for-hypersdk/src/cb58'
+import { ActionData, TransactionPayload } from 'sample-metamask-snap-for-hypersdk/src/sign'
 
 //FIXME: we don't have a fee prediction yet, so we just use a huge number
 const MAX_TX_FEE_TEMP = 10000000n
