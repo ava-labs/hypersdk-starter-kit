@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	HRP      = "morpheus"
-	Name     = "morpheusvm"
-	Symbol   = "RED"
+	HRP      = "hyper"
+	Name     = "hypervm"
+	Symbol   = "HPR"
 	Decimals = 9
 )
 

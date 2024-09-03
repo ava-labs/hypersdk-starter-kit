@@ -5,7 +5,7 @@ import { vmClient } from '../VMClient'
 
 
 
-const otherWalletAddress = "morpheus1qp8esppm6zgjnxkyy33g7ddn0ku0n4e9ha3q8scv6cf2twshqwf8zz46fz0"
+const otherWalletAddress = "hyper1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqjahycn"
 export default function Wallet({ myAddr }: { myAddr: string }) {
     const [loading, setLoading] = useState(0)
     const [logText, setLogText] = useState("")

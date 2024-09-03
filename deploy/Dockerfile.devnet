@@ -22,9 +22,9 @@ WORKDIR /
 
 COPY ./go.mod ./go.sum ./
 
-COPY ./morpheusvm ./morpheusvm
+COPY ./vm ./vm
 
-WORKDIR /morpheusvm
+WORKDIR /vm
 
 
 ENTRYPOINT ["/bin/bash", "-c", "./scripts/stop.sh; ./scripts/run.sh && echo 'Devnet started' && tail -f /dev/null"]

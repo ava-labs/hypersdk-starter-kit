@@ -30,8 +30,8 @@ type signerParams = {
 export abstract class HyperSDKBaseClient extends EventTarget {
     constructor(
         protected readonly apiHost: string,//for example: http://localhost:9650
-        protected readonly vmName: string,//for example: morpheusvm
-        protected readonly vmRPCPrefix: string,//for example: morpheusapi
+        protected readonly vmName: string,//for example: hypervm
+        protected readonly vmRPCPrefix: string,//for example: hyperapi
         protected readonly decimals: number = 9,
     ) {
         super();

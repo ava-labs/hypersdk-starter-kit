@@ -20,12 +20,12 @@ services:
       - devnet_go_mod:/go/pkg/mod
       - devnet_go_build:/root/.cache/go-build
     healthcheck:
-      test: ["CMD", "curl", "-X", "POST", "http://localhost:9650/ext/bc/morpheusvm/coreapi", "-H", "Content-Type: application/json", "-d", "{\"jsonrpc\":\"2.0\",\"method\":\"hypersdk.network\",\"params\":{},\"id\":1}"]
+      test: [ "CMD", "curl", "-X", "POST", "http://localhost:9650/ext/bc/hypervm/coreapi", "-H", "Content-Type: application/json", "-d", "{\"jsonrpc\":\"2.0\",\"method\":\"hypersdk.network\",\"params\":{},\"id\":1}" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 300s
-  
+
   faucet:
     container_name: faucet
     build:
@@ -44,7 +44,7 @@ services:
   proxy:
     container_name: proxy
     restart: always
-    profiles: ["prod"] # this prevents the proxy from being run by default
+    profiles: [ "prod" ] # this prevents the proxy from being run by default
     build:
       dockerfile: ./Dockerfile.proxy
     ports:
@@ -65,4 +65,5 @@ volumes:
   caddy_config:
   devnet_go_mod:
   devnet_go_build:
-  
+
+

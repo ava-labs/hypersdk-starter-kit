@@ -13,14 +13,14 @@ import (
 	"github.com/ava-labs/avalanchego/vms/rpcchainvm"
 	"github.com/spf13/cobra"
 
-	"github.com/ava-labs/hypersdk-starter/vm/cmd/morpheusvm/version"
+	"github.com/ava-labs/hypersdk-starter/vm/cmd/hypervm/version"
 	"github.com/ava-labs/hypersdk-starter/vm/controller"
 )
 
 var rootCmd = &cobra.Command{
-	Use:        "morpheusvm",
+	Use:        "hypervm",
 	Short:      "BaseVM agent",
-	SuggestFor: []string{"morpheusvm"},
+	SuggestFor: []string{"hypervm"},
 	RunE:       runFunc,
 }
 
@@ -36,7 +36,7 @@ func init() {
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "morpheusvm failed %v\n", err)
+		fmt.Fprintf(os.Stderr, "hypervm failed %v\n", err)
 		os.Exit(1)
 	}
 	os.Exit(0)

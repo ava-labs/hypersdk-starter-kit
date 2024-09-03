@@ -18,19 +18,19 @@ import (
 	ginkgo "github.com/onsi/ginkgo/v2"
 )
 
-const owner = "morpheusvm-e2e-tests"
+const owner = "hypervm-e2e-tests"
 
 var flagVars *e2e.FlagVars
 
 func TestE2e(t *testing.T) {
-	ginkgo.RunSpecs(t, "morpheusvm e2e test suites")
+	ginkgo.RunSpecs(t, "hypervm e2e test suites")
 }
 
 func init() {
 	flagVars = e2e.RegisterFlags()
 }
 
-// Construct tmpnet network with a single MorpheusVM Subnet
+// Construct tmpnet network with a single HyperVM Subnet
 var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	require := require.New(ginkgo.GinkgoT())
 
@@ -40,7 +40,7 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	genesisBytes, err := json.Marshal(gen)
 	require.NoError(err)
 
-	// Import HyperSDK e2e test coverage and inject MorpheusVM name
+	// Import HyperSDK e2e test coverage and inject HyperVM name
 	// and workload factory to orchestrate the test.
 	he2e.SetWorkload(consts.Name, workloadFactory)
 

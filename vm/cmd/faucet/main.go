@@ -18,6 +18,7 @@ import (
 	"golang.org/x/time/rate"
 
 	"github.com/ava-labs/hypersdk-starter/vm/actions"
+	"github.com/ava-labs/hypersdk-starter/vm/consts"
 	"github.com/ava-labs/hypersdk/api/jsonrpc"
 	"github.com/ava-labs/hypersdk/auth"
 	"github.com/ava-labs/hypersdk/chain"
@@ -25,7 +26,6 @@ import (
 	"github.com/ava-labs/hypersdk/crypto/ed25519"
 	"github.com/ava-labs/hypersdk/utils"
 
-	lconsts "github.com/ava-labs/hypersdk-starter/vm/consts"
 	"github.com/ava-labs/hypersdk-starter/vm/controller"
 )
 
@@ -34,8 +34,8 @@ const amtStr = "10.00"
 var (
 	priv        ed25519.PrivateKey
 	factory     chain.AuthFactory
-	morpheusRPC *controller.JSONRPCClient
-	hyperRPC    *jsonrpc.JSONRPCClient
+	hyperVMRPC  *controller.JSONRPCClient
+	hyperSDKRPC *jsonrpc.JSONRPCClient
 )
 
 func init() {
@@ -46,46 +46,50 @@ func init() {
 	priv = ed25519.PrivateKey(privBytes)
 	factory = auth.NewED25519Factory(priv)
 
+	myAddress := auth.NewED25519Address(priv.PublicKey())
+	myAddressBech32 := codec.MustAddressBech32(consts.HRP, myAddress)
+	log.Printf("Faucet address: %s\n", myAddressBech32)
+
 	rpcEndpoint := os.Getenv("RPC_ENDPOINT")
 	if rpcEndpoint == "" {
 		rpcEndpoint = "http://localhost:9650"
 	}
-	url := fmt.Sprintf("%s/ext/bc/morpheusvm", rpcEndpoint)
-	morpheusRPC = controller.NewJSONRPCClient(url)
+	url := fmt.Sprintf("%s/ext/bc/%s", rpcEndpoint, consts.Name)
+	hyperVMRPC = controller.NewJSONRPCClient(url)
 
-	hyperRPC = jsonrpc.NewJSONRPCClient(url)
+	hyperSDKRPC = jsonrpc.NewJSONRPCClient(url)
 }
 
 func transferCoins(to string) (string, error) {
-	toAddr, err := codec.ParseAddressBech32(lconsts.HRP, to)
+	toAddr, err := codec.ParseAddressBech32(consts.HRP, to)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse to address: %w", err)
 	}
 
-	amt, err := utils.ParseBalance(amtStr, lconsts.Decimals)
+	amt, err := utils.ParseBalance(amtStr, consts.Decimals)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse amount: %w", err)
 	}
 
-	balanceBefore, err := morpheusRPC.Balance(context.TODO(), to)
+	balanceBefore, err := hyperVMRPC.Balance(context.TODO(), to)
 	if err != nil {
 		return "", fmt.Errorf("failed to get balance: %w", err)
 	}
-	fmt.Printf("Balance before: %s\n", utils.FormatBalance(balanceBefore, lconsts.Decimals))
+	fmt.Printf("Balance before: %s\n", utils.FormatBalance(balanceBefore, consts.Decimals))
 
 	// Check if balance is greater than 1.000
-	threshold, _ := utils.ParseBalance("1.000", lconsts.Decimals)
+	threshold, _ := utils.ParseBalance("1.000", consts.Decimals)
 	if balanceBefore > threshold {
 		fmt.Printf("Balance is already greater than 1.000, no transfer needed\n")
 		return "Balance is already greater than 1.000, no transfer needed", nil
 	}
 
-	parser, err := morpheusRPC.Parser(context.TODO())
+	parser, err := hyperVMRPC.Parser(context.TODO())
 	if err != nil {
 		return "", fmt.Errorf("failed to get parser: %w", err)
 	}
 
-	submit, _, _, err := hyperRPC.GenerateTransaction(
+	submit, _, _, err := hyperSDKRPC.GenerateTransaction(
 		context.TODO(),
 		parser,
 		[]chain.Action{&actions.Transfer{
@@ -103,7 +107,7 @@ func transferCoins(to string) (string, error) {
 		return "", fmt.Errorf("failed to submit transaction: %w", err)
 	}
 
-	err = morpheusRPC.WaitForBalance(context.TODO(), to, amt)
+	err = hyperVMRPC.WaitForBalance(context.TODO(), to, amt)
 	if err != nil {
 		return "", fmt.Errorf("failed to wait for balance: %w", err)
 	}
@@ -125,7 +129,8 @@ func main() {
 	// Wrap the router with the CORS handler
 	handler := c.Handler(r)
 
-	fmt.Println("Starting faucet server on port 8765\nOpen http://localhost:8765/faucet/morpheus1qqgvs58cq6f0fv876f2lccay8t55fwf6vg4c77h5c3h4gjruqelk5srn9ds to test the transfer")
+	zeroAddressBech32 := codec.MustAddressBech32(consts.HRP, codec.EmptyAddress)
+	fmt.Printf("Starting faucet server on port 8765\nOpen http://localhost:8765/faucet/%s to test the transfer\n", zeroAddressBech32)
 
 	srv := &http.Server{
 		Addr:         ":8765",

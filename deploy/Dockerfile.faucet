@@ -7,12 +7,12 @@ FROM golang:1.22-bookworm AS faucet-builder
 WORKDIR /build
 COPY ./go.mod ./go.sum ./
 
-COPY ./morpheusvm ./morpheusvm
+COPY ./vm ./vm
 
 ENV GOMODCACHE /go/pkg/mod
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    go build -o build/faucet ./morpheusvm/cmd/faucet
+    go build -o build/faucet ./vm/cmd/faucet
 
 #####
 # Final layer with faucet, VM and avalanchego
