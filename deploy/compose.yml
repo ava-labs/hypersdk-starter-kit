@@ -6,7 +6,7 @@ services:
       context: ../
     restart: always
     ports:
-      - "127.0.0.1:8080:80"
+      - "127.0.0.1:8080:5173"
 
   devnet:
     container_name: devnet
