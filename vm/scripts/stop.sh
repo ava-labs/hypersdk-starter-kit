@@ -4,9 +4,9 @@
 
 set -e
 
-HYPERVM_PATH=$(
+MORPHEUSVM_PATH=$(
   cd "$(dirname "${BASH_SOURCE[0]}")"
   cd .. && pwd
 )
 
-ginkgo -v "$HYPERVM_PATH"/tests/e2e/e2e.test -- --stop-network
+ginkgo -v "$MORPHEUSVM_PATH"/tests/e2e/e2e.test -- --stop-network

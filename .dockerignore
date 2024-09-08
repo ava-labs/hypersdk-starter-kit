@@ -1,2 +1,3 @@
 .git
 web_wallet/node_modules
+vm/tests/e2e/e2e.test

@@ -8,13 +8,13 @@ set -e
 # MODE=test ./scripts/run.sh
 MODE=${MODE:-run}
 if ! [[ "$0" =~ scripts/run.sh ]]; then
-  echo "must be run from hypervm root"
+  echo "must be run from morpheusvm root"
   exit 255
 fi
 
 # shellcheck source=/scripts/constants.sh
 source ./scripts/constants.sh
-# shellcheck source=/scripts/utils.sh
+# shellcheck source=/scripts/common/utils.sh
 source ./scripts/utils.sh
 
 VERSION=d729e5c7ef9f008c3e89cd7131148ad3acda2e34
@@ -59,15 +59,15 @@ fi
 
 ############################
 
-echo "building hypervm"
+echo "building morpheusvm"
 
 # delete previous (if exists)
-rm -f "${HYPERSDK_DIR}"/avalanchego-"${VERSION}"/plugins/o1f99fVtFxc914NPh5HFYtX7qfZgHtDS1Ps1P1Sc1ZWdMTCgo
+rm -f "${HYPERSDK_DIR}"/avalanchego-"${VERSION}"/plugins/qCNyZHrs3rZX458wPJXPJJypPf6w423A84jnfbdP2TPEmEE9u
 
 # rebuild with latest code
 go build \
--o "${HYPERSDK_DIR}"/avalanchego-"${VERSION}"/plugins/o1f99fVtFxc914NPh5HFYtX7qfZgHtDS1Ps1P1Sc1ZWdMTCgo \
-./cmd/hypervm
+-o "${HYPERSDK_DIR}"/avalanchego-"${VERSION}"/plugins/qCNyZHrs3rZX458wPJXPJJypPf6w423A84jnfbdP2TPEmEE9u \
+./cmd/morpheusvm
 
 ############################
 echo "building e2e.test"
