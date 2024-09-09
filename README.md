@@ -15,7 +15,7 @@ This will start a local test network and a faucet on your computer:
 2. Start the services: `docker compose up -d --build`
 
 Wait about 5 minutes. If everything works, open this link in your browser:
-[http://localhost:8765/faucet/hyper1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqjahycn](http://localhost:8765/faucet/hyper1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqjahycn)
+[http://localhost:8765/faucet/morpheus1qypqxqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmrmag4](http://localhost:8765/faucet/morpheus1qypqxqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmrmag4)
 
 To see what's happening, use: `docker compose logs -f`
 You'll see "Devnet started" when it's ready.
@@ -41,7 +41,7 @@ To run the faucet locally:
    `export FAUCET_PRIVATE_KEY_HEX=323b1d8f4eed5f0da9da93071b034f2dce9d2d22692c172f3cb252a64ddfafd01b057de320297c29ad0c1f589ea216869cf1938d88c9fbd70d6748323dbf2fa7`
 4. Start the faucet: `go run ./cmd/faucet/`
 5. Test the faucet: Open this link in your browser:
-   `http://localhost:8766/faucet/hyper1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqjahycn`
+   `http://localhost:8766/faucet/morpheus1qypqxqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmrmag4`
 
 ## Set up a test network on a remote server
 You need a server with at least 1 CPU and 2 GB of RAM.

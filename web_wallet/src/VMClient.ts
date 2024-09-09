@@ -5,12 +5,12 @@ import { base64 } from '@scure/base'
 
 
 class VMClient extends HyperSDKBaseClient {
-    public readonly COIN_SYMBOL = 'HPR';
-    public readonly HRP = 'hyper'
+    public readonly COIN_SYMBOL = 'RED';
+    public readonly HRP = 'morpheus'
 
     constructor(apiHost: string, private readonly faucetHost: string) {
-        const vmName = 'hypervm';
-        const vmRPCPrefix = 'hyperapi';
+        const vmName = 'morpheusvm';
+        const vmRPCPrefix = 'morpheusapi';
         const decimals = 9;
         super(apiHost, vmName, vmRPCPrefix, decimals);
     }
@@ -35,7 +35,7 @@ class VMClient extends HyperSDKBaseClient {
             actionName: 'Transfer',
             data: {
                 to,
-                value: this.fromFormattedBalance(amountString),
+                value: this.fromFormattedBalance(amountString).toString(),
                 memo: base64.encode(new TextEncoder().encode(memo)),
             },
         }

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { vmClient } from '../VMClient'
 
 interface FaucetProps {
-    balance: bigint
     minBalance: bigint
     children: React.ReactNode
     myAddr: string

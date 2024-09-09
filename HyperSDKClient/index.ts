@@ -24,8 +24,6 @@ type signerParams = {
 } | {
     type: "metamask-snap",
     snapId?: string,
-    lastDerivationSection?: number,
-    useLocalSnap?: boolean
 }
 
 export abstract class HyperSDKBaseClient extends EventTarget {
@@ -43,7 +41,7 @@ export abstract class HyperSDKBaseClient extends EventTarget {
 
     //public methods
 
-    public async generatePayload(actions: ActionData[]): TransactionPayload {
+    public async generatePayload(actions: ActionData[]): Promise<TransactionPayload> {
         const chainIdStr = (await this.getNetwork()).chainId
         const chainIdBigNumber = idStringToBigInt(chainIdStr)
 
@@ -63,12 +61,14 @@ export abstract class HyperSDKBaseClient extends EventTarget {
         return this.getNetworkCache;
     }
 
+
     private abiCache: string | null = null;
     public async getAbi(): Promise<string> {
+        type VMABI = any; //FIXME: import from sample-metamask-snap-for-hypersdk 
         if (!this.abiCache) {
-            this.abiCache = (await this.makeCoreAPIRequest<{ abi: string }>('getABI')).abi
+            this.abiCache = (await this.makeCoreAPIRequest<{ vmabi: VMABI }>('getABI')).vmabi
         }
-        return this.abiCache;
+        return this.abiCache || ""
     }
 
     public async sendTx(actions: ActionData[]): Promise<void> {
@@ -91,7 +91,7 @@ export abstract class HyperSDKBaseClient extends EventTarget {
         } else if (params.type === "private-key") {
             this.signer = new PrivateKeySigner(params.privateKey);
         } else if (params.type === "metamask-snap") {
-            this.signer = new MetamaskSnapSigner(params.snapId ?? DEFAULT_SNAP_ID, params.lastDerivationSection ?? 0, params.useLocalSnap ?? false);
+            this.signer = new MetamaskSnapSigner(params.snapId ?? DEFAULT_SNAP_ID);
         } else {
             throw new Error(`Invalid signer type: ${(params as { type: string }).type}`);
         }
@@ -133,7 +133,8 @@ export abstract class HyperSDKBaseClient extends EventTarget {
     //private methods
     private async makeApiRequest<T>(namespace: string, method: string, params: object = {}): Promise<T> {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const TIMEOUT_SEC = 10
+        const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_SEC*1000);
 
         try {
             const response = await fetch(`${this.apiHost}/ext/bc/${this.vmName}/${namespace}`, {
@@ -157,7 +158,7 @@ export abstract class HyperSDKBaseClient extends EventTarget {
             return json.result;
         } catch (error: unknown) {
             if (error instanceof Error && error.name === 'AbortError') {
-                throw new Error('Request timed out after 3 seconds');
+                throw new Error(`Request timed out after ${TIMEOUT_SEC} seconds`);
             }
             throw error;
         } finally {

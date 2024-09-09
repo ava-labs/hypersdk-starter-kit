@@ -8,7 +8,11 @@ export default function ConnectWallet() {
     async function connectWallet(signerType: "metamask-snap" | "ephemeral") {
         try {
             setLoading((prevLoading) => prevLoading + 1);
-            await vmClient.connect({ type: signerType })
+            if (signerType === "metamask-snap") {
+                await vmClient.connect({ type: "metamask-snap", snapId: "local:http://localhost:8080" })//TODO: remove snapID when debug is done
+            } else {
+                await vmClient.connect({ type: "ephemeral" })
+            }
         } catch (e) {
             console.error(e);
             setErrors((prevErrors) => [...prevErrors, (e as Error)?.message || String(e)]);

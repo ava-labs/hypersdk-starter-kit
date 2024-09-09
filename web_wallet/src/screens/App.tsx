@@ -6,12 +6,15 @@ import Faucet from "./Faucet.tsx"
 import { pubKeyToED25519Addr } from 'sample-metamask-snap-for-hypersdk/src/bech32'
 import { SignerIface } from '../../../HyperSDKClient/types.ts'
 
+// Add this type definition at the top of the file
+type SignerConnectedEvent = CustomEvent<SignerIface | null>;
+
 function App() {
   const [signerConnected, setSignerConnected] = useState<boolean>(false)
   const [myAddr, setMyAddr] = useState<string>("")
 
   useEffect(() => {
-    const handleSignerConnected = (event: CustomEvent) => {
+    const handleSignerConnected = (event: SignerConnectedEvent) => {
       setSignerConnected(!!event.detail)
       const signer: SignerIface | null = event.detail
       if (signer) {
@@ -21,9 +24,9 @@ function App() {
       }
     }
 
-    vmClient.addEventListener('signerConnected', handleSignerConnected)
+    vmClient.addEventListener('signerConnected', handleSignerConnected as EventListener)
 
-    return () => vmClient.removeEventListener('signerConnected', handleSignerConnected)
+    return () => vmClient.removeEventListener('signerConnected', handleSignerConnected as EventListener)
   }, [])
 
   if (!signerConnected) {

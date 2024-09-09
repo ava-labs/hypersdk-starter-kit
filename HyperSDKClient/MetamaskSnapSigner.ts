@@ -26,10 +26,12 @@ async function getProvider(): Promise<SDKProvider> {
     return cachedProvider;
 }
 
+type VMABI = any//FIXME: import from sample-metamask-snap-for-hypersdk
+
 export class MetamaskSnapSigner implements SignerIface {
     private cachedPublicKey: Uint8Array | null = null;
 
-    constructor(private snapId: string, private lastDerivationSection: number = 0, private useLocalSnap: boolean = false) {
+    constructor(private snapId: string) {
 
     }
 
@@ -40,13 +42,10 @@ export class MetamaskSnapSigner implements SignerIface {
         return this.cachedPublicKey;
     }
 
-
-
-    async signTx(txPayload: TransactionPayload, abiString: string): Promise<Uint8Array> {
+    async signTx(txPayload: TransactionPayload, abi: VMABI): Promise<Uint8Array> {
         const sig58 = await this._invokeSnap({
             method: 'signTransaction', params: {
-                derivationPath: [`${this.lastDerivationSection}'`],
-                abiString: abiString,
+                abi: abi,
                 tx: txPayload,
             }
         }) as string | undefined;
@@ -68,15 +67,14 @@ export class MetamaskSnapSigner implements SignerIface {
             method: 'wallet_getSnaps',
         })) as Record<string, unknown>;
 
-        if (!Object.keys(snaps).includes(this.snapId) || this.useLocalSnap) {
+        if (!Object.keys(snaps).includes(this.snapId) || this.snapId.startsWith("local:")) {
             await this.reinstallSnap();
         }
 
+
         const pubKey = await this._invokeSnap({
             method: 'getPublicKey',
-            params: {
-                derivationPath: [`${this.lastDerivationSection}'`]
-            }
+            params: { }
         }) as string | undefined;
 
         if (!pubKey) {
@@ -111,6 +109,8 @@ export class MetamaskSnapSigner implements SignerIface {
     }
 
     private async _invokeSnap({ method, params }: InvokeSnapParams): Promise<unknown> {
+        JSON.stringify(params) //PRESERVE THIS! if we can't serialize it, Metamask will fail too
+
         const provider = await getProvider();
         return await provider.request({
             method: 'wallet_invokeSnap',
