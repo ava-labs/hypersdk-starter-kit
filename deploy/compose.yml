@@ -7,6 +7,12 @@ services:
     restart: always
     ports:
       - "127.0.0.1:8080:5173"
+    healthcheck:
+      test: [ "CMD", "curl", "-X", "POST", "http://localhost:5173/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   devnet:
     container_name: devnet

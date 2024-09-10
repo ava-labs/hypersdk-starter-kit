@@ -9,11 +9,10 @@ RUN --mount=type=cache,target=/root/.npm \
     npm ci --prefer-offline
 
 COPY web_wallet/ ./web_wallet/
-COPY HyperSDKClient/ ./HyperSDKClient/
 
 WORKDIR /app/web_wallet
 
-CMD npm run dev
+CMD npm run dev -- --host 0.0.0.0
 # RUN npm run build
 
 # # Production stage
