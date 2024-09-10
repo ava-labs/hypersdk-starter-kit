@@ -5,6 +5,7 @@ package workload
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
@@ -65,6 +66,11 @@ type workloadFactory struct {
 
 func New(minBlockGap int64) (*genesis.DefaultGenesis, workload.TxWorkloadFactory, error) {
 	customAllocs := make([]*genesis.CustomAllocation, 0, len(ed25519AddrStrs))
+
+	if prefundAddress := os.Getenv("PREFUND_ADDRESS"); prefundAddress != "" {
+		ed25519AddrStrs = append(ed25519AddrStrs, prefundAddress)
+	}
+
 	for _, prefundedAddrStr := range ed25519AddrStrs {
 		customAllocs = append(customAllocs, &genesis.CustomAllocation{
 			Address: prefundedAddrStr,
