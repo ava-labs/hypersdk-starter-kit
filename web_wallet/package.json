@@ -16,10 +16,10 @@
     "@metamask/sdk": "^0.26.5",
     "@noble/curves": "^1.4.2",
     "@scure/base": "^1.1.7",
+    "hypersdk-client": "^0.3.0",
     "lossless-json": "^4.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "sample-metamask-snap-for-hypersdk": "file:../../hypersdk-frontend/hypersdk_snap",
     "vitest": "^2.0.4"
   },
   "devDependencies": {

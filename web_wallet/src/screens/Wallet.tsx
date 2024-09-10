@@ -1,8 +1,7 @@
 import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { useState, useCallback, useEffect } from 'react'
-import { ActionData } from 'sample-metamask-snap-for-hypersdk/src/sign'
+import { ActionData } from 'hypersdk-client/src/snap'
 import { vmClient } from '../VMClient'
-
 
 
 const otherWalletAddress = "morpheus1qypqxqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmrmag4"

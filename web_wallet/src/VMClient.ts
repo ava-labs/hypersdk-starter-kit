@@ -1,6 +1,6 @@
 import { API_HOST, FAUCET_HOST } from "./const";
-import { HyperSDKBaseClient } from "sample-metamask-snap-for-hypersdk/src/client"
-import { ActionData } from 'sample-metamask-snap-for-hypersdk/src/snap'
+import { HyperSDKBaseClient } from "hypersdk-client/src/client"
+import { ActionData } from 'hypersdk-client/src/snap'
 import { base64 } from '@scure/base'
 
 

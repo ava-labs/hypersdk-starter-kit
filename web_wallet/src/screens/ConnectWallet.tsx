@@ -9,7 +9,10 @@ export default function ConnectWallet() {
         try {
             setLoading((prevLoading) => prevLoading + 1);
             if (signerType === "metamask-snap") {
-                await vmClient.connect({ type: "metamask-snap", snapId: "local:http://localhost:8080" })//TODO: remove snapID when debug is done
+                await vmClient.connect({ 
+                    type: "metamask-snap",
+                    // snapId: "local:http://localhost:8080"
+                })
             } else {
                 await vmClient.connect({ type: "ephemeral" })
             }
