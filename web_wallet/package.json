@@ -19,7 +19,7 @@
     "lossless-json": "^4.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "sample-metamask-snap-for-hypersdk": "^0.2.0",
+    "sample-metamask-snap-for-hypersdk": "file:../../hypersdk-frontend/hypersdk_snap",
     "vitest": "^2.0.4"
   },
   "devDependencies": {

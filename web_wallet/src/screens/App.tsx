@@ -3,8 +3,8 @@ import ConnectWallet from './ConnectWallet'
 import Wallet from './Wallet'
 import { vmClient } from '../VMClient.ts'
 import Faucet from "./Faucet.tsx"
-import { pubKeyToED25519Addr } from 'sample-metamask-snap-for-hypersdk/src/bech32'
-import { SignerIface } from '../../../HyperSDKClient/types.ts'
+import { pubKeyToED25519Addr } from 'sample-metamask-snap-for-hypersdk/src/snap/bech32'
+import { SignerIface } from 'sample-metamask-snap-for-hypersdk/src/client/types'
 
 // Add this type definition at the top of the file
 type SignerConnectedEvent = CustomEvent<SignerIface | null>;

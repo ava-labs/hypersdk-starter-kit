@@ -1,6 +1,6 @@
 import { API_HOST, FAUCET_HOST } from "./const";
-import { HyperSDKBaseClient } from "../../HyperSDKClient"
-import { ActionData } from 'sample-metamask-snap-for-hypersdk/src/sign'
+import { HyperSDKBaseClient } from "sample-metamask-snap-for-hypersdk/src/client"
+import { ActionData } from 'sample-metamask-snap-for-hypersdk/src/snap'
 import { base64 } from '@scure/base'
 
 
@@ -36,7 +36,7 @@ class VMClient extends HyperSDKBaseClient {
             data: {
                 to,
                 value: this.fromFormattedBalance(amountString).toString(),
-                memo: base64.encode(new TextEncoder().encode(memo)),
+                memo: memo,
             },
         }
     }
