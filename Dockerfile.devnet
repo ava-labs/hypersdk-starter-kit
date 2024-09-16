@@ -18,13 +18,13 @@ COPY --from=avalanchego /avalanchego/build/avalanchego /root/.hypersdk/avalanche
 
 ENV GOMODCACHE /go/pkg/mod
 
-WORKDIR /
+WORKDIR /app
 
 COPY ./go.mod ./go.sum ./
 
-COPY ./vm ./vm
+COPY ./ ./
 
-WORKDIR /vm
+WORKDIR /app
 
 
 ENTRYPOINT ["/bin/bash", "-c", "./scripts/stop.sh; ./scripts/run.sh && echo 'Devnet started' && tail -f /dev/null"]
