@@ -14,7 +14,6 @@ import (
 	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/state"
 
-	mconsts "github.com/ava-labs/hypersdk-starter/consts"
 	consts "github.com/ava-labs/hypersdk/consts"
 )
 
@@ -46,7 +45,7 @@ type TransferResult struct {
 }
 
 func (*Transfer) GetTypeID() uint8 {
-	return mconsts.TransferID
+	return 0
 }
 
 func (t *Transfer) StateKeys(actor codec.Address, _ ids.ID) state.Keys {
