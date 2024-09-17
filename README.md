@@ -12,9 +12,7 @@ Run: `docker compose up -d --build devnet faucet frontend`
 
 For devcontainers or codespaces, forward ports 8765 for faucet, 9650 for the chain, and 5173 for the frontend.
 
-Open [http://localhost:5173](http://localhost:5173) to see the frontend.
-
-Play around with it. Try both the Temporary key and Metamask snap (from npm, not local).
+Open [http://localhost:5173](http://localhost:5173) to see the frontend. Play around with it. Try both the Temporary key and Metamask snap (from npm, not local).
 
 That's how it should look with Metamask Snap signing:
 
@@ -31,13 +29,15 @@ To develop or port new actions:
 
 There are read-only and read-write actions. Ensure actions have `***Result` types defined in `vm/vm.go`. Use read-only actions instead of RPC API.
 
+By the way, the Go code depends on the [`read-only-actions` branch](https://github.com/ava-labs/hypersdk/tree/read-only-actions) of HyperSDK. So copy-pasting actions would not work; you'll need to define the return types.
+
 ## 3. Develop a Frontend
 1. Bring down the frontend container: `docker compose down`
 2. Start only the devnet and faucet: `docker compose up -d --build devnet faucet`
 3. Navigate to the web wallet: `cd web_wallet`
 4. Install dependencies and start the dev server: `npm i && npm run dev`
 
-Ensure ports 8765 (faucet), 9650 (chain), and 5173 (frontend) are forwarded.
+Ensure ports `8765` (faucet), `9650` (chain), and `5173` (frontend) are forwarded.
 
 Note that most functionality depends on the `hypersdk-client` npm package.
 
