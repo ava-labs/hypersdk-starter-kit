@@ -28,13 +28,18 @@ import (
 	"github.com/ava-labs/hypersdk/utils"
 )
 
-const amtStr = "10.00"
+const (
+	amtStr           = "10.00"
+	faucetServerPort = "8765"
+)
 
 var (
 	priv        ed25519.PrivateKey
 	factory     chain.AuthFactory
 	hyperVMRPC  *vm.JSONRPCClient
 	hyperSDKRPC *jsonrpc.JSONRPCClient
+	isReady     bool
+	healthMu    sync.RWMutex
 )
 
 func init() {
@@ -55,7 +60,6 @@ func init() {
 	}
 	url := fmt.Sprintf("%s/ext/bc/%s", rpcEndpoint, consts.Name)
 	hyperVMRPC = vm.NewJSONRPCClient(url)
-
 	hyperSDKRPC = jsonrpc.NewJSONRPCClient(url)
 }
 
@@ -74,12 +78,11 @@ func transferCoins(to string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to get balance: %w", err)
 	}
-	fmt.Printf("Balance before: %s\n", utils.FormatBalance(balanceBefore, consts.Decimals))
+	log.Printf("Balance before: %s\n", utils.FormatBalance(balanceBefore, consts.Decimals))
 
-	// Check if balance is greater than 1.000
 	threshold, _ := utils.ParseBalance("1.000", consts.Decimals)
 	if balanceBefore > threshold {
-		fmt.Printf("Balance is already greater than 1.000, no transfer needed\n")
+		log.Printf("Balance is already greater than 1.000, no transfer needed\n")
 		return "Balance is already greater than 1.000, no transfer needed", nil
 	}
 
@@ -101,46 +104,86 @@ func transferCoins(to string) (string, error) {
 		return "", fmt.Errorf("failed to generate transaction: %w", err)
 	}
 
-	err = submit(context.TODO())
-	if err != nil {
+	if err := submit(context.TODO()); err != nil {
 		return "", fmt.Errorf("failed to submit transaction: %w", err)
 	}
 
-	err = hyperVMRPC.WaitForBalance(context.TODO(), to, amt)
-	if err != nil {
+	if err := hyperVMRPC.WaitForBalance(context.TODO(), to, amt); err != nil {
 		return "", fmt.Errorf("failed to wait for balance: %w", err)
 	}
 
 	return "Coins transferred successfully", nil
 }
-
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/faucet/{address}", handleFaucetRequest).Methods("GET", "POST")
+	r.HandleFunc("/readyz", handleReadyCheck).Methods("GET")
 
-	// Create a new CORS handler
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
 		AllowedHeaders: []string{"*"},
 	})
 
-	// Wrap the router with the CORS handler
 	handler := c.Handler(r)
 
-	zeroAddressBech32 := codec.MustAddressBech32(consts.HRP, codec.Address{1, 2, 3})
-	fmt.Printf("Starting faucet server on port 8765\nOpen http://localhost:8765/faucet/%s to test the transfer\n", zeroAddressBech32)
+	performInitialTransfer()
 
 	srv := &http.Server{
-		Addr:         ":8765",
+		Addr:         ":" + faucetServerPort,
 		Handler:      handler,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
 
+	log.Printf("Starting faucet server on port %s\n", faucetServerPort)
+	log.Printf("Ready check endpoint: http://localhost:%s/readyz\n", faucetServerPort)
+	log.Printf("Faucet endpoint: http://localhost:%s/faucet/{address}\n", faucetServerPort)
+
 	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func performInitialTransfer() {
+	zeroAddressBech32 := codec.MustAddressBech32(consts.HRP, codec.Address{1, 2, 3})
+	log.Println("Performing initial transfer to ready check address...")
+
+	for i := 0; i < 10; i++ {
+		message, err := transferCoins(zeroAddressBech32)
+		if err == nil {
+			log.Printf("Initial transfer result: %s\n", message)
+			setReady(true)
+			log.Println("Faucet is now healthy and ready to serve requests")
+			return
+		}
+		log.Printf("Attempt %d failed to perform initial transfer: %v\n", i+1, err)
+		time.Sleep(time.Duration(i+1) * time.Second)
+	}
+
+	log.Fatal("Faucet initialization failed after 5 attempts. Exiting.")
+}
+
+func setReady(status bool) {
+	healthMu.Lock()
+	defer healthMu.Unlock()
+	isReady = status
+}
+
+func getReadyStatus() bool {
+	healthMu.RLock()
+	defer healthMu.RUnlock()
+	return isReady
+}
+
+func handleReadyCheck(w http.ResponseWriter, r *http.Request) {
+	if getReadyStatus() {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "Faucet is healthy")
+	} else {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		fmt.Fprint(w, "Faucet is not yet healthy")
 	}
 }
 
@@ -150,21 +193,17 @@ var (
 )
 
 func handleFaucetRequest(w http.ResponseWriter, r *http.Request) {
-	// Set CORS headers for all responses
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
-	// Handle preflight requests
 	if r.Method == "OPTIONS" {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	// Get client IP
 	clientIP := r.RemoteAddr
 
-	// Check rate limit
 	if !getRateLimiter(clientIP).Allow() {
 		http.Error(w, "Rate limit exceeded. Please try again later.", http.StatusTooManyRequests)
 		return
@@ -179,7 +218,7 @@ func handleFaucetRequest(w http.ResponseWriter, r *http.Request) {
 
 	message, err := transferCoins(address)
 	if err != nil {
-		fmt.Printf("Failed to transfer coins: %v\n", err)
+		log.Printf("Failed to transfer coins: %v\n", err)
 		http.Error(w, fmt.Sprintf("Failed to transfer coins: %v", err), http.StatusInternalServerError)
 		return
 	}

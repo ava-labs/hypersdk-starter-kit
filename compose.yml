@@ -13,6 +13,9 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    depends_on:
+      faucet:
+        condition: service_healthy
 
   devnet:
     container_name: devnet
@@ -34,6 +37,7 @@ services:
       retries: 5
       start_period: 300s
 
+      
   faucet:
     container_name: faucet
     build:
@@ -44,6 +48,12 @@ services:
     restart: always
     ports:
       - "127.0.0.1:8765:8765"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8765/readyz" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       devnet:
         condition: service_healthy

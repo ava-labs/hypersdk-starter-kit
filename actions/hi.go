@@ -82,19 +82,3 @@ func (*Hi) ComputeUnits(chain.Rules) uint64 {
 func (*Hi) ValidRange(chain.Rules) (int64, int64) {
 	return -1, -1
 }
-
-var _ chain.Marshaler = (*Hi)(nil)
-
-func (h *Hi) Size() int {
-	return codec.BytesLen(h.Name)
-}
-
-func (h *Hi) Marshal(p *codec.Packer) {
-	p.PackBytes(h.Name)
-}
-
-func UnmarshalHi(p *codec.Packer) (chain.Action, error) {
-	var hi Hi
-	p.UnpackBytes(MaxNameSize, false, (*[]byte)(&hi.Name))
-	return &hi, p.Err()
-}
