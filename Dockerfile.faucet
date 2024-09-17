@@ -19,8 +19,11 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 #####
 FROM debian:bookworm-slim
 
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y curl && apt clean && rm -rf /var/lib/apt/lists/*
+
 COPY --from=faucet-builder /build/build/faucet /faucet
 ENV RPC_ENDPOINT=http://devnet:9650
+
 
 
 ENTRYPOINT ["/faucet"]

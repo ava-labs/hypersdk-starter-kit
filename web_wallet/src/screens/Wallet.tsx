@@ -79,9 +79,13 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
     async function executeReadonlyAction() {
         setLogText("")
         try {
-            log("info", "Executing readonly action: Hi")
+            const payload = {
+                actionName: "Hi",
+                data: { name: "Luigi" }
+            }
+            log("info", `Executing readonly action: ${stringify(payload)}`)
             setLoading(counter => counter + 1)
-            const result = await vmClient.executeReadonlyAction({ actionName: "Hi", data: { name: "Luigi" } })
+            const result = await vmClient.executeReadonlyAction(payload)
             console.log(result)
             log("success", `Readonly action result: ${stringify(result)}`)
         } catch (e: unknown) {

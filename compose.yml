@@ -6,7 +6,7 @@ services:
       context: ./
     restart: always
     ports:
-      - "127.0.0.1:8080:5173"
+      - "127.0.0.1:5173:5173"
     healthcheck:
       test: [ "CMD", "curl", "-X", "POST", "http://localhost:5173/"]
       interval: 10s
@@ -14,8 +14,8 @@ services:
       retries: 5
       start_period: 10s
     depends_on:
-      faucet:
-        condition: service_healthy
+      - faucet
+      - devnet
 
   devnet:
     container_name: devnet
@@ -55,8 +55,7 @@ services:
       retries: 20
       start_period: 10s
     depends_on:
-      devnet:
-        condition: service_healthy
+      - devnet
 
   proxy:
     container_name: proxy
