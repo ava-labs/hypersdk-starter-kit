@@ -8,7 +8,7 @@
 
 ## 1. Start the Whole Stack
 
-Run: `docker compose up -d --build devnet faucet frontend`
+Run: `docker compose up -d --build devnet faucet frontend`. Might take 5 minutes to download dependencies.
 
 For devcontainers or codespaces, forward ports 8765 for faucet, 9650 for the chain, and 5173 for the frontend.
 
@@ -17,6 +17,10 @@ Open [http://localhost:5173](http://localhost:5173) to see the frontend. Play ar
 That's how it should look with Metamask Snap signing:
 
 ![Screenshot](assets/screenshot.png)
+
+
+BTW a relatively fresh version should be deployed at [https://ec2-18-224-139-0.us-east-2.compute.amazonaws.com/](https://ec2-18-224-139-0.us-east-2.compute.amazonaws.com/)
+
 
 When finished, shut everything down with: `docker compose down`
 
@@ -52,4 +56,5 @@ Note that most functionality depends on the `hypersdk-client` npm package.
   - Chain: `./scripts/run.sh`
   - Frontend: `npm run dev` in `web_wallet`
 - Instead of `docker compose up -d --build devnet faucet frontend`, you can use `docker compose up -d --build frontend`. The `frontend` service will automatically start `faucet` and `devnet` as dependencies.
-- Be aware of potential port conflicts if issues arise.
+- Be aware of potential port conflicts if issues arise. `docker rm -f $(docker ps -a -q)` is your friend.
+- 
