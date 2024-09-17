@@ -51,7 +51,7 @@ func init() {
 
 	rpcEndpoint := os.Getenv("RPC_ENDPOINT")
 	if rpcEndpoint == "" {
-		rpcEndpoint = "http://localhost:9650"
+		log.Fatalf("RPC_ENDPOINT is not set")
 	}
 	url := fmt.Sprintf("%s/ext/bc/%s", rpcEndpoint, consts.Name)
 	hyperVMRPC = vm.NewJSONRPCClient(url)
