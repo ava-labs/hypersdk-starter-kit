@@ -1,20 +1,20 @@
 import { useState } from 'react'
 import { vmClient } from '../VMClient'
 
+type SignerType = "metamask-snap" | "ephemeral";
+
 export default function ConnectWallet() {
     const [loading, setLoading] = useState(0)
     const [errors, setErrors] = useState<string[]>([])
 
-    async function connectWallet(signerType: "metamask-snap" | "ephemeral") {
+    async function connectWallet(signerType: SignerType, snapSource: "npm" | "local" = "npm") {
         try {
             setLoading((prevLoading) => prevLoading + 1);
             if (signerType === "metamask-snap") {
-                await vmClient.connect({ 
-                    type: "metamask-snap",
-                    // snapId: "local:http://localhost:8080"
-                })
+                const snapId = snapSource === "local" ? "local:http://localhost:8989" : undefined;
+                await vmClient.connect({ type: "metamask-snap", snapId });
             } else {
-                await vmClient.connect({ type: "ephemeral" })
+                await vmClient.connect({ type: "ephemeral" });
             }
         } catch (e) {
             console.error(e);
@@ -48,24 +48,33 @@ export default function ConnectWallet() {
     }
     return (
         <div className="flex items-center justify-center min-h-screen">
-            <div className="border border-black px-16 py-12 rounded-lg max-w-xl w-full text-center">
+            <div className="border border-black px-16 py-12 rounded-lg max-w-3xl w-full text-center">
                 <h3 className="text-4xl font-semibold text-gray-900 mb-5 ">HyperSDK e2e demo</h3>
                 <p className="mt-4 text-sm">Connect with Metamask Flask development signer via a Snap, or create a signer in memory.</p>
-                <div className="mt-8 flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+                <div className="mt-8 flex flex-col space-y-4">
                     <button
                         type="button"
-                        className="w-48 px-4 py-2 bg-black text-white font-bold rounded hover:bg-gray-800 transition-colors duration-200 transform hover:scale-105"
-                        onClick={() => connectWallet("metamask-snap")}
+                        className="w-full px-6 py-3 bg-black text-white font-bold rounded hover:bg-gray-800 transition-colors duration-200 transform hover:scale-105"
+                        onClick={() => connectWallet("metamask-snap", "npm")}
                     >
-                        Metamask Snap
+                        Connect with Snap from npm
                     </button>
-                    <button
-                        type="button"
-                        className="w-48 px-4 py-2 bg-white text-black font-bold rounded border border-black hover:bg-gray-100 transition-colors duration-200 transform hover:scale-105"
-                        onClick={() => connectWallet("ephemeral")}
-                    >
-                        Temporary key
-                    </button>
+                    <div className="flex flex-row justify-between space-x-4">
+                        <button
+                            type="button"
+                            className="flex-1 px-4 py-2 bg-gray-200 text-black font-semibold rounded hover:bg-gray-300 transition-colors duration-200 transform hover:scale-105"
+                            onClick={() => connectWallet("metamask-snap", "local")}
+                        >
+                            Snap from localhost:8989
+                        </button>
+                        <button
+                            type="button"
+                            className="flex-1 px-4 py-2 bg-gray-200 text-black font-semibold rounded hover:bg-gray-300 transition-colors duration-200 transform hover:scale-105"
+                            onClick={() => connectWallet("ephemeral")}
+                        >
+                            Temporary key
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

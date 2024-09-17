@@ -1,7 +1,6 @@
 import { API_HOST, FAUCET_HOST } from "./const";
 import { HyperSDKBaseClient } from "hypersdk-client/src/client"
 import { ActionData } from 'hypersdk-client/src/snap'
-import { base64 } from '@scure/base'
 
 
 class VMClient extends HyperSDKBaseClient {
