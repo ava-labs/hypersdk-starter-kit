@@ -26,11 +26,11 @@ var (
 )
 
 type Hi struct {
-	Name codec.Bytes `serialize:"true" json:"name"`
+	Name string `serialize:"true" json:"name"`
 }
 
 type HiResult struct {
-	Greeting []byte `serialize:"true" json:"greeting"`
+	Greeting string `serialize:"true" json:"greeting"`
 	Balance  uint64 `serialize:"true" json:"balance"`
 }
 
@@ -65,10 +65,10 @@ func (h *Hi) Execute(
 		return nil, err
 	}
 
-	greeting := fmt.Sprintf("Hi, %s", string(h.Name))
+	greeting := fmt.Sprintf("Hi, %s", h.Name)
 
 	bytes, err := codec.Marshal(HiResult{
-		Greeting: []byte(greeting),
+		Greeting: greeting,
 		Balance:  balance,
 	})
 

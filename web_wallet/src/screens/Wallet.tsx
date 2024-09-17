@@ -2,8 +2,7 @@ import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { useState, useCallback, useEffect } from 'react'
 import { ActionData } from 'hypersdk-client/src/snap'
 import { vmClient } from '../VMClient'
-import { base64 } from '@scure/base'
-
+import { stringify } from 'lossless-json'
 
 const otherWalletAddress = "morpheus1qypqxqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmrmag4"
 export default function Wallet({ myAddr }: { myAddr: string }) {
@@ -82,8 +81,9 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
         try {
             log("info", "Executing readonly action: Hi")
             setLoading(counter => counter + 1)
-            const result = await vmClient.executeReadonlyAction({ actionName: "Hi", data: { name: btoa("Luigi") } })
-            log("success", `Readonly action result: ${JSON.stringify(result)}`)
+            const result = await vmClient.executeReadonlyAction({ actionName: "Hi", data: { name: "Luigi" } })
+            console.log(result)
+            log("success", `Readonly action result: ${stringify(result)}`)
         } catch (e: unknown) {
             log("error", `Readonly action failed: ${(e as { message?: string })?.message || String(e)}`);
             console.error(e)

@@ -52,7 +52,7 @@ services:
       test: [ "CMD", "curl", "-f", "http://localhost:8765/readyz" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 20
       start_period: 10s
     depends_on:
       devnet:
