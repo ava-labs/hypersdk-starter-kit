@@ -2,7 +2,7 @@ import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { useState, useCallback, useEffect } from 'react'
 import { ActionData } from 'hypersdk-client/src/snap'
 import { vmClient } from '../VMClient'
-
+import { stringify } from 'lossless-json'
 
 const otherWalletAddress = "morpheus1qypqxqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmrmag4"
 export default function Wallet({ myAddr }: { myAddr: string }) {
@@ -76,6 +76,22 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
         }
     }
 
+    async function executeReadonlyAction() {
+        setLogText("")
+        try {
+            log("info", "Executing readonly action: Hi")
+            setLoading(counter => counter + 1)
+            const result = await vmClient.executeReadonlyAction({ actionName: "Hi", data: { name: "Luigi" } })
+            console.log(result)
+            log("success", `Readonly action result: ${stringify(result)}`)
+        } catch (e: unknown) {
+            log("error", `Readonly action failed: ${(e as { message?: string })?.message || String(e)}`);
+            console.error(e)
+        } finally {
+            setLoading(counter => counter - 1)
+        }
+    }
+
     return (
         <div className="w-full  bg-white p-8">
             <div className={loading > 0 ? "animate-pulse" : ""}>
@@ -99,7 +115,12 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
                     >
                         Send 1 RED
                     </button>
-
+                    <button className={`px-4 py-2 font-bold rounded border transition-colors duration-200 ${loading > 0 ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' : 'bg-white text-black border-black hover:bg-gray-100 transform hover:scale-105'}`}
+                        onClick={executeReadonlyAction}
+                        disabled={loading > 0}
+                    >
+                        Say Hi (Read Only Action)
+                    </button>
                 </div>
                 <div className="mt-8 border border-gray-300 rounded p-4 min-h-16">
                     <pre className="font-mono text-sm">
