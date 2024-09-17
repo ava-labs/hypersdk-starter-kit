@@ -3,15 +3,16 @@ import { HyperSDKBaseClient } from "hypersdk-client/src/client"
 import { ActionData } from 'hypersdk-client/src/snap'
 
 
+
 class VMClient extends HyperSDKBaseClient {
     public readonly COIN_SYMBOL = 'RED';
-    public readonly HRP = 'morpheus'
 
     constructor(apiHost: string, private readonly faucetHost: string) {
         const vmName = 'morpheusvm';
         const vmRPCPrefix = 'morpheusapi';
         const decimals = 9;
-        super(apiHost, vmName, vmRPCPrefix, decimals);
+        const HRP = 'morpheus'
+        super(apiHost, vmName, vmRPCPrefix, HRP, decimals);
     }
 
     public async getBalance(address: string): Promise<bigint> {
