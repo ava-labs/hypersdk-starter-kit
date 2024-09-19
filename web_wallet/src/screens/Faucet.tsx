@@ -34,7 +34,7 @@ export default function Faucet({ children, minBalance, myAddr }: FaucetProps) {
                             if (i === maxAttempts - 1) {
                                 throw e
                             }
-                            await new Promise(resolve => setTimeout(resolve, 100))
+                            await new Promise(resolve => setTimeout(resolve, i * 100))
                         }
                     }
 
