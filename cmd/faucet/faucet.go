@@ -50,9 +50,8 @@ func init() {
 	priv = ed25519.PrivateKey(privBytes)
 	factory = auth.NewED25519Factory(priv)
 
-	myAddress := auth.NewED25519Address(priv.PublicKey())
-	myAddressBech32 := codec.MustAddressBech32(consts.HRP, myAddress)
-	log.Printf("Faucet address: %s\n", myAddressBech32)
+	myAddressHex := auth.NewED25519Address(priv.PublicKey()).String()
+	log.Printf("Faucet address: %s\n", myAddressHex)
 
 	rpcEndpoint := os.Getenv("RPC_ENDPOINT")
 	if rpcEndpoint == "" {
@@ -64,7 +63,7 @@ func init() {
 }
 
 func transferCoins(to string) (string, error) {
-	toAddr, err := codec.ParseAddressBech32(consts.HRP, to)
+	toAddr, err := codec.StringToAddress(to)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse to address: %w", err)
 	}
@@ -74,7 +73,7 @@ func transferCoins(to string) (string, error) {
 		return "", fmt.Errorf("failed to parse amount: %w", err)
 	}
 
-	balanceBefore, err := hyperVMRPC.Balance(context.TODO(), to)
+	balanceBefore, err := hyperVMRPC.Balance(context.TODO(), toAddr)
 	if err != nil {
 		return "", fmt.Errorf("failed to get balance: %w", err)
 	}
@@ -108,7 +107,7 @@ func transferCoins(to string) (string, error) {
 		return "", fmt.Errorf("failed to submit transaction: %w", err)
 	}
 
-	if err := hyperVMRPC.WaitForBalance(context.TODO(), to, amt); err != nil {
+	if err := hyperVMRPC.WaitForBalance(context.TODO(), toAddr, amt); err != nil {
 		return "", fmt.Errorf("failed to wait for balance: %w", err)
 	}
 
@@ -147,11 +146,11 @@ func main() {
 }
 
 func performInitialTransfer() {
-	zeroAddressBech32 := codec.MustAddressBech32(consts.HRP, codec.Address{1, 2, 3})
+	zeroAddressHex := codec.EmptyAddress.String()
 	log.Println("Performing initial transfer to ready check address...")
 
 	for i := 0; i < 10; i++ {
-		message, err := transferCoins(zeroAddressBech32)
+		message, err := transferCoins(zeroAddressHex)
 		if err == nil {
 			log.Printf("Initial transfer result: %s\n", message)
 			setReady(true)

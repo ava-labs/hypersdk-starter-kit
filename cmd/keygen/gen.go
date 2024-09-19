@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ava-labs/hypersdk-starter/consts"
 	"github.com/ava-labs/hypersdk/auth"
-	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/crypto/ed25519"
 	"github.com/joho/godotenv"
 )
@@ -19,7 +17,7 @@ func main() {
 	}
 
 	pub := priv.PublicKey()
-	addrStr := codec.MustAddressBech32(consts.HRP, auth.NewED25519Address(pub))
+	addrStr := auth.NewED25519Address(pub).String()
 
 	privKeyHex := hex.EncodeToString(priv[:])
 

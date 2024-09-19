@@ -34,6 +34,10 @@ type HiResult struct {
 	Balance  uint64 `serialize:"true" json:"balance"`
 }
 
+func (h *HiResult) GetTypeID() uint8 {
+	return 1
+}
+
 func (*Hi) GetTypeID() uint8 {
 	return 1
 }
@@ -55,7 +59,7 @@ func (h *Hi) Execute(
 	_ int64,
 	actor codec.Address,
 	_ ids.ID,
-) ([][]byte, error) {
+) (codec.Typed, error) {
 	if len(h.Name) > MaxNameSize {
 		return nil, ErrNameTooLarge
 	}
@@ -67,12 +71,10 @@ func (h *Hi) Execute(
 
 	greeting := fmt.Sprintf("Hi, %s", h.Name)
 
-	bytes, err := codec.Marshal(HiResult{
+	return &HiResult{
 		Greeting: greeting,
 		Balance:  balance,
-	})
-
-	return [][]byte{bytes}, err
+	}, err
 }
 
 func (*Hi) ComputeUnits(chain.Rules) uint64 {

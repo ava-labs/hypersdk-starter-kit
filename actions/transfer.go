@@ -8,8 +8,8 @@ import (
 	"errors"
 
 	"github.com/ava-labs/avalanchego/ids"
-
 	"github.com/ava-labs/hypersdk-starter/storage"
+
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/state"
@@ -37,11 +37,6 @@ type Transfer struct {
 	Memo codec.Bytes `serialize:"true" json:"memo"`
 }
 
-type TransferResult struct {
-	SenderBalance   uint64 `serialize:"true" json:"sender_balance"`
-	ReceiverBalance uint64 `serialize:"true" json:"receiver_balance"`
-}
-
 func (*Transfer) GetTypeID() uint8 {
 	return 0
 }
@@ -64,35 +59,26 @@ func (t *Transfer) Execute(
 	_ int64,
 	actor codec.Address,
 	_ ids.ID,
-) ([][]byte, error) {
+) (codec.Typed, error) {
 	if t.Value == 0 {
 		return nil, ErrOutputValueZero
 	}
 	if len(t.Memo) > MaxMemoSize {
 		return nil, ErrOutputMemoTooLarge
 	}
-	if err := storage.SubBalance(ctx, mu, actor, t.Value); err != nil {
-		return nil, err
-	}
-	if err := storage.AddBalance(ctx, mu, t.To, t.Value, true); err != nil {
-		return nil, err
-	}
-
-	senderBalance, err := storage.GetBalance(ctx, mu, actor)
+	senderBalance, err := storage.SubBalance(ctx, mu, actor, t.Value)
 	if err != nil {
 		return nil, err
 	}
-	receiverBalance, err := storage.GetBalance(ctx, mu, t.To)
+	receiverBalance, err := storage.AddBalance(ctx, mu, t.To, t.Value, true)
 	if err != nil {
 		return nil, err
 	}
 
-	bytes, err := codec.Marshal(TransferResult{
+	return &TransferResult{
 		SenderBalance:   senderBalance,
 		ReceiverBalance: receiverBalance,
-	})
-
-	return [][]byte{bytes}, err
+	}, nil
 }
 
 func (*Transfer) ComputeUnits(chain.Rules) uint64 {
@@ -102,4 +88,15 @@ func (*Transfer) ComputeUnits(chain.Rules) uint64 {
 func (*Transfer) ValidRange(chain.Rules) (int64, int64) {
 	// Returning -1, -1 means that the action is always valid.
 	return -1, -1
+}
+
+var _ codec.Typed = (*TransferResult)(nil)
+
+type TransferResult struct {
+	SenderBalance   uint64 `serialize:"true" json:"sender_balance"`
+	ReceiverBalance uint64 `serialize:"true" json:"receiver_balance"`
+}
+
+func (*TransferResult) GetTypeID() uint8 {
+	return 0
 }

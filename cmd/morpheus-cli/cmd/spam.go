@@ -19,6 +19,7 @@ import (
 	"github.com/ava-labs/hypersdk/crypto/bls"
 	"github.com/ava-labs/hypersdk/crypto/ed25519"
 	"github.com/ava-labs/hypersdk/crypto/secp256r1"
+	"github.com/ava-labs/hypersdk/pubsub"
 	"github.com/ava-labs/hypersdk/utils"
 )
 
@@ -51,7 +52,7 @@ func (*SpamHelper) GetFactory(pk *cli.PrivateKey) (chain.AuthFactory, error) {
 
 func (sh *SpamHelper) CreateClient(uri string) error {
 	sh.cli = vm.NewJSONRPCClient(uri)
-	ws, err := ws.NewWebSocketClient(uri, ws.DefaultHandshakeTimeout, 1024, 1024*1024)
+	ws, err := ws.NewWebSocketClient(uri, ws.DefaultHandshakeTimeout, pubsub.MaxPendingMessages, pubsub.MaxReadMessageSize)
 	if err != nil {
 		return err
 	}
@@ -63,7 +64,7 @@ func (sh *SpamHelper) GetParser(ctx context.Context) (chain.Parser, error) {
 	return sh.cli.Parser(ctx)
 }
 
-func (sh *SpamHelper) LookupBalance(choice int, address string) (uint64, error) {
+func (sh *SpamHelper) LookupBalance(choice int, address codec.Address) (uint64, error) {
 	balance, err := sh.cli.Balance(context.TODO(), address)
 	if err != nil {
 		return 0, err
