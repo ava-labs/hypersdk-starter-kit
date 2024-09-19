@@ -3,7 +3,7 @@ import ConnectWallet from './ConnectWallet'
 import Wallet from './Wallet'
 import { vmClient } from '../VMClient.ts'
 import Faucet from "./Faucet.tsx"
-import { pubKeyToED25519Addr } from 'hypersdk-client/src/snap/bech32'
+import { addressHexFromPubKey } from 'hypersdk-client/src/lib/Marshaler.ts'
 import { SignerIface } from 'hypersdk-client/src/client/types'
 
 // Add this type definition at the top of the file
@@ -18,7 +18,7 @@ function App() {
       setSignerConnected(!!event.detail)
       const signer: SignerIface | null = event.detail
       if (signer) {
-        setMyAddr(pubKeyToED25519Addr(signer.getPublicKey(), vmClient.HRP))
+        setMyAddr(addressHexFromPubKey(signer.getPublicKey()))
       } else {
         setMyAddr("")
       }

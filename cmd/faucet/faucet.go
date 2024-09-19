@@ -113,8 +113,10 @@ func transferCoins(to string) (string, error) {
 
 	return "Coins transferred successfully", nil
 }
+
 func main() {
 	r := mux.NewRouter()
+	r.HandleFunc("/", handleAPIDocumentation).Methods("GET")
 	r.HandleFunc("/faucet/{address}", handleFaucetRequest).Methods("GET", "POST")
 	r.HandleFunc("/readyz", handleReadyCheck).Methods("GET")
 
@@ -137,12 +139,23 @@ func main() {
 	}
 
 	log.Printf("Starting faucet server on port %s\n", faucetServerPort)
+	log.Printf("API documentation: http://localhost:%s/\n", faucetServerPort)
 	log.Printf("Ready check endpoint: http://localhost:%s/readyz\n", faucetServerPort)
 	log.Printf("Faucet endpoint: http://localhost:%s/faucet/{address}\n", faucetServerPort)
 
 	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
+}
+func handleAPIDocumentation(w http.ResponseWriter, r *http.Request) {
+	apiDoc := `Faucet API Guide
+
+1. "/" - You're here! This page provides API documentation.
+2. "/faucet/{address}" - Request tokens for testing (GET or POST).
+3. "/readyz" - Check if the faucet is operational.`
+
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(w, apiDoc)
 }
 
 func performInitialTransfer() {

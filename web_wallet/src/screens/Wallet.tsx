@@ -4,7 +4,8 @@ import { ActionData } from 'hypersdk-client/src/snap'
 import { vmClient } from '../VMClient'
 import { stringify } from 'lossless-json'
 
-const otherWalletAddress = "morpheus1qypqxqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmrmag4"
+const otherWalletAddress = "00072ea9f7c0053ccb646b04ea68a1062e149a2b5b230283357834600ed8d0d639"
+
 export default function Wallet({ myAddr }: { myAddr: string }) {
     const [loading, setLoading] = useState(0)
     const [logText, setLogText] = useState("")

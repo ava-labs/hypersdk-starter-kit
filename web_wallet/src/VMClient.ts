@@ -11,8 +11,7 @@ class VMClient extends HyperSDKBaseClient {
         const vmName = 'morpheusvm';
         const vmRPCPrefix = 'morpheusapi';
         const decimals = 9;
-        const HRP = 'morpheus'
-        super(apiHost, vmName, vmRPCPrefix, HRP, decimals);
+        super(apiHost, vmName, vmRPCPrefix, decimals);
     }
 
     public async getBalance(address: string): Promise<bigint> {
