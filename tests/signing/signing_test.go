@@ -58,15 +58,15 @@ func TestSigningSingleActionTx(t *testing.T) {
 	chainID, err := ids.FromString("2c7iUW3kCDwRA9ZFd5bjZZc8iDy68uAsFSBahjqSZGttiTDSNH")
 	require.NoError(err)
 
-	addrBytes, err := hex.DecodeString("1b057de320297c29ad0c1f589ea216869cf1938d88c9fbd70d6748323dbf2fa7")
+	addrBytes, err := hex.DecodeString("0102030405060708090a0b0c0d0e0f101112131400000000000000000000000000")
 	require.NoError(err)
 	var addr codec.Address
 	copy(addr[:], addrBytes)
 
 	action := &actions.Transfer{
 		To:    addr,
-		Value: 123,
-		Memo:  []byte("memo"),
+		Value: 1000,
+		Memo:  []byte("hi"),
 	}
 
 	tx := chain.NewTx(
@@ -84,10 +84,11 @@ func TestSigningSingleActionTx(t *testing.T) {
 	expected := expectedBase +
 		"01" + //how many actions
 		"00" + //action id
-		"1b057de320297c29ad0c1f589ea216869cf1938d88c9fbd70d6748323dbf2fa7" + //from
-		"00000000000000007b" + //value
-		"000000046d656d6f" //memo
+		"0102030405060708090a0b0c0d0e0f101112131400000000000000000000000000" + //to
+		"00000000000003e8" + //value
+		"000000026869" //memo
 
+	require.Equal("0000018fcbcdeef0d36e467c73e2840140cc41b3d72f8a5a7446b2399c39b9c74d4cf077d250902400000002540be40001000102030405060708090a0b0c0d0e0f10111213140000000000000000000000000000000000000003e8000000026869", hex.EncodeToString(digest))
 	require.Equal(expected, hex.EncodeToString(digest))
 
 	privateKeyHex := "323b1d8f4eed5f0da9da93071b034f2dce9d2d22692c172f3cb252a64ddfafd01b057de320297c29ad0c1f589ea216869cf1938d88c9fbd70d6748323dbf2fa7"
@@ -102,6 +103,6 @@ func TestSigningSingleActionTx(t *testing.T) {
 	signedTxBytes := signedTx.Bytes()
 	require.NoError(err)
 
-	expectedSignedTx := "0000018fcbcdeef0d36e467c73e2840140cc41b3d72f8a5a7446b2399c39b9c74d4cf077d250902400000002540be40001001b057de320297c29ad0c1f589ea216869cf1938d88c9fbd70d6748323dbf2fa700000000000000007b000000046d656d6f001b057de320297c29ad0c1f589ea216869cf1938d88c9fbd70d6748323dbf2fa72df1b5e3ea1dcf780b70e3c5f4f00ff3d28505ba26a83d7f60f5b691ec301f7b9ed128f5f5fc6289fcff736ba89b22e2fc15644d0355c778e014177b2a8f200c"
+	expectedSignedTx := "0000018fcbcdeef0d36e467c73e2840140cc41b3d72f8a5a7446b2399c39b9c74d4cf077d250902400000002540be40001000102030405060708090a0b0c0d0e0f10111213140000000000000000000000000000000000000003e8000000026869001b057de320297c29ad0c1f589ea216869cf1938d88c9fbd70d6748323dbf2fa7b86baec5fe89f2bb585cb781f694a398107fe760577c750da3e9b381c5f5a3673c4a85c65a0db8d5ed03b4c4fd7f818d99270504e65c0ebf4d73884e0bfce60a"
 	require.Equal(expectedSignedTx, hex.EncodeToString(signedTxBytes))
 }
