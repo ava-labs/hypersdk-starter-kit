@@ -20,9 +20,17 @@ ENV GOMODCACHE /go/pkg/mod
 
 WORKDIR /app
 
+RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.13.1
+
 COPY ./go.mod ./go.sum ./
 
-COPY ./ ./
+COPY ./actions ./actions
+COPY ./cmd/morpheusvm ./cmd/morpheusvm
+COPY ./consts ./consts
+COPY ./scripts ./scripts
+COPY ./storage ./storage
+COPY ./tests ./tests
+COPY ./vm ./vm
 
 WORKDIR /app
 
