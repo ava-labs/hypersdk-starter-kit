@@ -4,7 +4,7 @@ import { ActionData } from 'hypersdk-client/src/snap'
 import { vmClient } from '../VMClient'
 import { stringify } from 'lossless-json'
 
-const otherWalletAddress = "00" + "77".repeat(24) + "DEC0DEDEADC0DE"
+const otherWalletAddress = "00" + "77".repeat(25) + "DEC0DEDEADC0DE"
 
 
 export default function Wallet({ myAddr }: { myAddr: string }) {
@@ -44,7 +44,7 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
 
             log("info", `Initial balance: ${vmClient.formatBalance(initialBalance)} ${vmClient.COIN_SYMBOL}`)
 
-            const actionData: ActionData = vmClient.newTransferAction(otherWalletAddress, amountString, "test")
+            const actionData: ActionData = vmClient.newTransferAction(otherWalletAddress, amountString, btoa(new Date().toISOString()))
             await vmClient.sendTx([actionData])
             log("success", `Transaction sent, waiting for the balance change`)
 
