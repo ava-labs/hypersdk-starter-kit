@@ -1,3 +1,5 @@
 .env
 tests/e2e/e2e.test
 build
+.morpheus-cli/
+**.coverage.**

@@ -2,3 +2,5 @@
 web_wallet/node_modules
 tests/e2e/e2e.test
 build
+.morpheus-cli/
+**.coverage.**
