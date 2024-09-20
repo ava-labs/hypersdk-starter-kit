@@ -11,21 +11,23 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ava-labs/hypersdk-starter/consts"
-	"github.com/ava-labs/hypersdk-starter/tests/workload"
-	"github.com/ava-labs/hypersdk-starter/vm"
 	"github.com/ava-labs/hypersdk/abi"
+
+	// "github.com/ava-labs/hypersdk/examples/cfmmvm/tests/workload"
+	"github.com/ava-labs/hypersdk-starter/vm"
+	"github.com/ava-labs/hypersdk/genesis"
 	"github.com/ava-labs/hypersdk/tests/fixture"
 
 	he2e "github.com/ava-labs/hypersdk/tests/e2e"
 	ginkgo "github.com/onsi/ginkgo/v2"
 )
 
-const owner = "morpheusvm-e2e-tests"
+const owner = "cfmmvm-e2e-tests"
 
 var flagVars *e2e.FlagVars
 
 func TestE2e(t *testing.T) {
-	ginkgo.RunSpecs(t, "morpheusvm e2e test suites")
+	ginkgo.RunSpecs(t, "cfmmvm e2e test suites")
 }
 
 func init() {
@@ -36,8 +38,10 @@ func init() {
 var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	require := require.New(ginkgo.GinkgoT())
 
-	gen, workloadFactory, err := workload.New(100 /* minBlockGap: 100ms */)
-	require.NoError(err)
+	// gen, workloadFactory, err := workload.New(100 /* minBlockGap: 100ms */)
+	// require.NoError(err)
+	customAllocs := make([]*genesis.CustomAllocation, 0)
+	gen := genesis.NewDefaultGenesis(customAllocs)
 
 	genesisBytes, err := json.Marshal(gen)
 	require.NoError(err)
@@ -47,7 +51,7 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 
 	// Import HyperSDK e2e test coverage and inject MorpheusVM name
 	// and workload factory to orchestrate the test.
-	he2e.SetWorkload(consts.Name, workloadFactory, expectedABI)
+	he2e.SetWorkload(consts.Name, nil, expectedABI)
 
 	tc := e2e.NewTestContext()
 

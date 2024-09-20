@@ -35,6 +35,7 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
         fetchBalance()
     }, [fetchBalance])
 
+    //needs updating
     async function sendTokens(amountString: "0.1" | "1") {
         setLogText("")
         try {
@@ -78,24 +79,13 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
         }
     }
 
-    async function executeReadonlyAction() {
-        setLogText("")
-        try {
-            const payload = {
-                actionName: "Hi",
-                data: { name: "Luigi" }
-            }
-            log("info", `Executing readonly action: ${stringify(payload)}`)
-            setLoading(counter => counter + 1)
-            const result = await vmClient.executeReadonlyAction(payload)
-            console.log(result)
-            log("success", `Readonly action result: ${stringify(result)}`)
-        } catch (e: unknown) {
-            log("error", `Readonly action failed: ${(e as { message?: string })?.message || String(e)}`);
-            console.error(e)
-        } finally {
-            setLoading(counter => counter - 1)
-        }
+    async function createNewToken() {
+        // const name = "MyToken"
+        // const symbol = "MT"
+        // const metadata = "My metadata"
+        // const actionData: ActionData = vmClient.newCreateTokenAction(name, symbol, metadata)
+        // await vmClient.sendTx([actionData])
+        // vmClient.getNativeTokenAddress()
     }
 
     return (
@@ -113,19 +103,19 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
                         onClick={() => sendTokens("0.1")}
                         disabled={loading > 0}
                     >
-                        Send 0.1 RED
+                        Send 0.1 CVM
                     </button>
                     <button className={`px-4 py-2 font-bold rounded border transition-colors duration-200 ${loading > 0 ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' : 'bg-white text-black border-black hover:bg-gray-100 transform hover:scale-105'}`}
                         onClick={() => sendTokens("1")}
                         disabled={loading > 0}
                     >
-                        Send 1 RED
+                        Send 1 CVM
                     </button>
                     <button className={`px-4 py-2 font-bold rounded border transition-colors duration-200 ${loading > 0 ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' : 'bg-white text-black border-black hover:bg-gray-100 transform hover:scale-105'}`}
-                        onClick={executeReadonlyAction}
+                        onClick={createNewToken}
                         disabled={loading > 0}
                     >
-                        Say Hi (Read Only Action)
+                        Create New Token
                     </button>
                 </div>
                 <div className="mt-8 border border-gray-300 rounded p-4 min-h-16">

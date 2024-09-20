@@ -9,12 +9,15 @@ import (
 	"github.com/ava-labs/hypersdk-starter/actions"
 	"github.com/ava-labs/hypersdk-starter/consts"
 	"github.com/ava-labs/hypersdk-starter/storage"
+	"github.com/ava-labs/hypersdk/api/indexer"
+	"github.com/ava-labs/hypersdk/api/jsonrpc"
+	"github.com/ava-labs/hypersdk/api/ws"
 	"github.com/ava-labs/hypersdk/auth"
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
+	"github.com/ava-labs/hypersdk/extension/externalsubscriber"
 	"github.com/ava-labs/hypersdk/genesis"
 	"github.com/ava-labs/hypersdk/vm"
-	"github.com/ava-labs/hypersdk/vm/defaultvm"
 )
 
 var (
@@ -31,28 +34,53 @@ func init() {
 
 	errs := &wrappers.Errs{}
 	errs.Add(
-		// When registering new actions, ALWAYS make sure to append at the end.
-		// Pass nil as second argument if manual marshalling isn't needed (if in doubt, you probably don't)
-		ActionParser.Register(&actions.Transfer{}, nil),
-		ActionParser.Register(&actions.Hi{}, nil),
+		// Token-related actions
+		ActionParser.Register(&actions.CreateToken{}, nil),
+		ActionParser.Register(&actions.MintToken{}, nil),
+		ActionParser.Register(&actions.BurnToken{}, nil),
+		ActionParser.Register(&actions.TransferToken{}, nil),
 
-		// When registering new auth, ALWAYS make sure to append at the end.
+		// LP-related actions
+		ActionParser.Register(&actions.CreateLiquidityPool{}, nil),
+		ActionParser.Register(&actions.AddLiquidity{}, nil),
+		ActionParser.Register(&actions.RemoveLiquidity{}, nil),
+		ActionParser.Register(&actions.Swap{}, nil),
+
 		AuthParser.Register(&auth.ED25519{}, auth.UnmarshalED25519),
 		AuthParser.Register(&auth.SECP256R1{}, auth.UnmarshalSECP256R1),
 		AuthParser.Register(&auth.BLS{}, auth.UnmarshalBLS),
 
-		OutputParser.Register(&actions.TransferResult{}, nil),
-		OutputParser.Register(&actions.HiResult{}, nil),
+		OutputParser.Register(&actions.CreateToken{}, nil),
+		OutputParser.Register(&actions.MintToken{}, nil),
+		OutputParser.Register(&actions.BurnToken{}, nil),
+		OutputParser.Register(&actions.TransferToken{}, nil),
+		OutputParser.Register(&actions.CreateLiquidityPool{}, nil),
+		OutputParser.Register(&actions.AddLiquidity{}, nil),
+		OutputParser.Register(&actions.RemoveLiquidity{}, nil),
+		OutputParser.Register(&actions.Swap{}, nil),
 	)
 	if errs.Errored() {
 		panic(errs.Err)
 	}
 }
 
-// NewWithOptions returns a VM with the specified options
+// New returns a VM with the indexer, websocket, rpc, and external subscriber apis enabled.
 func New(options ...vm.Option) (*vm.VM, error) {
-	options = append(options, With()) // Add MorpheusVM API
-	return defaultvm.New(
+	opts := append([]vm.Option{
+		indexer.With(),
+		ws.With(),
+		jsonrpc.With(),
+		// TODO: reimplement Controller API
+		With(), // Add Controller API
+		externalsubscriber.With(),
+	}, options...)
+
+	return NewWithOptions(opts...)
+}
+
+// NewWithOptions returns a VM with the specified options
+func NewWithOptions(options ...vm.Option) (*vm.VM, error) {
+	return vm.New(
 		consts.Version,
 		genesis.DefaultGenesisFactory{},
 		&storage.StateManager{},

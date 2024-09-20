@@ -25,11 +25,12 @@ RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.13.1
 COPY ./go.mod ./go.sum ./
 
 COPY ./actions ./actions
-COPY ./cmd/morpheusvm ./cmd/morpheusvm
+COPY ./cmd/cfmmvm ./cmd/cfmmvm
 COPY ./consts ./consts
 COPY ./scripts ./scripts
 COPY ./storage ./storage
 COPY ./tests ./tests
+COPY ./pricing ./pricing
 COPY ./vm ./vm
 
 WORKDIR /app

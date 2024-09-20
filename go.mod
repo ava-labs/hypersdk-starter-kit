@@ -5,9 +5,7 @@ go 1.22.5
 require (
 	github.com/ava-labs/avalanchego v1.11.11-0.20240827034238-fc892827880a
 	github.com/ava-labs/hypersdk v0.0.18-0.20240920115159-c34272093511
-	github.com/fatih/color v1.13.0
 	github.com/gorilla/mux v1.8.0
-	github.com/joho/godotenv v1.5.1
 	github.com/onsi/ginkgo/v2 v2.13.1
 	github.com/rs/cors v1.7.0
 	github.com/spf13/cobra v1.7.0
@@ -27,7 +25,6 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.3 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cockroachdb/errors v1.9.1 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/pebble v0.0.0-20230928194634-aa077af62593 // indirect
@@ -81,7 +78,6 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
-	github.com/manifoldco/promptui v0.9.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
@@ -96,7 +92,6 @@ require (
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
 	github.com/pires/go-proxyproto v0.6.2 // indirect
-	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.16.0 // indirect

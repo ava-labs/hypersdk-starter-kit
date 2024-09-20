@@ -4,6 +4,7 @@
 package vm
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/ava-labs/hypersdk-starter/consts"
@@ -13,7 +14,7 @@ import (
 	"github.com/ava-labs/hypersdk/genesis"
 )
 
-const JSONRPCEndpoint = "/morpheusapi"
+const JSONRPCEndpoint = "/cfmmapi"
 
 var _ api.HandlerFactory[api.VM] = (*jsonRPCServerFactory)(nil)
 
@@ -44,22 +45,14 @@ func (j *JSONRPCServer) Genesis(_ *http.Request, _ *struct{}, reply *GenesisRepl
 	return nil
 }
 
-type BalanceArgs struct {
-	Address codec.Address `json:"address"`
+type NativeTokenAddressReply struct {
+	Address string `json:"address"`
 }
 
-type BalanceReply struct {
-	Amount uint64 `json:"amount"`
-}
-
-func (j *JSONRPCServer) Balance(req *http.Request, args *BalanceArgs, reply *BalanceReply) error {
-	ctx, span := j.vm.Tracer().Start(req.Context(), "Server.Balance")
-	defer span.End()
-
-	balance, err := storage.GetBalanceFromState(ctx, j.vm.ReadState, args.Address)
-	if err != nil {
-		return err
+func (j *JSONRPCServer) NativeTokenAddress(req *http.Request, _ *struct{}, reply *NativeTokenAddressReply) error {
+	if storage.CoinAddress == (codec.Address{}) {
+		return fmt.Errorf("CoinAddress is not set")
 	}
-	reply.Amount = balance
-	return err
+	reply.Address = storage.CoinAddress.String()
+	return nil
 }

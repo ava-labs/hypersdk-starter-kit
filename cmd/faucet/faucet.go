@@ -1,6 +1,7 @@
 // Copyright (C) 2024, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// blocked: The CFMM Genesis doesnt mint any tokens as of now
 package main
 
 import (
@@ -68,7 +69,7 @@ func transferCoins(to string) (string, error) {
 		return "", fmt.Errorf("failed to parse to address: %w", err)
 	}
 
-	amt, err := utils.ParseBalance(amtStr, consts.Decimals)
+	amt, err := utils.ParseBalance(amtStr, 18)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse amount: %w", err)
 	}

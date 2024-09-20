@@ -2,23 +2,17 @@ import { API_HOST, FAUCET_HOST } from "./const";
 import { HyperSDKBaseClient } from "hypersdk-client/src/client"
 import { ActionData } from 'hypersdk-client/src/snap'
 
-
-
 class VMClient extends HyperSDKBaseClient {
-    public readonly COIN_SYMBOL = 'RED';
-
+    public readonly COIN_SYMBOL = 'CVM';
+    
     constructor(apiHost: string, private readonly faucetHost: string) {
-        const vmName = 'morpheusvm';
-        const vmRPCPrefix = 'morpheusapi';
-        const decimals = 9;
+        const vmName = 'CFMMVM';
+        const vmRPCPrefix = 'cfmmapi';
+        const decimals = 18;
         super(apiHost, vmName, vmRPCPrefix, decimals);
-    }
+    }        
 
-    public async getBalance(address: string): Promise<bigint> {
-        const result = await this.makeVmAPIRequest<{ amount: number }>('balance', { address });
-        return BigInt(result.amount)//FIXME: might be some loss of precision here
-    }
-
+    //broken for now
     async requestFaucetTransfer(address: string): Promise<void> {
         const response = await fetch(`${this.faucetHost}/faucet/${address}`, {
             method: 'POST',
@@ -29,16 +23,64 @@ class VMClient extends HyperSDKBaseClient {
         }
     }
 
-    public newTransferAction(to: string, amountString: string, memo: string): ActionData {
+    async getNativeTokenAddress(): Promise<string> {
+        const address = await this.makeVmAPIRequest('native_token_address', {}) as unknown as string;
+        console.log(address)
+        return address;
+    }
+
+    public newGetTokenAccountBalanceAction(tokenAddress: string, address: string): ActionData {
         return {
-            actionName: 'Transfer',
+            actionName: 'GetTokenAccountBalance',
             data: {
-                to,
-                value: this.fromFormattedBalance(amountString).toString(),
-                memo: memo,
+                tokenAddress,
+                address
             },
         }
     }
+
+    public newCreateTokenAction(name: string, symbol: string, metadata: string): ActionData {
+        return {
+            actionName: 'CreateToken',
+            data: {
+               name,
+               symbol,
+               metadata
+            },
+        }
+    }
+
+    public newMintTokenAction(to: string, value: number, tokenAddress: string): ActionData {
+        return {
+            actionName: 'MintToken',
+            data: {
+                to,
+                value,
+                tokenAddress
+            },
+        }
+    }
+
+    public newTransferTokenAction(to: string, tokenAddress: string, value: string): ActionData {
+        return {
+            actionName: 'TransferToken',
+            data: {
+                to,
+                tokenAddress,
+                value
+            },
+        }
+    }
+
+    public newGetTokenInfoAction(tokenAddress: string): ActionData {
+        return {
+            actionName: 'GetTokenInfo',
+            data: {
+               tokenAddress
+            },
+        }
+    }
+
 }
 
 export const vmClient = new VMClient(API_HOST, FAUCET_HOST);
