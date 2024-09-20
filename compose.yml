@@ -37,6 +37,16 @@ services:
       retries: 5
       start_period: 300s
 
+  explorer:
+    container_name: explorer
+    restart: always
+    ports:
+      - "127.0.0.1:3000:3000"
+    image: containerman17/hypersdk-explorer:latest
+    environment:
+      INDEXER_API_URL: http://devnet:9650/ext/bc/morpheusvm/indexer
+    depends_on:
+      - devnet
       
   faucet:
     container_name: faucet
