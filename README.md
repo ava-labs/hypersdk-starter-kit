@@ -18,6 +18,11 @@ That's how it should look with Metamask Snap signing:
 
 ![Screenshot](assets/screenshot.png)
 
+This is the explorer:
+
+![Screenshot](assets/explorer.png)
+
+
 You can access the explorer at [http://localhost:3000](http://localhost:3000).
 
 BTW a relatively fresh version should be deployed at [https://ec2-18-224-139-0.us-east-2.compute.amazonaws.com/](https://ec2-18-224-139-0.us-east-2.compute.amazonaws.com/)
