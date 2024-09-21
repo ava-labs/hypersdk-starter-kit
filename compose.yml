@@ -26,12 +26,12 @@ services:
     ports:
       - "127.0.0.1:9650:9650"
     environment:
-      - PREFUND_ADDRESS=morpheus1qrar5gu3mx0syrkxesd66yzk0h8ep7sy8dejzu4crgkjkcynnj8k6qh5wjj
+      - PREFUND_ADDRESS=0x00c4cb545f748a28770042f893784ce85b107389004d6a0e0d6d7518eeae1292d9
     volumes:
       - devnet_go_mod:/go/pkg/mod
       - devnet_go_build:/root/.cache/go-build
     healthcheck:
-      test: [ "CMD", "curl", "-X", "POST", "http://localhost:9650/ext/bc/hypervm/coreapi", "-H", "Content-Type: application/json", "-d", "{\"jsonrpc\":\"2.0\",\"method\":\"hypersdk.network\",\"params\":{},\"id\":1}" ]
+      test: [ "CMD", "curl", "-X", "POST", "http://localhost:9650/ext/bc/CFMMVM/coreapi", "-H", "Content-Type: application/json", "-d", "{\"jsonrpc\":\"2.0\",\"method\":\"hypersdk.network\",\"params\":{},\"id\":1}" ]
       interval: 10s
       timeout: 5s
       retries: 5

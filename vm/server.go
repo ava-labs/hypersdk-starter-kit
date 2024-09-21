@@ -7,7 +7,9 @@ import (
 	"net/http"
 
 	"github.com/ava-labs/hypersdk-starter/consts"
+	"github.com/ava-labs/hypersdk-starter/storage"
 	"github.com/ava-labs/hypersdk/api"
+	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/genesis"
 )
 
@@ -40,4 +42,24 @@ type GenesisReply struct {
 func (j *JSONRPCServer) Genesis(_ *http.Request, _ *struct{}, reply *GenesisReply) (err error) {
 	reply.Genesis = j.vm.Genesis().(*genesis.DefaultGenesis)
 	return nil
+}
+
+type BalanceArgs struct {
+	Address codec.Address `json:"address"`
+}
+
+type BalanceReply struct {
+	Amount uint64 `json:"amount"`
+}
+
+func (j *JSONRPCServer) Balance(req *http.Request, args *BalanceArgs, reply *BalanceReply) error {
+	ctx, span := j.vm.Tracer().Start(req.Context(), "Server.Balance")
+	defer span.End()
+
+	balance, err := storage.GetTokenAccountBalanceFromState(ctx, j.vm.ReadState, storage.CoinAddress, args.Address)
+	if err != nil {
+		return err
+	}
+	reply.Amount = balance
+	return err
 }

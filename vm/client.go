@@ -11,6 +11,7 @@ import (
 	"github.com/ava-labs/hypersdk-starter/consts"
 	"github.com/ava-labs/hypersdk-starter/storage"
 	"github.com/ava-labs/hypersdk/chain"
+	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/genesis"
 	"github.com/ava-labs/hypersdk/requester"
 )
@@ -45,6 +46,19 @@ func (cli *JSONRPCClient) Genesis(ctx context.Context) (*genesis.DefaultGenesis,
 	}
 	cli.g = resp.Genesis
 	return resp.Genesis, nil
+}
+
+func (cli *JSONRPCClient) Balance(ctx context.Context, addr codec.Address) (uint64, error) {
+	resp := new(BalanceReply)
+	err := cli.requester.SendRequest(
+		ctx,
+		"balance",
+		&BalanceArgs{
+			Address: addr,
+		},
+		resp,
+	)
+	return resp.Amount, err
 }
 
 func (cli *JSONRPCClient) Parser(ctx context.Context) (chain.Parser, error) {

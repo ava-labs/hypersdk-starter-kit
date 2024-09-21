@@ -14,7 +14,7 @@ class VMClient extends HyperSDKBaseClient {
     }        
 
     public async getBalance(address: string): Promise<bigint> {
-        const payload = {
+        const payload: ActionData = {
             actionName: "GetTokenAccountBalance",
             data: { 
                 balance: vmClient.TOKEN_ADDRESS, // should be the token address, balance naming is wrong
@@ -26,7 +26,7 @@ class VMClient extends HyperSDKBaseClient {
     }
 
     public async getTokenInfo(address: string): Promise<{ name: string, symbol: string, metadata: string, supply: bigint, owner: string }> {
-        const payload = {
+        const payload: ActionData = {
             actionName: "GetTokenInfo",
             data: { 
                 token: address 

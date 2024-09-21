@@ -1,7 +1,6 @@
 // Copyright (C) 2024, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-// blocked: The CFMM Genesis doesnt mint any tokens as of now
 package main
 
 import (
@@ -75,22 +74,10 @@ func transferCoins(to string) (string, error) {
 		return "", fmt.Errorf("failed to parse amount: %w", err)
 	}
 
-	balanceBeforeResult, err := hyperSDKRPC.Execute(context.TODO(), codec.EmptyAddress, &actions.GetTokenAccountBalance{
-		Token:   storage.CoinAddress,
-		Account: toAddr,
-	})
+	balanceBefore, err := hyperVMRPC.Balance(context.TODO(), toAddr)
 	if err != nil {
 		return "", fmt.Errorf("failed to get balance: %w", err)
 	}
-
-	parser := codec.NewTypeParser[*actions.GetTokenAccountBalanceResult]()
-	packer := codec.NewReader(balanceBeforeResult, storage.MaxTokenDecimals)
-	result, nil := parser.Unmarshal(packer)
-	if err != nil {
-		return "", fmt.Errorf("failed to unpack balance: %w", err)
-	}
-	balanceBefore := result.Balance
-
 	log.Printf("Balance before: %s\n", utils.FormatBalance(balanceBefore, 9))
 
 	threshold, _ := utils.ParseBalance("1.000", 9)
@@ -99,14 +86,14 @@ func transferCoins(to string) (string, error) {
 		return "Balance is already greater than 1.000, no transfer needed", nil
 	}
 
-	vmParser, err := hyperVMRPC.Parser(context.TODO())
+	parser, err := hyperVMRPC.Parser(context.TODO())
 	if err != nil {
 		return "", fmt.Errorf("failed to get parser: %w", err)
 	}
 
 	submit, _, _, err := hyperSDKRPC.GenerateTransaction(
 		context.TODO(),
-		vmParser,
+		parser,
 		[]chain.Action{&actions.TransferToken{
 			To:           toAddr,
 			TokenAddress: storage.CoinAddress,
