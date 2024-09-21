@@ -23,6 +23,8 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
         try {
             setLoading(l => l + 1)
             const balance = await vmClient.getBalance(myAddr)
+            const abi = await vmClient.getAbi()
+            console.log(abi)
             setBalance(balance)
         } catch (e) {
             log("error", `Failed to fetch balance: ${(e as { message?: string })?.message || String(e)}`);
@@ -86,7 +88,18 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
         // const actionData: ActionData = vmClient.newCreateTokenAction(name, symbol, metadata)
         // await vmClient.sendTx([actionData])
         // vmClient.getNativeTokenAddress()
+        setLogText("")
+        try {
+            const tokenInfo = await vmClient.getTokenInfo(vmClient.TOKEN_ADDRESS)
+            log("info", `Token info: ${stringify(tokenInfo)}`)
+        } catch (e: unknown) {
+            log("error", `Readonly action failed: ${(e as { message?: string })?.message || String(e)}`);
+            console.error(e)
+        } finally {
+            setLoading(counter => counter - 1)
+        }
     }
+   
 
     return (
         <div className="w-full  bg-white p-8">

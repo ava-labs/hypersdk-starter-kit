@@ -46,10 +46,17 @@ func init() {
 		ActionParser.Register(&actions.RemoveLiquidity{}, nil),
 		ActionParser.Register(&actions.Swap{}, nil),
 
+		// Read only actions
+		ActionParser.Register(&actions.GetTokenAccountBalance{}, nil),
+		ActionParser.Register(&actions.GetTokenInfo{}, nil),
+		ActionParser.Register(&actions.GetLiquidityPoolInfo{}, nil),
+
+		//Auth
 		AuthParser.Register(&auth.ED25519{}, auth.UnmarshalED25519),
 		AuthParser.Register(&auth.SECP256R1{}, auth.UnmarshalSECP256R1),
 		AuthParser.Register(&auth.BLS{}, auth.UnmarshalBLS),
 
+		// Register to parse output
 		OutputParser.Register(&actions.CreateToken{}, nil),
 		OutputParser.Register(&actions.MintToken{}, nil),
 		OutputParser.Register(&actions.BurnToken{}, nil),
@@ -58,6 +65,9 @@ func init() {
 		OutputParser.Register(&actions.AddLiquidity{}, nil),
 		OutputParser.Register(&actions.RemoveLiquidity{}, nil),
 		OutputParser.Register(&actions.Swap{}, nil),
+		OutputParser.Register(&actions.GetTokenAccountBalanceResult{}, nil),
+		OutputParser.Register(&actions.GetTokenInfoResult{}, nil),
+		OutputParser.Register(&actions.GetLiquidityPoolInfoResult{}, nil),
 	)
 	if errs.Errored() {
 		panic(errs.Err)

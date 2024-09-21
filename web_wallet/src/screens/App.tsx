@@ -84,9 +84,9 @@ function App() {
                 >
                   <div className="text-xs text-gray-500">
                     {Object.keys(categories)[idx] === 'Wallet' && (
-                      // <Faucet myAddr={myAddr} minBalance={vmClient.fromFormattedBalance("1")}>
+                      <Faucet myAddr={myAddr} minBalance={vmClient.fromFormattedBalance("1")}>
                         <Wallet myAddr={myAddr} />
-                      // </Faucet>
+                      </Faucet>
                     )}
                     {Object.keys(categories)[idx] === 'Swap' && <Swap tokens={tokenList} onAddToken={handleAddToken}/>}
                     {Object.keys(categories)[idx] === 'Pool' && <Pool tokens={tokenList} onAddToken={handleAddToken}/>}

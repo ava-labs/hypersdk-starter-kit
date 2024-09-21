@@ -4,13 +4,10 @@
 package vm
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/ava-labs/hypersdk-starter/consts"
-	"github.com/ava-labs/hypersdk-starter/storage"
 	"github.com/ava-labs/hypersdk/api"
-	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/genesis"
 )
 
@@ -42,17 +39,5 @@ type GenesisReply struct {
 
 func (j *JSONRPCServer) Genesis(_ *http.Request, _ *struct{}, reply *GenesisReply) (err error) {
 	reply.Genesis = j.vm.Genesis().(*genesis.DefaultGenesis)
-	return nil
-}
-
-type NativeTokenAddressReply struct {
-	Address string `json:"address"`
-}
-
-func (j *JSONRPCServer) NativeTokenAddress(req *http.Request, _ *struct{}, reply *NativeTokenAddressReply) error {
-	if storage.CoinAddress == (codec.Address{}) {
-		return fmt.Errorf("CoinAddress is not set")
-	}
-	reply.Address = storage.CoinAddress.String()
 	return nil
 }

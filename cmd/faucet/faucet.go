@@ -20,6 +20,7 @@ import (
 
 	"github.com/ava-labs/hypersdk-starter/actions"
 	"github.com/ava-labs/hypersdk-starter/consts"
+	"github.com/ava-labs/hypersdk-starter/storage"
 	"github.com/ava-labs/hypersdk-starter/vm"
 	"github.com/ava-labs/hypersdk/api/jsonrpc"
 	"github.com/ava-labs/hypersdk/auth"
@@ -69,34 +70,47 @@ func transferCoins(to string) (string, error) {
 		return "", fmt.Errorf("failed to parse to address: %w", err)
 	}
 
-	amt, err := utils.ParseBalance(amtStr, 18)
+	amt, err := utils.ParseBalance(amtStr, 9)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse amount: %w", err)
 	}
 
-	balanceBefore, err := hyperVMRPC.Balance(context.TODO(), toAddr)
+	balanceBeforeResult, err := hyperSDKRPC.Execute(context.TODO(), codec.EmptyAddress, &actions.GetTokenAccountBalance{
+		Token:   storage.CoinAddress,
+		Account: toAddr,
+	})
 	if err != nil {
 		return "", fmt.Errorf("failed to get balance: %w", err)
 	}
-	log.Printf("Balance before: %s\n", utils.FormatBalance(balanceBefore, consts.Decimals))
 
-	threshold, _ := utils.ParseBalance("1.000", consts.Decimals)
+	parser := codec.NewTypeParser[*actions.GetTokenAccountBalanceResult]()
+	packer := codec.NewReader(balanceBeforeResult, storage.MaxTokenDecimals)
+	result, nil := parser.Unmarshal(packer)
+	if err != nil {
+		return "", fmt.Errorf("failed to unpack balance: %w", err)
+	}
+	balanceBefore := result.Balance
+
+	log.Printf("Balance before: %s\n", utils.FormatBalance(balanceBefore, 9))
+
+	threshold, _ := utils.ParseBalance("1.000", 9)
 	if balanceBefore > threshold {
 		log.Printf("Balance is already greater than 1.000, no transfer needed\n")
 		return "Balance is already greater than 1.000, no transfer needed", nil
 	}
 
-	parser, err := hyperVMRPC.Parser(context.TODO())
+	vmParser, err := hyperVMRPC.Parser(context.TODO())
 	if err != nil {
 		return "", fmt.Errorf("failed to get parser: %w", err)
 	}
 
 	submit, _, _, err := hyperSDKRPC.GenerateTransaction(
 		context.TODO(),
-		parser,
-		[]chain.Action{&actions.Transfer{
-			To:    toAddr,
-			Value: amt,
+		vmParser,
+		[]chain.Action{&actions.TransferToken{
+			To:           toAddr,
+			TokenAddress: storage.CoinAddress,
+			Value:        amt,
 		}},
 		factory,
 	)
@@ -108,9 +122,9 @@ func transferCoins(to string) (string, error) {
 		return "", fmt.Errorf("failed to submit transaction: %w", err)
 	}
 
-	if err := hyperVMRPC.WaitForBalance(context.TODO(), toAddr, amt); err != nil {
-		return "", fmt.Errorf("failed to wait for balance: %w", err)
-	}
+	// if err := hyperVMRPC.WaitForBalance(context.TODO(), toAddr, amt); err != nil {
+	// 	return "", fmt.Errorf("failed to wait for balance: %w", err)
+	// }
 
 	return "Coins transferred successfully", nil
 }

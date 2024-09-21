@@ -19,9 +19,8 @@ export default function Faucet({ children, minBalance, myAddr }: FaucetProps) {
         async function performFaucetRequest() {
             setLoading(l => l + 1)
             try {
-                const getBalanceAction = vmClient.newGetTokenAccountBalanceAction("0x0", myAddr) // need to fetch native token address
-                let result = await vmClient.executeReadonlyAction(getBalanceAction)
-                const initialBalance = BigInt((result as { data: { balance: string } }).data.balance)
+                const initialBalance = await vmClient.getBalance(myAddr) // need to fetch native token address
+    
                 if (initialBalance <= minBalance) {
 
 
@@ -41,8 +40,7 @@ export default function Faucet({ children, minBalance, myAddr }: FaucetProps) {
                     }
 
                     for (let i = 0; i < 100; i++) {
-                        result = await vmClient.executeReadonlyAction(getBalanceAction)
-                        const balance = BigInt((result as { data: { balance: string } }).data.balance)
+                        const balance = await vmClient.getBalance(myAddr)
                         if (balance !== minBalance) {
                             console.log(`Balance is ${balance}, changed from ${minBalance}`)
                             break

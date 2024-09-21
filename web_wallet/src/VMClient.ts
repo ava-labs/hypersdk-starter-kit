@@ -4,13 +4,44 @@ import { ActionData } from 'hypersdk-client/src/snap'
 
 class VMClient extends HyperSDKBaseClient {
     public readonly COIN_SYMBOL = 'CVM';
-    
+    public readonly TOKEN_ADDRESS = "039dd909c6fac1072001b309003837e26150eb2bf3be281c35f3ea3dc861e22dcd";
+
     constructor(apiHost: string, private readonly faucetHost: string) {
         const vmName = 'CFMMVM';
         const vmRPCPrefix = 'cfmmapi';
         const decimals = 18;
         super(apiHost, vmName, vmRPCPrefix, decimals);
     }        
+
+    public async getBalance(address: string): Promise<bigint> {
+        const payload = {
+            actionName: "GetTokenAccountBalance",
+            data: { 
+                balance: vmClient.TOKEN_ADDRESS, // should be the token address, balance naming is wrong
+                account: address 
+            }
+        }
+        const result = await this.executeReadonlyAction(payload) as { balance: number };
+        return BigInt(result.balance);
+    }
+
+    public async getTokenInfo(address: string): Promise<{ name: string, symbol: string, metadata: string, supply: bigint, owner: string }> {
+        const payload = {
+            actionName: "GetTokenInfo",
+            data: { 
+                token: address 
+            }
+        }
+        const result = await this.executeReadonlyAction(payload) as { name: string, symbol: string, metadata: string, supply: number, owner: string };
+        console.log(result)
+        return {
+            name: result.name,
+            symbol: result.symbol,
+            metadata: result.metadata,
+            supply: BigInt(result.supply),
+            owner: result.owner
+        };
+    }
 
     //broken for now
     async requestFaucetTransfer(address: string): Promise<void> {
@@ -22,65 +53,6 @@ class VMClient extends HyperSDKBaseClient {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
     }
-
-    async getNativeTokenAddress(): Promise<string> {
-        const address = await this.makeVmAPIRequest('native_token_address', {}) as unknown as string;
-        console.log(address)
-        return address;
-    }
-
-    public newGetTokenAccountBalanceAction(tokenAddress: string, address: string): ActionData {
-        return {
-            actionName: 'GetTokenAccountBalance',
-            data: {
-                tokenAddress,
-                address
-            },
-        }
-    }
-
-    public newCreateTokenAction(name: string, symbol: string, metadata: string): ActionData {
-        return {
-            actionName: 'CreateToken',
-            data: {
-               name,
-               symbol,
-               metadata
-            },
-        }
-    }
-
-    public newMintTokenAction(to: string, value: number, tokenAddress: string): ActionData {
-        return {
-            actionName: 'MintToken',
-            data: {
-                to,
-                value,
-                tokenAddress
-            },
-        }
-    }
-
-    public newTransferTokenAction(to: string, tokenAddress: string, value: string): ActionData {
-        return {
-            actionName: 'TransferToken',
-            data: {
-                to,
-                tokenAddress,
-                value
-            },
-        }
-    }
-
-    public newGetTokenInfoAction(tokenAddress: string): ActionData {
-        return {
-            actionName: 'GetTokenInfo',
-            data: {
-               tokenAddress
-            },
-        }
-    }
-
 }
 
 export const vmClient = new VMClient(API_HOST, FAUCET_HOST);

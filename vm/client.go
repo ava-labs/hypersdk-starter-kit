@@ -93,14 +93,3 @@ func CreateParser(genesisBytes []byte) (chain.Parser, error) {
 	}
 	return NewParser(&genesis), nil
 }
-
-func (cli *JSONRPCClient) NativeTokenAddress(ctx context.Context) (string, error) {
-	resp := new(NativeTokenAddressReply)
-	err := cli.requester.SendRequest(
-		ctx,
-		"native_token_address",
-		nil,
-		resp,
-	)
-	return resp.Address, err
-}
