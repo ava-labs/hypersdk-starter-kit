@@ -63,3 +63,4 @@ Note that most functionality depends on the `hypersdk-client` npm package.
   - Explorer: Use the provided Docker image or set up your own instance
 - Be aware of potential port conflicts if issues arise. `docker rm -f $(docker ps -a -q)` is your friend.
 - To update the explorer image, run `docker compose pull explorer` before starting the stack.
+- To release on a remote machine, set `export DOCKER_HOST="ssh://username@ip"` and run `docker compose pull && docker compose up -d --build proxy`.

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
+    "build-no-check": "tsc --noEmit && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest"
@@ -16,7 +17,7 @@
     "@metamask/sdk": "^0.26.5",
     "@noble/curves": "^1.4.2",
     "@scure/base": "^1.1.7",
-    "hypersdk-client": "file:../../hypersdk-client",
+    "hypersdk-client": "^0.4.5",
     "lossless-json": "^4.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

@@ -5,17 +5,20 @@ WORKDIR /app
 
 COPY web_wallet/package.json web_wallet/package-lock.json ./
 
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci --prefer-offline
+# RUN --mount=type=cache,target=/root/.npm \
+#     npm ci --prefer-offline
+# FIXME:
+RUN --mount=type=cache,target=/root/.npm npm install
 
 COPY web_wallet/ ./web_wallet/
 
 WORKDIR /app/web_wallet
 
-CMD npm run dev -- --host 0.0.0.0
-# RUN npm run build
+# CMD npm run dev -- --host 0.0.0.0
+# FIXME:
+RUN npm run build-no-check 
 
 # # Production stage
-# FROM nginx:latest
+FROM nginx:latest
 
-# COPY --from=build /app/web_wallet/dist /usr/share/nginx/html
+COPY --from=build /app/web_wallet/dist /usr/share/nginx/html

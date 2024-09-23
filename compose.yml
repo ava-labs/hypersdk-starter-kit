@@ -6,7 +6,7 @@ services:
       context: ./
     restart: always
     ports:
-      - "127.0.0.1:5173:5173"
+      - "127.0.0.1:5173:80"
     healthcheck:
       test: [ "CMD", "curl", "-X", "POST", "http://localhost:5173/"]
       interval: 10s
