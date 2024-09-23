@@ -13,14 +13,15 @@ import (
 // Key prefixes
 const (
 	// Required for StateManager
-	heightPrefix byte = iota
-	timestampPrefix
-	feePrefix
+	balancePrefix   = 0x0
+	heightPrefix    = 0x1
+	timestampPrefix = 0x2
+	feePrefix       = 0x3
 
 	// Required for CFMMVM
-	tokenInfoPrefix
-	tokenAccountBalancePrefix
-	liquidityPoolPrefix
+	tokenInfoPrefix           = 0x4
+	tokenAccountBalancePrefix = 0x5
+	liquidityPoolPrefix       = 0x6
 )
 
 // TODO: tune these values

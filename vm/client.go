@@ -7,14 +7,19 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
+	"time"
 
 	"github.com/ava-labs/hypersdk-starter/consts"
 	"github.com/ava-labs/hypersdk-starter/storage"
+	"github.com/ava-labs/hypersdk/api/jsonrpc"
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/genesis"
 	"github.com/ava-labs/hypersdk/requester"
+	"github.com/ava-labs/hypersdk/utils"
 )
+
+const balanceCheckInterval = 500 * time.Millisecond
 
 type JSONRPCClient struct {
 	requester *requester.EndpointRequester
@@ -59,6 +64,28 @@ func (cli *JSONRPCClient) Balance(ctx context.Context, addr codec.Address) (uint
 		resp,
 	)
 	return resp.Amount, err
+}
+
+func (cli *JSONRPCClient) WaitForBalance(
+	ctx context.Context,
+	addr codec.Address,
+	min uint64,
+) error {
+	return jsonrpc.Wait(ctx, balanceCheckInterval, func(ctx context.Context) (bool, error) {
+		balance, err := cli.Balance(ctx, addr)
+		if err != nil {
+			return false, err
+		}
+		shouldExit := balance >= min
+		if !shouldExit {
+			utils.Outf(
+				"{{yellow}}waiting for %s balance: %s{{/}}\n",
+				utils.FormatBalance(min, consts.Decimals),
+				addr,
+			)
+		}
+		return shouldExit, nil
+	})
 }
 
 func (cli *JSONRPCClient) Parser(ctx context.Context) (chain.Parser, error) {

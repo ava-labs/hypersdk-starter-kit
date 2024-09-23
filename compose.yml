@@ -44,7 +44,7 @@ services:
       - "127.0.0.1:3000:3000"
     image: containerman17/hypersdk-explorer:latest
     environment:
-      INDEXER_API_URL: http://devnet:9650/ext/bc/morpheusvm/indexer
+      INDEXER_API_URL: http://devnet:9650/ext/bc/cfmmvm/indexer
     depends_on:
       - devnet
       

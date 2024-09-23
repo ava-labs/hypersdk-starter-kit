@@ -11,14 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ava-labs/hypersdk-starter/consts"
-	"github.com/ava-labs/hypersdk/abi"
-	"github.com/ava-labs/hypersdk/auth"
-	"github.com/ava-labs/hypersdk/codec"
-
-	// "github.com/ava-labs/hypersdk/examples/cfmmvm/tests/workload"
+	"github.com/ava-labs/hypersdk-starter/tests/workload"
 	"github.com/ava-labs/hypersdk-starter/vm"
-	"github.com/ava-labs/hypersdk/crypto/ed25519"
-	"github.com/ava-labs/hypersdk/genesis"
+	"github.com/ava-labs/hypersdk/abi"
 	"github.com/ava-labs/hypersdk/tests/fixture"
 
 	he2e "github.com/ava-labs/hypersdk/tests/e2e"
@@ -26,54 +21,23 @@ import (
 )
 
 const owner = "cfmmvm-e2e-tests"
-const initialBalance uint64 = 10_000_000_000_000
 
 var flagVars *e2e.FlagVars
-var (
-	ed25519HexKeys = []string{
-		"323b1d8f4eed5f0da9da93071b034f2dce9d2d22692c172f3cb252a64ddfafd01b057de320297c29ad0c1f589ea216869cf1938d88c9fbd70d6748323dbf2fa7", //nolint:lll
-		"8a7be2e0c9a2d09ac2861c34326d6fe5a461d920ba9c2b345ae28e603d517df148735063f8d5d8ba79ea4668358943e5c80bc09e9b2b9a15b5b15db6c1862e88", //nolint:lll
-	}
-	ed25519PrivKeys      = make([]ed25519.PrivateKey, len(ed25519HexKeys))
-	ed25519Addrs         = make([]codec.Address, len(ed25519HexKeys))
-	ed25519AuthFactories = make([]*auth.ED25519Factory, len(ed25519HexKeys))
-)
 
 func TestE2e(t *testing.T) {
-	ginkgo.RunSpecs(t, "cfmmvm e2e test suites")
+	ginkgo.RunSpecs(t, "CFMMVM e2e test suites")
 }
 
 func init() {
 	flagVars = e2e.RegisterFlags()
-	for i, keyHex := range ed25519HexKeys {
-		privBytes, err := codec.LoadHex(keyHex, ed25519.PrivateKeyLen)
-		if err != nil {
-			panic(err)
-		}
-		priv := ed25519.PrivateKey(privBytes)
-		ed25519PrivKeys[i] = priv
-		ed25519AuthFactories[i] = auth.NewED25519Factory(priv)
-		addr := auth.NewED25519Address(priv.PublicKey())
-		ed25519Addrs[i] = addr
-	}
 }
 
 // Construct tmpnet network with a single MorpheusVM Subnet
 var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	require := require.New(ginkgo.GinkgoT())
 
-	// gen, workloadFactory, err := workload.New(100 /* minBlockGap: 100ms */)
-	// require.NoError(err)
-	// customAllocs := make([]*genesis.CustomAllocation, 0, len(ed25519Addrs))
-	// for _, prefundedAddr := range ed25519Addrs {
-	// 	customAllocs = append(customAllocs, &genesis.CustomAllocation{
-	// 		Address: prefundedAddr,
-	// 		Balance: initialBalance,
-	// 	})
-	// }
-
-	customAllocs := make([]*genesis.CustomAllocation, 0)
-	gen := genesis.NewDefaultGenesis(customAllocs)
+	gen, workloadFactory, err := workload.New(100 /* minBlockGap: 100ms */)
+	require.NoError(err)
 
 	genesisBytes, err := json.Marshal(gen)
 	require.NoError(err)
@@ -83,7 +47,7 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 
 	// Import HyperSDK e2e test coverage and inject MorpheusVM name
 	// and workload factory to orchestrate the test.
-	he2e.SetWorkload(consts.Name, nil, expectedABI)
+	he2e.SetWorkload(consts.Name, workloadFactory, expectedABI)
 
 	tc := e2e.NewTestContext()
 

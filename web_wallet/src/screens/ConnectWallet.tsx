@@ -60,13 +60,13 @@ export default function ConnectWallet() {
                         Connect with Snap from npm
                     </button>
                     <div className="flex flex-row justify-between space-x-4">
-                        <button
+                        {/* <button
                             type="button"
                             className="flex-1 px-4 py-2 bg-gray-200 text-black font-semibold rounded hover:bg-gray-300 transition-colors duration-200 transform hover:scale-105"
                             onClick={() => connectWallet("metamask-snap", "local")}
                         >
                             Snap from localhost:8989
-                        </button>
+                        </button> */}
                         <button
                             type="button"
                             className="flex-1 px-4 py-2 bg-gray-200 text-black font-semibold rounded hover:bg-gray-300 transition-colors duration-200 transform hover:scale-105"

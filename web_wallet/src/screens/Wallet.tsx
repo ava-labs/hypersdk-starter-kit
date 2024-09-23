@@ -1,10 +1,8 @@
 import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { useState, useCallback, useEffect } from 'react'
-import { ActionData } from 'hypersdk-client/src/snap'
 import { vmClient } from '../VMClient'
-import { stringify } from 'lossless-json'
 
-const otherWalletAddress = "00" + "77".repeat(25) + "DEC0DEDEADC0DE"
+const otherWalletAddress = "00c4cb545f748a28770042f893784ce85b107389004d6a0e0d6d7518eeae1292d9"
 
 
 export default function Wallet({ myAddr }: { myAddr: string }) {
@@ -47,8 +45,9 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
 
             log("info", `Initial balance: ${vmClient.formatBalance(initialBalance)} ${vmClient.COIN_SYMBOL}`)
 
-            const actionData: ActionData = vmClient.newTransferAction(otherWalletAddress, amountString, btoa(new Date().toISOString()))
-            await vmClient.sendTx([actionData])
+            const payload = await vmClient.newTransferAction(otherWalletAddress, amountString)
+            await vmClient.sendTx([payload])
+
             log("success", `Transaction sent, waiting for the balance change`)
 
             let balanceChanged = false
@@ -81,25 +80,32 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
         }
     }
 
-    async function createNewToken() {
-        // const name = "MyToken"
-        // const symbol = "MT"
-        // const metadata = "My metadata"
-        // const actionData: ActionData = vmClient.newCreateTokenAction(name, symbol, metadata)
-        // await vmClient.sendTx([actionData])
-        // vmClient.getNativeTokenAddress()
-        setLogText("")
+   const createNewToken = async () => {
+    const tokenName = "TEST"
+    const tokenSymbol = "MT"
+    const tokenMetadata = "MyToken Metadata"
         try {
-            const tokenInfo = await vmClient.getTokenInfo(vmClient.TOKEN_ADDRESS)
-            log("info", `Token info: ${stringify(tokenInfo)}`)
+            setLoading(counter => counter + 1)
+
+            log("info", `Creating new token ${tokenName} (${tokenSymbol})`)
+            const payload = vmClient.NewTokenAction(tokenName, tokenSymbol, tokenMetadata)
+            
+            const tx = await vmClient.sendTx([payload]) as unknown as { txId: string }
+            
+            console.log(tx.txId)
+            log("success", `Token created successfully`)
+
+            await fetchBalance()
+
         } catch (e: unknown) {
-            log("error", `Readonly action failed: ${(e as { message?: string })?.message || String(e)}`);
+            log("error", `Token creation failed: ${(e as { message?: string })?.message || String(e)}`);
             console.error(e)
         } finally {
             setLoading(counter => counter - 1)
         }
+
+
     }
-   
 
     return (
         <div className="w-full  bg-white p-8">

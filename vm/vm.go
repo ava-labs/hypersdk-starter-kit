@@ -34,19 +34,22 @@ func init() {
 
 	errs := &wrappers.Errs{}
 	errs.Add(
+
+		// Native Token
+		// ActionParser.Register(&actions.Transfer{}, actions.UnmarshalTransfer),
 		// Token-related actions
 		ActionParser.Register(&actions.CreateToken{}, nil),
 		ActionParser.Register(&actions.MintToken{}, nil),
 		ActionParser.Register(&actions.BurnToken{}, nil),
 		ActionParser.Register(&actions.TransferToken{}, nil),
 
-		// LP-related actions
+		// // LP-related actions
 		ActionParser.Register(&actions.CreateLiquidityPool{}, nil),
 		ActionParser.Register(&actions.AddLiquidity{}, nil),
 		ActionParser.Register(&actions.RemoveLiquidity{}, nil),
 		ActionParser.Register(&actions.Swap{}, nil),
 
-		// Read only actions
+		// // Read only actions
 		ActionParser.Register(&actions.GetTokenAccountBalance{}, nil),
 		ActionParser.Register(&actions.GetTokenInfo{}, nil),
 		ActionParser.Register(&actions.GetLiquidityPoolInfo{}, nil),
@@ -57,6 +60,7 @@ func init() {
 		AuthParser.Register(&auth.BLS{}, auth.UnmarshalBLS),
 
 		// Register to parse output
+		// OutputParser.Register(&actions.TransferResult{}, nil),
 		OutputParser.Register(&actions.CreateTokenResult{}, nil),
 		OutputParser.Register(&actions.MintTokenResult{}, nil),
 		OutputParser.Register(&actions.BurnTokenResult{}, nil),

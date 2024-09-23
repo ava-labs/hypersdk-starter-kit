@@ -12,11 +12,13 @@ import (
 
 // TypeIDs for actions
 const (
+
 	// Token-related
 	CreateTokenID uint8 = iota
 	MintTokenID
 	BurnTokenID
 	TransferTokenID
+
 	// LP-related
 	CreateLiquidityPoolID
 	AddLiquidityID
@@ -43,8 +45,9 @@ const (
 )
 
 const (
-	Name = "CFMMVM"
-	HRP  = "cfmm"
+	Name     = "CFMMVM"
+	HRP      = "cfmm"
+	Decimals = 9
 )
 
 var (
