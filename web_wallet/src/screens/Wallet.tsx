@@ -1,138 +1,173 @@
-import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { useState, useCallback, useEffect } from 'react'
-import { ActionData } from 'hypersdk-client/src/snap'
 import { vmClient } from '../VMClient'
+import { VMABI } from 'hypersdk-client/src/lib/Marshaler';
+import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { stringify } from 'lossless-json'
-
-const otherWalletAddress = "00" + "77".repeat(25) + "DEC0DEDEADC0DE"
 
 
 export default function Wallet({ myAddr }: { myAddr: string }) {
-    const [loading, setLoading] = useState(0)
-    const [logText, setLogText] = useState("")
     const [balance, setBalance] = useState(0n)
+    const [loading, setLoading] = useState(0)
+    const [error, setError] = useState<string | null>(null)
+    const [abi, setAbi] = useState<VMABI | null>(null)
+    const [actionLogs, setActionLogs] = useState<Record<string, string>>({})
+    const [actionInputs, setActionInputs] = useState<Record<string, Record<string, string>>>({})
 
-    const log = useCallback((level: "success" | "error" | "info", text: string) => {
-        const now = new Date();
-        const time = now.toLocaleTimeString('en-US', { hour12: false });
-        const emoji = level === 'success' ? '✅' : level === 'error' ? '❌' : 'ℹ️';
-        setLogText(prevLog => `${prevLog}\n${time} ${emoji} ${text}`);
-    }, []);
-
+    //balance stuff
     const fetchBalance = useCallback(async () => {
+        setLoading(l => l + 1)
         try {
-            setLoading(l => l + 1)
             const balance = await vmClient.getBalance(myAddr)
             setBalance(balance)
+            setError(null)
         } catch (e) {
-            log("error", `Failed to fetch balance: ${(e as { message?: string })?.message || String(e)}`);
+            console.error("Failed to fetch balance:", e)
+            setError((e instanceof Error && e.message) ? e.message : String(e))
         } finally {
             setLoading(l => l - 1)
         }
-    }, [myAddr, log]);
+    }, [myAddr]);
 
     useEffect(() => {
         fetchBalance()
     }, [fetchBalance])
 
-    async function sendTokens(amountString: "0.1" | "1") {
-        setLogText("")
+    useEffect(() => {
+        setLoading(l => l + 1)
+        vmClient.getAbi()
+            .then(setAbi)
+            .catch(e => {
+                console.error("Failed to fetch ABI:", e)
+                setError((e instanceof Error && e.message) ? e.message : String(e))
+            })
+            .finally(() => setLoading(l => l - 1))
+    }, [])
+
+    const executeAction = async (actionName: string, isReadOnly: boolean) => {
+        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        setActionLogs(prev => ({ ...prev, [actionName]: `${now} - Executing...` }))
         try {
-            log("info", `Sending ${amountString} ${vmClient.COIN_SYMBOL} to ${otherWalletAddress}`)
-            setLoading(counter => counter + 1)
-            const initialBalance = await vmClient.getBalance(myAddr)
-
-            log("info", `Initial balance: ${vmClient.formatBalance(initialBalance)} ${vmClient.COIN_SYMBOL}`)
-
-            const actionData: ActionData = vmClient.newTransferAction(otherWalletAddress, amountString, btoa(new Date().toISOString()))
-            await vmClient.sendTx([actionData])
-            log("success", `Transaction sent, waiting for the balance change`)
-
-            let balanceChanged = false
-            const totalWaitTime = 15 * 1000
-            const timeStarted = Date.now()
-
-            for (let i = 0; i < 100000; i++) {
-                const balance = await vmClient.getBalance(myAddr)
-                if (balance !== initialBalance || Date.now() - timeStarted > totalWaitTime) {
-                    balanceChanged = true
-                    log("success", `Balance changed to ${parseFloat(vmClient.formatBalance(balance)).toFixed(6)} ${vmClient.COIN_SYMBOL} in ${((Date.now() - timeStarted) / 1000).toFixed(2)}s`)
-                    break
-                } else {
-                    await new Promise(resolve => setTimeout(resolve, 100))
-                }
-            }
-
-            if (!balanceChanged) {
-                throw new Error("Transaction failed")
-            }
-
-            log("success", "Transaction successful")
-
-            await fetchBalance()
-        } catch (e: unknown) {
-            log("error", `Transaction failed: ${(e as { message?: string })?.message || String(e)}`);
+            const data = getFilledStructData(actionName)
+            setActionLogs(prev => ({ ...prev, [actionName]: `Action data for ${actionName}: ${JSON.stringify(data, null, 2)}` }))
+            const result = isReadOnly
+                ? await vmClient.executeReadonlyAction({ actionName, data })
+                : await vmClient.sendTx([{ actionName, data }])
+            const endTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            setActionLogs(prev => ({ ...prev, [actionName]: `${endTime} - Success: ${stringify(result)}` }))
+            fetchBalance()
+        } catch (e) {
             console.error(e)
-        } finally {
-            setLoading(counter => counter - 1)
+            const errorTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            setActionLogs(prev => ({ ...prev, [actionName]: `${errorTime} - Error: ${e}` }))
         }
     }
 
-    async function executeReadonlyAction() {
-        setLogText("")
-        try {
-            const payload = {
-                actionName: "Hi",
-                data: { name: "Luigi" }
-            }
-            log("info", `Executing readonly action: ${stringify(payload)}`)
-            setLoading(counter => counter + 1)
-            const result = await vmClient.executeReadonlyAction(payload)
-            console.log(result)
-            log("success", `Readonly action result: ${stringify(result)}`)
-        } catch (e: unknown) {
-            log("error", `Readonly action failed: ${(e as { message?: string })?.message || String(e)}`);
-            console.error(e)
-        } finally {
-            setLoading(counter => counter - 1)
+    function getFilledStructData(typeName: string): Record<string, string> {
+        const structData: Record<string, string> = actionInputs[typeName] || {}
+        const structType = abi?.types.find(type => type.name === typeName)
+        if (!structType) {
+            throw new Error(`Struct ${typeName} not found in ABI`)
         }
+        for (const field of structType.fields) {
+            if (typeof structData[field.name] === 'undefined') {
+                structData[field.name] = getDefaultValue(field.type);
+            }
+        }
+        return structData
+    }
+
+
+    const handleInputChange = (actionName: string, fieldName: string, value: string) => {
+        setActionInputs(prev => ({
+            ...prev,
+            [actionName]: {
+                ...(prev[actionName] || {}),
+                [fieldName]: value
+            }
+        }))
+    }
+
+    const getDefaultValue = (fieldType: string) => {
+        if (fieldType === 'Address') return "00" + "00".repeat(27) + "00deadc0de"
+        if (fieldType === 'Bytes') return btoa('Luigi');
+        if (fieldType === 'string') return 'Hello';
+        if (fieldType === 'uint64') return '1234567890';
+        if (fieldType.startsWith('int') || fieldType.startsWith('uint')) return '0';
+        return '';
+    }
+
+    if (loading > 0) {
+        return <div>Loading...</div>
+    }
+
+    if (error) {
+        return <div>Error: {error}</div>
     }
 
     return (
-        <div className="w-full  bg-white p-8">
-            <div className={loading > 0 ? "animate-pulse" : ""}>
-                <div className="text-xl font-mono break-all ">{myAddr}</div>
-                <div className="flex items-center my-12">
-                    <div className='text-8xl font-bold'>{parseFloat(vmClient.formatBalance(balance)).toFixed(6)} {vmClient.COIN_SYMBOL}</div>
-                    <button className="ml-4" onClick={() => fetchBalance()}>
-                        <ArrowPathIcon className="h-6 w-6 text-gray-500 hover:text-gray-700" />
+        <div className="w-full bg-white p-8">
+            <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-2">Address:</h2>
+                <div className="text-md font-mono break-all bg-gray-100 p-3 rounded">{myAddr}</div>
+            </div>
+            <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-2">Balance:</h2>
+                <div className="flex items-center">
+                    <div className="text-4xl font-bold mr-2">
+                        {parseFloat(vmClient.formatBalance(balance)).toFixed(6)} {vmClient.COIN_SYMBOL}
+                    </div>
+                    <button onClick={fetchBalance} className="p-2 rounded-full hover:bg-gray-200">
+                        <ArrowPathIcon className="h-5 w-5" />
                     </button>
                 </div>
-                <div className="flex space-x-4">
-                    <button className={`px-4 py-2 font-bold rounded transition-colors duration-200 ${loading > 0 ? 'bg-gray-400 text-gray-600 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-800 transform hover:scale-105'}`}
-                        onClick={() => sendTokens("0.1")}
-                        disabled={loading > 0}
-                    >
-                        Send 0.1 RED
-                    </button>
-                    <button className={`px-4 py-2 font-bold rounded border transition-colors duration-200 ${loading > 0 ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' : 'bg-white text-black border-black hover:bg-gray-100 transform hover:scale-105'}`}
-                        onClick={() => sendTokens("1")}
-                        disabled={loading > 0}
-                    >
-                        Send 1 RED
-                    </button>
-                    <button className={`px-4 py-2 font-bold rounded border transition-colors duration-200 ${loading > 0 ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' : 'bg-white text-black border-black hover:bg-gray-100 transform hover:scale-105'}`}
-                        onClick={executeReadonlyAction}
-                        disabled={loading > 0}
-                    >
-                        Say Hi (Read Only Action)
-                    </button>
-                </div>
-                <div className="mt-8 border border-gray-300 rounded p-4 min-h-16">
-                    <pre className="font-mono text-sm">
-                        {logText}
-                    </pre>
-                </div>
+            </div>
+            <div>
+                {abi?.actions.map(action => {
+                    const actionType = abi.types.find(t => t.name === action.name)
+                    return (
+                        <div key={action.id} className="mb-6 p-4 border border-gray-300 rounded">
+                            <h3 className="text-xl font-semibold mb-2">{action.name}</h3>
+                            <div className="mb-4">
+                                <h4 className="font-semibold mb-1">Input Fields:</h4>
+                                {actionType?.fields.map(field => {
+                                    if (field.type.includes('[]')) {
+                                        return <p key={field.name} className="text-red-500">Warning: Array type not supported for {field.name}</p>
+                                    }
+                                    const defaultValue = getDefaultValue(field.type);
+                                    return (
+                                        <div key={field.name} className="mb-2">
+                                            <label className="block text-sm font-medium text-gray-700">{field.name}: {field.type}</label>
+                                            <input
+                                                type="text"
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                                value={getFilledStructData(action.name)[field.name] ?? defaultValue}
+                                                onChange={(e) => handleInputChange(action.name, field.name, e.target.value)}
+                                            />
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            <div className="flex space-x-2 mb-2">
+                                <button
+                                    onClick={() => executeAction(action.name, true)}
+                                    className="px-4 py-2 bg-gray-200 text-black font-bold rounded hover:bg-gray-300"
+                                >
+                                    Execute Read Only
+                                </button>
+                                <button
+                                    onClick={() => executeAction(action.name, false)}
+                                    className="px-4 py-2 bg-black text-white font-bold rounded hover:bg-gray-800"
+                                >
+                                    Execute in Transaction
+                                </button>
+                            </div>
+                            <div className="bg-gray-100 p-2 rounded">
+                                <h4 className="font-semibold mb-1">Log:</h4>
+                                <pre className="whitespace-pre-wrap">{actionLogs[action.name] || 'No logs yet.'}</pre>
+                            </div>
+                        </div>
+                    )
+                })}
             </div>
         </div>
     )

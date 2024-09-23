@@ -5,6 +5,7 @@ package actions
 
 import (
 	"context"
+	"encoding/base64"
 	"math"
 	"testing"
 
@@ -12,6 +13,7 @@ import (
 
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/hypersdk-starter/storage"
+	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/chain/chaintest"
 	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/codec/codectest"
@@ -161,4 +163,27 @@ func BenchmarkSimpleTransfer(b *testing.B) {
 
 	ctx := context.Background()
 	transferActionTest.Run(ctx, b)
+}
+
+func TestDecodeTransferResult(t *testing.T) {
+	require := require.New(t)
+
+	actionParser := codec.NewTypeParser[chain.Action]()
+	outputParser := codec.NewTypeParser[codec.Typed]()
+
+	err := actionParser.Register(&Transfer{}, nil)
+	require.NoError(err)
+	err = outputParser.Register(&TransferResult{}, nil)
+	require.NoError(err)
+
+	decoded, err := base64.StdEncoding.DecodeString("AAAAAAIKdeEuAAAABFcl974=")
+	require.NoError(err)
+	packer := codec.NewReader(decoded, 10000)
+
+	result, err := outputParser.Unmarshal(packer)
+	require.NoError(err)
+	require.Equal(result, &TransferResult{
+		SenderBalance:   8765432110,
+		ReceiverBalance: 18641975230,
+	})
 }
