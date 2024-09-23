@@ -27,6 +27,7 @@ const (
 // TODO: tune these values
 // Chunks
 const (
+	TokenAddressChunks        uint16 = 1
 	TokenInfoChunks           uint16 = 2
 	TokenAccountBalanceChunks uint16 = 1
 	LiquidityPoolChunks       uint16 = 3

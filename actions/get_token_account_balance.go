@@ -29,7 +29,7 @@ func (g *GetTokenAccountBalanceResult) GetTypeID() uint8 {
 }
 
 type GetTokenAccountBalance struct {
-	Token   codec.Address `serialize:"true" json:"balance"`
+	Token   codec.Address `serialize:"true" json:"token"`
 	Account codec.Address `serialize:"true" json:"account"`
 }
 

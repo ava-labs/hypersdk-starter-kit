@@ -20,6 +20,34 @@ class VMClient extends HyperSDKBaseClient {
         return BigInt(result.amount)//FIXME: might be some loss of precision here
     }
 
+    public async getTokenBalance(address: string, tokenAddress: string): Promise<string> {
+       const payload: ActionData = {
+              actionName: 'GetTokenAccountBalance',
+              data: {
+                token: tokenAddress,
+                account: address,
+              }
+         }
+         const res = await this.executeReadonlyAction(payload) as { balance: number }
+         console.log(res)
+         return res.balance.toString()
+
+    }
+
+    public async getTokenAddress(name: string, symbol: string, metadata: string): Promise<string> {
+        const payload: ActionData = {
+            actionName: 'GetTokenAddress',
+            data: {
+                name: btoa(name),
+                symbol: btoa(symbol),
+                metadata: btoa(metadata),
+            }
+        }
+        const res = await this.executeReadonlyAction(payload) as { address: string }
+        console.log(res)
+        return res.address
+    }
+
     async requestFaucetTransfer(address: string): Promise<void> {
         const response = await fetch(`${this.faucetHost}/faucet/${address}`, {
             method: 'POST',
@@ -52,7 +80,7 @@ class VMClient extends HyperSDKBaseClient {
         }
     }
 
-    public GetTokenInfoAction(tokenAddress: string): ActionData {
+    public NewTokenInfoAction(tokenAddress: string): ActionData {
         return {
             actionName: 'GetTokenInfo',
             data: {
@@ -61,12 +89,12 @@ class VMClient extends HyperSDKBaseClient {
         }
     }
 
-    public MintTokenAction(to: string, value: string, token: string): ActionData {
+    public MintTokenAction(to: string, value: number, token: string): ActionData {
         return {
             actionName: 'MintToken',
             data: {
                 to,
-                value:  this.fromFormattedBalance(value).toString(),
+                value:  value,
                 token: token,
             }
         }

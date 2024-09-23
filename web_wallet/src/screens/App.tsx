@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import ConnectWallet from './ConnectWallet'
 import Wallet from './Wallet'
+import Tokens from './Tokens'
 import Swap from './Swap.tsx'
 import Faucet from "./Faucet.tsx"
 import Pool from './Pool.tsx'
@@ -16,9 +17,37 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
+export interface Token {
+  name: string;
+  symbol: string
+  metadata: string;
+  address: string;
+  balance: string;
+  totalSupply: string;
+  owner: string;
+}
+
+interface TokensProps {
+  initialTokens: Token[];
+}
+
 function App() {
   const [signerConnected, setSignerConnected] = useState<boolean>(false)
   const [myAddr, setMyAddr] = useState<string>("")
+
+  const tokenProps: TokensProps = {
+    initialTokens: [
+      {
+        name: "CFMMVM",
+        symbol: vmClient.COIN_SYMBOL,
+        metadata: "A constant-function market-maker VM implementation",
+        address: vmClient.TOKEN_ADDRESS,
+        balance: "0",
+        totalSupply: '',
+        owner: "000000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ]
+  };
 
   useEffect(() => {
     const handleSignerConnected = (event: SignerConnectedEvent) => {
@@ -36,14 +65,16 @@ function App() {
     return () => vmClient.removeEventListener('signerConnected', handleSignerConnected as EventListener)
   }, [])
 
-  const [tokenList, setTokenList] = useState<string[]>(['RED', 'USDC', "Add Token"]);
+  const [tokenList, setTokenList] = useState<Token[]>(tokenProps.initialTokens)
 
-  const handleAddToken = (newToken: string) => {
-    setTokenList([...tokenList.slice(0, tokenList.length - 1), newToken, "Add Token"])
+  const handleAddToken = (newToken: Token) => {
+    console.log("Adding token:", newToken)
+    setTokenList([...tokenList, newToken])
   };
 
   const [categories] = useState({
     'Wallet': [],
+    'Tokens': [],
     'Swap': [],
     'Pool': []
   })
@@ -53,7 +84,7 @@ function App() {
   } else {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-full max-w-md px-2 py-8 sm:px-0">
+        <div className="w-full max-w-5xl px-2 py-8 sm:px-0">
           <Tab.Group>
             <Tab.List className="flex space-x-1 rounded-lg bg-gray-100 p-0.5">
               {Object.keys(categories).map((category) => (
@@ -88,7 +119,8 @@ function App() {
                         <Wallet myAddr={myAddr} />
                       </Faucet>
                     )}
-                    {Object.keys(categories)[idx] === 'Swap' && <Swap tokens={tokenList} onAddToken={handleAddToken}/>}
+                    {Object.keys(categories)[idx] === 'Tokens' && <Tokens myAddr={myAddr} initialTokens={tokenList} onAddToken={handleAddToken}/>}
+                    {Object.keys(categories)[idx] === 'Swap' && <Swap tokens={tokenList}/>}
                     {Object.keys(categories)[idx] === 'Pool' && <Pool tokens={tokenList} onAddToken={handleAddToken}/>}
                   </div>
                 </Tab.Panel>

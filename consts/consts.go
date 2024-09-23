@@ -26,6 +26,7 @@ const (
 	SwapID
 
 	// Read-only actions
+	GetTokenAddressID
 	GetTokenInfoID
 	GetTokenAccountBalanceID
 	GetLiquidityPoolInfoID

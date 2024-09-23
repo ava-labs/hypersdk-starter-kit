@@ -35,13 +35,12 @@ func init() {
 	errs := &wrappers.Errs{}
 	errs.Add(
 
-		// Native Token
-		// ActionParser.Register(&actions.Transfer{}, actions.UnmarshalTransfer),
 		// Token-related actions
 		ActionParser.Register(&actions.CreateToken{}, nil),
 		ActionParser.Register(&actions.MintToken{}, nil),
 		ActionParser.Register(&actions.BurnToken{}, nil),
 		ActionParser.Register(&actions.TransferToken{}, nil),
+		ActionParser.Register(&actions.GetTokenAddress{}, nil),
 
 		// // LP-related actions
 		ActionParser.Register(&actions.CreateLiquidityPool{}, nil),
@@ -60,7 +59,6 @@ func init() {
 		AuthParser.Register(&auth.BLS{}, auth.UnmarshalBLS),
 
 		// Register to parse output
-		// OutputParser.Register(&actions.TransferResult{}, nil),
 		OutputParser.Register(&actions.CreateTokenResult{}, nil),
 		OutputParser.Register(&actions.MintTokenResult{}, nil),
 		OutputParser.Register(&actions.BurnTokenResult{}, nil),
@@ -72,6 +70,7 @@ func init() {
 		OutputParser.Register(&actions.GetTokenAccountBalanceResult{}, nil),
 		OutputParser.Register(&actions.GetTokenInfoResult{}, nil),
 		OutputParser.Register(&actions.GetLiquidityPoolInfoResult{}, nil),
+		OutputParser.Register(&actions.GetTokenAddressResult{}, nil),
 	)
 	if errs.Errored() {
 		panic(errs.Err)

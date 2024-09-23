@@ -1,30 +1,24 @@
 import { useState, useRef } from 'react'
 import { ChevronDownIcon } from 'lucide-react'
-import AddTokenModal from '../components/AddTokenModal'
-
+import { Token } from './App'
 
 interface SwapProps {
-  tokens: string[];
-  onAddToken: (newToken: string) => void;
+  tokens: Token[];
 }
 
-const Swap: React.FC<SwapProps> = ({ tokens, onAddToken }) => {
+const Swap: React.FC<SwapProps> = ({ tokens }) => {
 
-  const [sellToken, setSellToken] = useState('RED')
-  const [buyToken, setBuyToken] = useState('USDC')
+  const [sellToken, setSellToken] = useState('CVM')
+  const [buyToken, setBuyToken] = useState('CVM')
   const [sellDropdownOpen, setSellDropdownOpen] = useState(false)
   const [buyDropdownOpen, setBuyDropdownOpen] = useState(false)
 
   const [sellAmount, setSellAmount] = useState(0)
   const [buyAmount, setBuyAmount] = useState(0)
 
-  const [showAddTokenModal, setShowAddTokenModal] = useState(false)
   const sellDropdownRef = useRef(null)
   const buyDropdownRef = useRef(null)
-  
-  const handleAddToken = (token: string) => {
-    onAddToken(token)
-  }
+
   const handleSwapTokens = () => {
 
     setSellToken(buyToken)
@@ -36,13 +30,6 @@ const Swap: React.FC<SwapProps> = ({ tokens, onAddToken }) => {
 
   return (
     <div className="bg-transparent min-h-screen">
-      {showAddTokenModal && (
-      <AddTokenModal
-        isOpen={showAddTokenModal}
-        onClose={() => setShowAddTokenModal(false)}
-        onAddToken={handleAddToken}
-      />
-      )}
 
       {/* Main Content */}
       <div className="flex items-center justify-center mt-20">
@@ -73,7 +60,7 @@ const Swap: React.FC<SwapProps> = ({ tokens, onAddToken }) => {
             className="flex items-center space-x-2 bg-black hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-full"
             onClick={() => setSellDropdownOpen(!sellDropdownOpen)}
             >
-            <img src="/placeholder.svg?height=24&width=24" alt="RED" className="w-6 h-6 rounded-full bg-blue-500" />
+            <img src="/placeholder.svg?height=24&width=24" alt="CVM" className="w-6 h-6 rounded-full bg-blue-500" />
             <span>{sellToken}</span>
             <ChevronDownIcon className="w-5 h-5 " />
             </button>
@@ -82,18 +69,10 @@ const Swap: React.FC<SwapProps> = ({ tokens, onAddToken }) => {
             <div className="absolute right-0 mt-2 w-full bg-black rounded-md shadow-lg z-10">
               {tokens.map((token) => (
               <button
-                key={token}
+                key={token.name}
                 className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
-                onClick={() => {
-                if (token === "Add Token") {
-                  setShowAddTokenModal(true)
-                } else {
-                  setSellToken(token)
-                  setSellDropdownOpen(false)
-                }
-                }}
               >
-                {token}
+                {token.symbol}
               </button>
               ))}
             </div>
@@ -148,15 +127,11 @@ const Swap: React.FC<SwapProps> = ({ tokens, onAddToken }) => {
                 key={token}
                 className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
                 onClick={() => {
-                if (token === "Add Token") {
-                  setShowAddTokenModal(true)
-                } else {
-                  setBuyToken(token)
+                  setBuyToken(token.symbol)
                   setBuyDropdownOpen(false)
-                }
                 }}
               >
-                {token}
+                {token.symbol}
               </button>
               ))}
             </div>

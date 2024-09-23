@@ -5,7 +5,6 @@ package workload
 
 import (
 	"context"
-	"math"
 	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
@@ -22,7 +21,6 @@ import (
 	"github.com/ava-labs/hypersdk/crypto/bls"
 	"github.com/ava-labs/hypersdk/crypto/ed25519"
 	"github.com/ava-labs/hypersdk/crypto/secp256r1"
-	"github.com/ava-labs/hypersdk/fees"
 	"github.com/ava-labs/hypersdk/genesis"
 	"github.com/ava-labs/hypersdk/tests/workload"
 )
@@ -74,11 +72,11 @@ func New(minBlockGap int64) (*genesis.DefaultGenesis, workload.TxWorkloadFactory
 
 	genesis := genesis.NewDefaultGenesis(customAllocs)
 	// Set WindowTargetUnits to MaxUint64 for all dimensions to iterate full mempool during block building.
-	genesis.Rules.WindowTargetUnits = fees.Dimensions{math.MaxUint64, math.MaxUint64, math.MaxUint64, math.MaxUint64, math.MaxUint64}
+	// genesis.Rules.WindowTargetUnits = fees.Dimensions{math.MaxUint64, math.MaxUint64, math.MaxUint64, math.MaxUint64, math.MaxUint64}
 	// Set all limits to MaxUint64 to avoid limiting block size for all dimensions except bandwidth. Must limit bandwidth to avoid building
 	// a block that exceeds the maximum size allowed by AvalancheGo.
-	genesis.Rules.MaxBlockUnits = fees.Dimensions{1800000, math.MaxUint64, math.MaxUint64, math.MaxUint64, math.MaxUint64}
-	genesis.Rules.MinBlockGap = minBlockGap
+	// genesis.Rules.MaxBlockUnits = fees.Dimensions{1800000, math.MaxUint64, math.MaxUint64, math.MaxUint64, math.MaxUint64}
+	// genesis.Rules.MinBlockGap = minBlockGap
 
 	return genesis, &workloadFactory{
 		factories: ed25519AuthFactories,

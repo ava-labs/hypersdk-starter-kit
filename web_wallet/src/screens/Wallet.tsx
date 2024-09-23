@@ -21,8 +21,6 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
         try {
             setLoading(l => l + 1)
             const balance = await vmClient.getBalance(myAddr)
-            const abi = await vmClient.getAbi()
-            console.log(abi)
             setBalance(balance)
         } catch (e) {
             log("error", `Failed to fetch balance: ${(e as { message?: string })?.message || String(e)}`);
@@ -45,8 +43,9 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
 
             log("info", `Initial balance: ${vmClient.formatBalance(initialBalance)} ${vmClient.COIN_SYMBOL}`)
 
-            const payload = await vmClient.newTransferAction(otherWalletAddress, amountString)
-            await vmClient.sendTx([payload])
+            const payload = vmClient.newTransferAction(otherWalletAddress, amountString)
+            const txInfo = await vmClient.sendTx([payload])
+            console.log(txInfo)
 
             log("success", `Transaction sent, waiting for the balance change`)
 
@@ -79,38 +78,23 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
             setLoading(counter => counter - 1)
         }
     }
-
-   const createNewToken = async () => {
-    const tokenName = "TEST"
-    const tokenSymbol = "MT"
-    const tokenMetadata = "MyToken Metadata"
-        try {
-            setLoading(counter => counter + 1)
-
-            log("info", `Creating new token ${tokenName} (${tokenSymbol})`)
-            const payload = vmClient.NewTokenAction(tokenName, tokenSymbol, tokenMetadata)
-            
-            const tx = await vmClient.sendTx([payload]) as unknown as { txId: string }
-            
-            console.log(tx.txId)
-            log("success", `Token created successfully`)
-
-            await fetchBalance()
-
-        } catch (e: unknown) {
-            log("error", `Token creation failed: ${(e as { message?: string })?.message || String(e)}`);
-            console.error(e)
-        } finally {
-            setLoading(counter => counter - 1)
-        }
-
-
-    }
-
     return (
         <div className="w-full  bg-white p-8">
             <div className={loading > 0 ? "animate-pulse" : ""}>
-                <div className="text-xl font-mono break-all ">{myAddr}</div>
+                <div className="flex items-center space-x-2">
+                    <div className="text-xl font-mono break-all">{myAddr}</div>
+                    <button
+                        className="text-sm text-blue-500 hover:underline flex items-center space-x-1"
+                        onClick={() => {
+                            navigator.clipboard.writeText(myAddr);
+                            log("info", "Address copied to clipboard");
+                        }}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="black">
+                            <path d="M15 2a1 1 0 011 1v11a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1h10zm-1 2H6v9h8V4zM4 6a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-1H5a1 1 0 01-1-1V6z" />
+                        </svg>
+                    </button>
+                </div>
                 <div className="flex items-center my-12">
                     <div className='text-8xl font-bold'>{parseFloat(vmClient.formatBalance(balance)).toFixed(6)} {vmClient.COIN_SYMBOL}</div>
                     <button className="ml-4" onClick={() => fetchBalance()}>
@@ -129,12 +113,6 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
                         disabled={loading > 0}
                     >
                         Send 1 CVM
-                    </button>
-                    <button className={`px-4 py-2 font-bold rounded border transition-colors duration-200 ${loading > 0 ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' : 'bg-white text-black border-black hover:bg-gray-100 transform hover:scale-105'}`}
-                        onClick={createNewToken}
-                        disabled={loading > 0}
-                    >
-                        Create New Token
                     </button>
                 </div>
                 <div className="mt-8 border border-gray-300 rounded p-4 min-h-16">
