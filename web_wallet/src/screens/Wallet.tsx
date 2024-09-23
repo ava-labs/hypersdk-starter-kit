@@ -4,27 +4,135 @@ import { VMABI } from 'hypersdk-client/src/lib/Marshaler';
 import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { stringify } from 'lossless-json'
 
+const getDefaultValue = (fieldType: string) => {
+    if (fieldType === 'Address') return "00" + "00".repeat(27) + "00deadc0de"
+    if (fieldType === 'Bytes') return btoa('Luigi');
+    if (fieldType === 'string') return 'Hello';
+    if (fieldType === 'uint64') return '123456789';
+    if (fieldType.startsWith('int') || fieldType.startsWith('uint')) return '0';
+    return '';
+}
+
+
+function Action({ actionName, abi, fetchBalance }: { actionName: string, abi: VMABI, fetchBalance: (waitForChange: boolean) => void }) {
+    const actionType = abi.types.find(t => t.name === actionName)
+    const action = abi.actions.find(a => a.name === actionName)
+    const [actionLogs, setActionLogs] = useState<string[]>([])
+    const [actionInputs, setActionInputs] = useState<Record<string, string>>({})
+
+    useEffect(() => {
+        if (actionType) {
+            setActionInputs(prev => {
+                for (const field of actionType.fields) {
+                    if (!(field.name in prev)) {
+                        prev[field.name] = getDefaultValue(field.type)
+                    }
+                }
+                return prev
+            })
+        }
+    }, [actionName, actionType]);
+
+    const executeAction = async (actionName: string, isReadOnly: boolean) => {
+        setActionLogs([])
+        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        setActionLogs(prev => [...prev, `${now} - Executing...`])
+        try {
+            setActionLogs(prev => [...prev, `Action data for ${actionName}: ${JSON.stringify(actionInputs, null, 2)}`])
+            const result = isReadOnly
+                ? await vmClient.executeReadonlyAction({ actionName, data: actionInputs })
+                : await vmClient.sendTx([{ actionName, data: actionInputs }])
+            const endTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            setActionLogs(prev => [...prev, `${endTime} - Success: ${stringify(result)}`])
+            if (!isReadOnly) {
+                fetchBalance(true)
+            }
+        } catch (e) {
+            console.error(e)
+            const errorTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            setActionLogs(prev => [...prev, `${errorTime} - Error: ${e}`])
+        }
+    }
+
+    const handleInputChange = (fieldName: string, value: string) => {
+        setActionInputs(prev => ({
+            ...prev, [fieldName]: value
+        }))
+    }
+
+    if (!action) {
+        return <div>Action not found</div>
+    }
+
+    return (
+        <div key={action.id} className="mb-6 p-4 border border-gray-300 rounded">
+            <h3 className="text-xl font-semibold mb-2">{action.name}</h3>
+            <div className="mb-4">
+                <h4 className="font-semibold mb-1">Input Fields:</h4>
+                {actionType?.fields.map(field => {
+                    if (field.type.includes('[]')) {
+                        return <p key={field.name} className="text-red-500">Warning: Array type not supported for {field.name}</p>
+                    }
+                    return (
+                        <div key={field.name} className="mb-2">
+                            <label className="block text-sm font-medium text-gray-700">{field.name}: {field.type}</label>
+                            <input
+                                type="text"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                value={actionInputs[field.name] ?? ""}
+                                onChange={(e) => handleInputChange(field.name, e.target.value)}
+                            />
+                        </div>
+                    )
+                })}
+            </div>
+            <div className="flex space-x-2 mb-2">
+                <button
+                    onClick={() => executeAction(action.name, true)}
+                    className="px-4 py-2 bg-gray-200 text-black font-bold rounded hover:bg-gray-300"
+                >
+                    Execute Read Only
+                </button>
+                <button
+                    onClick={() => executeAction(action.name, false)}
+                    className="px-4 py-2 bg-black text-white font-bold rounded hover:bg-gray-800"
+                >
+                    Execute in Transaction
+                </button>
+            </div>
+            <div className="bg-gray-100 p-2 rounded">
+                <h4 className="font-semibold mb-1">Log:</h4>
+                <pre className="whitespace-pre-wrap">{actionLogs.join('\n') || 'No logs yet.'}</pre>
+            </div>
+        </div>
+    )
+}
 
 export default function Wallet({ myAddr }: { myAddr: string }) {
-    const [balance, setBalance] = useState(0n)
-    const [loading, setLoading] = useState(0)
-    const [error, setError] = useState<string | null>(null)
+    const [balance, setBalance] = useState<bigint | null>(null)
+    const [balanceLoading, setBalanceLoading] = useState(false)
+    const [balanceError, setBalanceError] = useState<string | null>(null)
     const [abi, setAbi] = useState<VMABI | null>(null)
-    const [actionLogs, setActionLogs] = useState<Record<string, string>>({})
-    const [actionInputs, setActionInputs] = useState<Record<string, Record<string, string>>>({})
+    const [abiLoading, setAbiLoading] = useState(false)
+    const [abiError, setAbiError] = useState<string | null>(null)
 
-    //balance stuff
-    const fetchBalance = useCallback(async () => {
-        setLoading(l => l + 1)
+    // Balance fetching
+    const fetchBalance = useCallback(async (waitForChange: boolean = false) => {
+        setBalanceLoading(true)
         try {
-            const balance = await vmClient.getBalance(myAddr)
-            setBalance(balance)
-            setError(null)
+            if (waitForChange) {
+                await new Promise(resolve => setTimeout(resolve, 3 * 1000))
+                //TODO: actually wait for the balance to change
+            }
+            let newBalance = await vmClient.getBalance(myAddr)
+
+            setBalance(newBalance)
+            setBalanceError(null)
         } catch (e) {
             console.error("Failed to fetch balance:", e)
-            setError((e instanceof Error && e.message) ? e.message : String(e))
+            setBalanceError((e instanceof Error && e.message) ? e.message : String(e))
         } finally {
-            setLoading(l => l - 1)
+            setBalanceLoading(false)
         }
     }, [myAddr]);
 
@@ -32,77 +140,20 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
         fetchBalance()
     }, [fetchBalance])
 
+    // ABI fetching
     useEffect(() => {
-        setLoading(l => l + 1)
+        setAbiLoading(true)
         vmClient.getAbi()
-            .then(setAbi)
+            .then(newAbi => {
+                setAbi(newAbi)
+                setAbiError(null)
+            })
             .catch(e => {
                 console.error("Failed to fetch ABI:", e)
-                setError((e instanceof Error && e.message) ? e.message : String(e))
+                setAbiError((e instanceof Error && e.message) ? e.message : String(e))
             })
-            .finally(() => setLoading(l => l - 1))
+            .finally(() => setAbiLoading(false))
     }, [])
-
-    const executeAction = async (actionName: string, isReadOnly: boolean) => {
-        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        setActionLogs(prev => ({ ...prev, [actionName]: `${now} - Executing...` }))
-        try {
-            const data = getFilledStructData(actionName)
-            setActionLogs(prev => ({ ...prev, [actionName]: `Action data for ${actionName}: ${JSON.stringify(data, null, 2)}` }))
-            const result = isReadOnly
-                ? await vmClient.executeReadonlyAction({ actionName, data })
-                : await vmClient.sendTx([{ actionName, data }])
-            const endTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            setActionLogs(prev => ({ ...prev, [actionName]: `${endTime} - Success: ${stringify(result)}` }))
-            fetchBalance()
-        } catch (e) {
-            console.error(e)
-            const errorTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            setActionLogs(prev => ({ ...prev, [actionName]: `${errorTime} - Error: ${e}` }))
-        }
-    }
-
-    function getFilledStructData(typeName: string): Record<string, string> {
-        const structData: Record<string, string> = actionInputs[typeName] || {}
-        const structType = abi?.types.find(type => type.name === typeName)
-        if (!structType) {
-            throw new Error(`Struct ${typeName} not found in ABI`)
-        }
-        for (const field of structType.fields) {
-            if (typeof structData[field.name] === 'undefined') {
-                structData[field.name] = getDefaultValue(field.type);
-            }
-        }
-        return structData
-    }
-
-
-    const handleInputChange = (actionName: string, fieldName: string, value: string) => {
-        setActionInputs(prev => ({
-            ...prev,
-            [actionName]: {
-                ...(prev[actionName] || {}),
-                [fieldName]: value
-            }
-        }))
-    }
-
-    const getDefaultValue = (fieldType: string) => {
-        if (fieldType === 'Address') return "00" + "00".repeat(27) + "00deadc0de"
-        if (fieldType === 'Bytes') return btoa('Luigi');
-        if (fieldType === 'string') return 'Hello';
-        if (fieldType === 'uint64') return '1234567890';
-        if (fieldType.startsWith('int') || fieldType.startsWith('uint')) return '0';
-        return '';
-    }
-
-    if (loading > 0) {
-        return <div>Loading...</div>
-    }
-
-    if (error) {
-        return <div>Error: {error}</div>
-    }
 
     return (
         <div className="w-full bg-white p-8">
@@ -112,62 +163,31 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
             </div>
             <div className="mb-6">
                 <h2 className="text-lg font-semibold mb-2">Balance:</h2>
-                <div className="flex items-center">
-                    <div className="text-4xl font-bold mr-2">
-                        {parseFloat(vmClient.formatBalance(balance)).toFixed(6)} {vmClient.COIN_SYMBOL}
+                {balanceLoading ? (
+                    <div>Loading balance...</div>
+                ) : balanceError ? (
+                    <div>Error loading balance: {balanceError}</div>
+                ) : balance !== null ? (
+                    <div className="flex items-center">
+                        <div className="text-4xl font-bold mr-2">
+                            {parseFloat(vmClient.formatBalance(balance)).toFixed(6)} {vmClient.COIN_SYMBOL}
+                        </div>
+                        <button onClick={() => fetchBalance(false)} className="p-2 rounded-full hover:bg-gray-200">
+                            <ArrowPathIcon className="h-5 w-5" />
+                        </button>
                     </div>
-                    <button onClick={fetchBalance} className="p-2 rounded-full hover:bg-gray-200">
-                        <ArrowPathIcon className="h-5 w-5" />
-                    </button>
-                </div>
+                ) : null}
             </div>
             <div>
-                {abi?.actions.map(action => {
-                    const actionType = abi.types.find(t => t.name === action.name)
-                    return (
-                        <div key={action.id} className="mb-6 p-4 border border-gray-300 rounded">
-                            <h3 className="text-xl font-semibold mb-2">{action.name}</h3>
-                            <div className="mb-4">
-                                <h4 className="font-semibold mb-1">Input Fields:</h4>
-                                {actionType?.fields.map(field => {
-                                    if (field.type.includes('[]')) {
-                                        return <p key={field.name} className="text-red-500">Warning: Array type not supported for {field.name}</p>
-                                    }
-                                    const defaultValue = getDefaultValue(field.type);
-                                    return (
-                                        <div key={field.name} className="mb-2">
-                                            <label className="block text-sm font-medium text-gray-700">{field.name}: {field.type}</label>
-                                            <input
-                                                type="text"
-                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                                value={getFilledStructData(action.name)[field.name] ?? defaultValue}
-                                                onChange={(e) => handleInputChange(action.name, field.name, e.target.value)}
-                                            />
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                            <div className="flex space-x-2 mb-2">
-                                <button
-                                    onClick={() => executeAction(action.name, true)}
-                                    className="px-4 py-2 bg-gray-200 text-black font-bold rounded hover:bg-gray-300"
-                                >
-                                    Execute Read Only
-                                </button>
-                                <button
-                                    onClick={() => executeAction(action.name, false)}
-                                    className="px-4 py-2 bg-black text-white font-bold rounded hover:bg-gray-800"
-                                >
-                                    Execute in Transaction
-                                </button>
-                            </div>
-                            <div className="bg-gray-100 p-2 rounded">
-                                <h4 className="font-semibold mb-1">Log:</h4>
-                                <pre className="whitespace-pre-wrap">{actionLogs[action.name] || 'No logs yet.'}</pre>
-                            </div>
-                        </div>
-                    )
-                })}
+                {abiLoading ? (
+                    <div>Loading ABI...</div>
+                ) : abiError ? (
+                    <div>Error loading ABI: {abiError}</div>
+                ) : abi ? (
+                    abi.actions.map(action => (
+                        <Action key={action.id} actionName={action.name} abi={abi} fetchBalance={fetchBalance} />
+                    ))
+                ) : null}
             </div>
         </div>
     )
