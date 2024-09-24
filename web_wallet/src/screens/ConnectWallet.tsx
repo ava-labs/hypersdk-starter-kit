@@ -49,7 +49,7 @@ export default function ConnectWallet() {
     return (
         <div className="flex items-center justify-center min-h-screen">
             <div className="border border-black px-16 py-12 rounded-lg max-w-3xl w-full text-center">
-                <h3 className="text-4xl font-semibold text-gray-900 mb-5 ">HyperSDK e2e demo</h3>
+                <h3 className="text-4xl font-semibold text-gray-900 mb-5 ">CFMM-VM e2e Demo</h3>
                 <p className="mt-4 text-sm">Connect with Metamask Flask development signer via a Snap, or create a signer in memory.</p>
                 <div className="mt-8 flex flex-col space-y-4">
                     <button

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { Token } from '../screens/App'
 import MintTokenModal from "./MintTokenModal"
+import { vmClient } from "../VMClient"
 interface TokenInfoModalProps {
   token: Token;
 }
@@ -24,17 +25,36 @@ export default function TokenInfoModal({ token }: TokenInfoModalProps) {
   }
 
 
+  const [tokenState, setTokenState] = useState<Token>()
+  useEffect(() => {
+    const tokenInfoAction = vmClient.NewTokenInfoAction(token.address)
+    vmClient.executeReadonlyAction(tokenInfoAction).then((res => {
+      const result = res as { name: string, symbol: string, metadata: string, supply: bigint, owner: string };
+      const newToken: Token = { 
+        name: result.name,
+        symbol: result.symbol,
+        metadata: result.metadata,
+        totalSupply: vmClient.formatBalance(result.supply),
+        owner: result.owner,
+        address: token.address,
+        balance: token.balance
+      }
+      setTokenState(newToken)
+    }))
+  }, [token])
+
+
   return (
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="px-4 py-2 text-sm font-small text-white bg-black rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-105"
+        className="px-4 py-2 text-sm font-small text-white bg-black rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 transform hover:scale-105"
       >
      Info
       </button>
 
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && tokenState && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -52,58 +72,57 @@ export default function TokenInfoModal({ token }: TokenInfoModalProps) {
             >
               <h2 className="text-2xl font-bold mb-4 text-gray-800">Token Info</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-4">
-                  <div className="flex items-center">
-                    <label className="block text-sm font-medium text-gray-700 w-1/3">
-                      Token Name
-                    </label>
-                    <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-300 rounded-md bg-gray-100 p-2">
-                      {token.name}
-                    </p>
-                  </div>
-                  <div className="flex items-center">
-                    <label className="block text-sm font-medium text-gray-700 w-1/3">
-                      Token Symbol
-                    </label>
-                    <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-300 rounded-md bg-gray-100 p-2">
-                      {token.symbol}
-                    </p>
-                  </div>
-                  <div className="flex items-center">
-                    <label className="block text-sm font-medium text-gray-700 w-1/3">
-                      Token Metadata
-                    </label>
-                    <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-300 rounded-md bg-gray-100 p-2">
-                      {token.metadata}
-                    </p>
-                  </div>
-                  <div className="flex items-center">
-                    <label className="block text-sm font-medium text-gray-700 w-1/3">
-                      Token Supply
-                    </label>
-                    <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-300 rounded-md bg-gray-100 p-2">
-                      {token.supply}
-                    </p>
-                  </div>
-                  <div className="flex items-center">
-                    <label className="block text-sm font-medium text-gray-700 w-1/3">
-                      Token Owner
-                    </label>
-                    <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-300 rounded-md bg-gray-100 p-2">
-                      {token.owner}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setIsOpen(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-                  >
-                    Close
-                  </button>
-                 <MintTokenModal onMintToken={(amount: string) => { /* handle mint token logic here */ }} />
-                </div>
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <label className="block text-sm font-medium text-gray-700 w-1/3">
+                Token Name
+              </label>
+              <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-300 rounded-md bg-gray-100 p-2">
+                {tokenState.name}
+              </p>
+            </div>
+            <div className="flex items-center">
+              <label className="block text-sm font-medium text-gray-700 w-1/3">
+                Token Symbol
+              </label>
+              <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-300 rounded-md bg-gray-100 p-2">
+                {tokenState.symbol}
+              </p>
+            </div>
+            <div className="flex items-center">
+              <label className="block text-sm font-medium text-gray-700 w-1/3">
+                Token Metadata
+              </label>
+              <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-300 rounded-md bg-gray-100 p-2">
+                {tokenState.metadata}
+              </p>
+            </div>
+            <div className="flex items-center">
+              <label className="block text-sm font-medium text-gray-700 w-1/3">
+                Token Supply
+              </label>
+              <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-300 rounded-md bg-gray-100 p-2">
+                {tokenState.totalSupply}
+              </p>
+            </div>
+            <div className="flex items-center">
+              <label className="block text-sm font-medium text-gray-700 w-1/3">
+                Token Owner
+              </label>
+              <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-300 rounded-md bg-gray-100 p-2 break-words">
+                {tokenState.owner}
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2 pt-4">
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+            >
+              Close
+            </button>
+          </div>
               </form>
             </motion.div>
           </motion.div>
