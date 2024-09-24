@@ -1,13 +1,11 @@
 import { useState, useRef } from 'react'
 import { ChevronDownIcon } from 'lucide-react'
-import AddTokenModal from './AddTokenModal'
-
+import { Token } from '../screens/App'
 interface AddLiquidityProps {
-  tokens: string[];
-  onAddToken: (newToken: string) => void;
+  tokens: Token[];
 }
 
-const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, onAddToken }) => {
+const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens }) => {
   const [sellToken, setSellToken] = useState('RED')
   const [buyToken, setBuyToken] = useState('USDC')
   const [sellDropdownOpen, setSellDropdownOpen] = useState(false)
@@ -16,13 +14,9 @@ const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, onAddToken }) => {
   const [sellAmount, setSellAmount] = useState(0)
   const [buyAmount, setBuyAmount] = useState(0)
 
-  const [showAddTokenModal, setShowAddTokenModal] = useState(false)
   const sellDropdownRef = useRef(null)
   const buyDropdownRef = useRef(null)
 
-  const handleAddToken = (token: string) => {
-    onAddToken(token)
-  }
   
   const handleSwapTokens = () => {
 
@@ -35,13 +29,6 @@ const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, onAddToken }) => {
 
   return (
     <div className="bg-transparent min-h-screen">
-      {showAddTokenModal && (
-      <AddTokenModal
-        isOpen={showAddTokenModal}
-        onClose={() => setShowAddTokenModal(false)}
-        onAddToken={handleAddToken}
-      />
-      )}
 
       {/* Main Content */}
       <div className="flex items-center justify-center mt-20">
@@ -81,18 +68,15 @@ const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, onAddToken }) => {
             <div className="absolute right-0 mt-2 w-full bg-black rounded-md shadow-lg z-10">
               {tokens.map((token) => (
               <button
-                key={token}
+                key={token.symbol}
                 className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
                 onClick={() => {
-                if (token === "Add Token") {
-                  setShowAddTokenModal(true)
-                } else {
-                  setSellToken(token)
+               
+                  setSellToken(token.symbol)
                   setSellDropdownOpen(false)
-                }
                 }}
               >
-                {token}
+                {token.symbol}
               </button>
               ))}
             </div>
@@ -144,18 +128,14 @@ const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, onAddToken }) => {
             <div className="absolute right-0 mt-2 w-full bg-black rounded-md shadow-lg z-10">
               {tokens.map((token) => (
               <button
-                key={token}
+                key={token.symbol}
                 className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
                 onClick={() => {
-                if (token === "Add Token") {
-                  setShowAddTokenModal(true)
-                } else {
-                  setBuyToken(token)
+                  setBuyToken(token.symbol)
                   setBuyDropdownOpen(false)
-                }
                 }}
               >
-                {token}
+                {token.symbol}
               </button>
               ))}
             </div>

@@ -75,8 +75,8 @@ function App() {
   const [categories] = useState({
     'Wallet': [],
     'Tokens': [],
-    'Swap': [],
-    'Pool': []
+    'Pool': [],
+    'Swap': []
   })
 
   if (!signerConnected) {
@@ -120,8 +120,8 @@ function App() {
                       </Faucet>
                     )}
                     {Object.keys(categories)[idx] === 'Tokens' && <Tokens myAddr={myAddr} initialTokens={tokenList} onAddToken={handleAddToken}/>}
+                    {Object.keys(categories)[idx] === 'Pool' && <Pool tokens={tokenList}/>}
                     {Object.keys(categories)[idx] === 'Swap' && <Swap tokens={tokenList}/>}
-                    {Object.keys(categories)[idx] === 'Pool' && <Pool tokens={tokenList} onAddToken={handleAddToken}/>}
                   </div>
                 </Tab.Panel>
               ))}

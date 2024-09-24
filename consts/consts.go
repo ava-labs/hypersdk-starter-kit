@@ -12,13 +12,11 @@ import (
 
 // TypeIDs for actions
 const (
-
 	// Token-related
 	CreateTokenID uint8 = iota
 	MintTokenID
 	BurnTokenID
 	TransferTokenID
-
 	// LP-related
 	CreateLiquidityPoolID
 	AddLiquidityID
@@ -26,7 +24,6 @@ const (
 	SwapID
 
 	// Read-only actions
-	GetTokenAddressID
 	GetTokenInfoID
 	GetTokenAccountBalanceID
 	GetLiquidityPoolInfoID

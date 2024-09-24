@@ -3,17 +3,17 @@ import AddLiquidity from '../components/AddLiquidity';
 import RemoveLiquidity from '../components/RemoveLiquidity';
 import CreatePair from '../components/CreatePair';
 import { Tab } from '@headlessui/react'
+import { Token } from './App';
 
 function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ')
   }
 
 interface PoolProps {
-  tokens: string[];
-  onAddToken: (newToken: string) => void;
+  tokens: Token[];
 }
 
-const Pool: React.FC<PoolProps> = ({ tokens, onAddToken }) => {
+const Pool: React.FC<PoolProps> = ({ tokens }) => {
 
     const [categories] = useState({
         'Create Pair': [],
@@ -23,8 +23,8 @@ const Pool: React.FC<PoolProps> = ({ tokens, onAddToken }) => {
 
     return (
         
-  <div>
-      <div className="w-full max-w-md px-2 py-8 sm:px-0">
+  <div className="flex justify-center items-center min-h-screen">
+    <div className="w-full max-w-md px-2 py-8 sm:px-0">
       <Tab.Group>
         <Tab.List className="flex space-x-1 rounded-lg bg-gray-100 p-0.5">
           {Object.keys(categories).map((category) => (
@@ -54,10 +54,9 @@ const Pool: React.FC<PoolProps> = ({ tokens, onAddToken }) => {
               )}
             >
               <div className="text-xs text-gray-500">
-                {Object.keys(categories)[idx] === 'Add Liquidity' && <AddLiquidity tokens={tokens} onAddToken={onAddToken}/>}
+                {Object.keys(categories)[idx] === 'Add Liquidity' && <AddLiquidity tokens={tokens} />}
                 {Object.keys(categories)[idx] === 'Remove Liquidity' && <RemoveLiquidity />}
-                {Object.keys(categories)[idx] === 'Create Pair' && <CreatePair tokens={tokens} onAddToken={onAddToken}/>}
-
+                {Object.keys(categories)[idx] === 'Create Pair' && <CreatePair tokens={tokens} />}
               </div>
             </Tab.Panel>
           ))}

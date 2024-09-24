@@ -1,17 +1,14 @@
 import { useState, useRef } from 'react'
 import { ChevronDownIcon } from 'lucide-react'
-import AddTokenModal from './AddTokenModal'
-
+import { Token } from '../screens/App'
 interface CreatePairProps {
-  tokens: string[];
-  onAddToken: (newToken: string) => void;
+  tokens: Token[];
 }
 
 // users have to specify a model ID, tokenX, tokenY, and a fee
-const CreatePair: React.FC<CreatePairProps> = ({ tokens, onAddToken }) => {
-  const [showAddTokenModal, setShowAddTokenModal] = useState(false)
-  const [sellToken, setSellToken] = useState('RED')
-  const [buyToken, setBuyToken] = useState('USDC')
+const CreatePair: React.FC<CreatePairProps> = ({ tokens }) => {
+  const [sellToken, setSellToken] = useState('CVM')
+  const [buyToken, setBuyToken] = useState('CVM')
   const [sellDropdownOpen, setSellDropdownOpen] = useState(false)
   const [buyDropdownOpen, setBuyDropdownOpen] = useState(false)
 
@@ -24,9 +21,6 @@ const CreatePair: React.FC<CreatePairProps> = ({ tokens, onAddToken }) => {
   const sellDropdownRef = useRef(null)
   const buyDropdownRef = useRef(null)
 
-const handleAddToken = (token: string) => {
-    onAddToken(token)
-  }
   const handleSwapTokens = () => {
     setSellToken(buyToken)
     setBuyToken(sellToken)
@@ -37,13 +31,6 @@ const handleAddToken = (token: string) => {
 
   return (
     <div className="bg-transparent min-h-screen">
-      {showAddTokenModal && (
-      <AddTokenModal
-        isOpen={showAddTokenModal}
-        onClose={() => setShowAddTokenModal(false)}
-        onAddToken={handleAddToken}
-      />
-      )}
       {/* Main Content */}
       <div className="flex items-center justify-center mt-20">
         <div className="bg-transparent p-6 rounded-3xl w-full max-w-sm">
@@ -62,7 +49,6 @@ const handleAddToken = (token: string) => {
                       setSellAmount(0)
                     } else {
                       setSellAmount(parseFloat(e.target.value))}
-
                     }}
                 />
                 <div className="relative" ref={sellDropdownRef}>
@@ -82,15 +68,13 @@ const handleAddToken = (token: string) => {
                           key={token}
                           className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
                           onClick={() => {
-                            if (token === "Add Token") {
-                              setShowAddTokenModal(true)
-                            } else {
-                              setSellToken(token)
+                            
+                              setSellToken(token.symbol)
                               setSellDropdownOpen(false)
-                            }
+                          
                           }}
                         >
-                          {token}
+                          {token.symbol}
                         </button>
                       ))}
                     </div>
@@ -139,18 +123,14 @@ const handleAddToken = (token: string) => {
                     <div className="absolute right-0 mt-2 w-full bg-black rounded-md shadow-lg z-10">
                       {tokens.map((token) => (
                         <button
-                          key={token}
+                          key={token.symbol}
                           className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
                           onClick={() => {
-                            if (token === "Add Token") {
-                              setShowAddTokenModal(true)
-                            } else {
-                              setBuyToken(token)
+                              setBuyToken(token.symbol)
                               setBuyDropdownOpen(false)
-                            }
                           }}
                         >
-                          {token}
+                          {token.symbol}
                         </button>
                       ))}
                     </div>

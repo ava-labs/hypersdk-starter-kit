@@ -41,26 +41,26 @@ export const CreateTokenModal: React.FC<CreateTokenModalProps> = ({ myAddr, onAd
     console.log("txId:", txId)
 
 
-    // const mintPayload = vmClient.MintTokenAction(myAddr, 1000000000, tokenRes.tokenAddress)
-    // console.log("mintPayload:", await vmClient.executeReadonlyAction(mintPayload))
-    // await vmClient.sendTx([mintPayload])
+    const mintPayload = vmClient.MintTokenAction(myAddr, 1000000000, tokenRes.tokenAddress)
+    console.log("mintPayload:", await vmClient.executeReadonlyAction(mintPayload))
+    await vmClient.sendTx([mintPayload])
     
 
-    // const tokenInfoAction = vmClient.NewTokenInfoAction(tokenRes.tokenAddress)
-    // const res = await vmClient.executeReadonlyAction(tokenInfoAction) as unknown as { name: string, symbol: string, metadata: string, supply: string, owner: string }
-    // console.log(res)
+    const tokenInfoAction = vmClient.NewTokenInfoAction(tokenRes.tokenAddress)
+    const res = await vmClient.executeReadonlyAction(tokenInfoAction) as unknown as { name: string, symbol: string, metadata: string, supply: string, owner: string }
+    console.log(res)
 
 
-    // const token: Token = {
-    //   name: name,
-    //   symbol: symbol,
-    //   metadata: metadata,
-    //   balance: "0",
-    //   address: tokenRes.tokenAddress,
-    //   totalSupply: res.supply,
-    //   owner: res.owner
-    // }
-    // onAddToken(token)
+    const token: Token = {
+      name: name,
+      symbol: symbol,
+      metadata: metadata,
+      balance: "0",
+      address: tokenRes.tokenAddress,
+      totalSupply: res.supply,
+      owner: res.owner
+    }
+    onAddToken(token)
     setName("")
     setSymbol("")
     setMetadata("")

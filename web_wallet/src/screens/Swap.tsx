@@ -124,7 +124,7 @@ const Swap: React.FC<SwapProps> = ({ tokens }) => {
             <div className="absolute right-0 mt-2 w-full bg-black rounded-md shadow-lg z-10">
               {tokens.map((token) => (
               <button
-                key={token}
+                key={token.address}
                 className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
                 onClick={() => {
                   setBuyToken(token.symbol)

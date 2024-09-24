@@ -37,6 +37,15 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
     async function sendTokens(amountString: "0.1" | "1") {
         setLogText("")
         try {
+
+            // sanity check
+            // const p = vmClient.NewTokenAction("name", "symbol", "metadata")
+            // const tokenRes = await vmClient.executeReadonlyAction(p) as { tokenAddress: string }
+            // console.log("token address: ", tokenRes.tokenAddress)
+            // const txId = await vmClient.sendTx([p])
+            // console.log("txId:", txId)
+
+
             log("info", `Sending ${amountString} ${vmClient.COIN_SYMBOL} to ${otherWalletAddress}`)
             setLoading(counter => counter + 1)
             const initialBalance = await vmClient.getBalance(myAddr)

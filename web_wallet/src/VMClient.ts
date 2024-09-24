@@ -34,20 +34,6 @@ class VMClient extends HyperSDKBaseClient {
 
     }
 
-    public async getTokenAddress(name: string, symbol: string, metadata: string): Promise<string> {
-        const payload: ActionData = {
-            actionName: 'GetTokenAddress',
-            data: {
-                name: btoa(name),
-                symbol: btoa(symbol),
-                metadata: btoa(metadata),
-            }
-        }
-        const res = await this.executeReadonlyAction(payload) as { address: string }
-        console.log(res)
-        return res.address
-    }
-
     async requestFaucetTransfer(address: string): Promise<void> {
         const response = await fetch(`${this.faucetHost}/faucet/${address}`, {
             method: 'POST',

@@ -13,21 +13,19 @@ import (
 // Key prefixes
 const (
 	// Required for StateManager
-	balancePrefix   = 0x0
-	heightPrefix    = 0x1
-	timestampPrefix = 0x2
-	feePrefix       = 0x3
+	heightPrefix byte = iota
+	timestampPrefix
+	feePrefix
 
 	// Required for CFMMVM
-	tokenInfoPrefix           = 0x4
-	tokenAccountBalancePrefix = 0x5
-	liquidityPoolPrefix       = 0x6
+	tokenInfoPrefix
+	tokenAccountBalancePrefix
+	liquidityPoolPrefix
 )
 
 // TODO: tune these values
 // Chunks
 const (
-	TokenAddressChunks        uint16 = 1
 	TokenInfoChunks           uint16 = 2
 	TokenAccountBalanceChunks uint16 = 1
 	LiquidityPoolChunks       uint16 = 3
