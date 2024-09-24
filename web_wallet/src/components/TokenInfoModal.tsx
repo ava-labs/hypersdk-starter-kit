@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { Token } from '../screens/App'
-import MintTokenModal from "./MintTokenModal"
 import { vmClient } from "../VMClient"
 interface TokenInfoModalProps {
   token: Token;
