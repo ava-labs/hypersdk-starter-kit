@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { vmClient } from '../VMClient'
+import { requestFaucetTransfer, vmClient } from '../VMClient'
 
 interface FaucetProps {
     minBalance: bigint
@@ -27,7 +27,7 @@ export default function Faucet({ children, minBalance, myAddr }: FaucetProps) {
                     const maxAttempts = 10
                     for (let i = 0; i < maxAttempts; i++) {
                         try {
-                            await vmClient.requestFaucetTransfer(myAddr)
+                            await requestFaucetTransfer(myAddr)
                             break
                         } catch (e) {
                             console.log(`Error requesting faucet transfer: ${(e instanceof Error && e.message) ? e.message : String(e)}`)

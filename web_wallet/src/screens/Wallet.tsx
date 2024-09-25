@@ -6,7 +6,7 @@ import { stringify } from 'lossless-json'
 
 const getDefaultValue = (fieldType: string) => {
     if (fieldType === 'Address') return "00" + "00".repeat(27) + "00deadc0de"
-    if (fieldType === 'Bytes') return btoa('Luigi');
+    if (fieldType === '[]uint8') return btoa('Luigi');
     if (fieldType === 'string') return 'Hello';
     if (fieldType === 'uint64') return '123456789';
     if (fieldType.startsWith('int') || fieldType.startsWith('uint')) return '0';
@@ -70,7 +70,7 @@ function Action({ actionName, abi, fetchBalance }: { actionName: string, abi: VM
             <div className="mb-4">
                 <h4 className="font-semibold mb-1">Input Fields:</h4>
                 {actionType?.fields.map(field => {
-                    if (field.type.includes('[]')) {
+                    if (field.type.includes('[]') && field.type !== '[]uint8') {
                         return <p key={field.name} className="text-red-500">Warning: Array type not supported for {field.name}</p>
                     }
                     return (
@@ -117,13 +117,9 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
     const [abiError, setAbiError] = useState<string | null>(null)
 
     // Balance fetching
-    const fetchBalance = useCallback(async (waitForChange: boolean = false) => {
+    const fetchBalance = useCallback(async () => {
         setBalanceLoading(true)
         try {
-            if (waitForChange) {
-                await new Promise(resolve => setTimeout(resolve, 3 * 1000))
-                //TODO: actually wait for the balance to change
-            }
             let newBalance = await vmClient.getBalance(myAddr)
 
             setBalance(newBalance)
@@ -170,9 +166,9 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
                 ) : balance !== null ? (
                     <div className="flex items-center">
                         <div className="text-4xl font-bold mr-2">
-                            {parseFloat(vmClient.formatBalance(balance)).toFixed(6)} {vmClient.COIN_SYMBOL}
+                            {parseFloat(vmClient.formatBalance(balance)).toFixed(6)} {"COIN"}
                         </div>
-                        <button onClick={() => fetchBalance(false)} className="p-2 rounded-full hover:bg-gray-200">
+                        <button onClick={() => fetchBalance()} className="p-2 rounded-full hover:bg-gray-200">
                             <ArrowPathIcon className="h-5 w-5" />
                         </button>
                     </div>

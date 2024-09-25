@@ -76,6 +76,12 @@ github.com/ava-labs/hypersdk v0.0.18-0.20240920110143-2deade85d8e5 h1:0gUC3p0n5i
 github.com/ava-labs/hypersdk v0.0.18-0.20240920110143-2deade85d8e5/go.mod h1:IH+fJyFJWfrwRR4YHwKVpdPIJUqO9n3URH2odigGfDE=
 github.com/ava-labs/hypersdk v0.0.18-0.20240920115159-c34272093511 h1:13p7Zk9zFeRI/FglqqPfJJGe79Y/gJHhQeuEYKVPf2M=
 github.com/ava-labs/hypersdk v0.0.18-0.20240920115159-c34272093511/go.mod h1:IH+fJyFJWfrwRR4YHwKVpdPIJUqO9n3URH2odigGfDE=
+github.com/ava-labs/hypersdk v0.0.18-0.20240924014410-2331d030be97 h1:Wj4u/uwUpKR9J9siDez/vKgZevpT8czbILXff71xMFM=
+github.com/ava-labs/hypersdk v0.0.18-0.20240924014410-2331d030be97/go.mod h1:IH+fJyFJWfrwRR4YHwKVpdPIJUqO9n3URH2odigGfDE=
+github.com/ava-labs/hypersdk v0.0.18-0.20240924140531-778461f7b593 h1:QI7SQgRDLdtFFmg3PH0iD7Wv1GA+k6bGkt41m0lcA84=
+github.com/ava-labs/hypersdk v0.0.18-0.20240924140531-778461f7b593/go.mod h1:IH+fJyFJWfrwRR4YHwKVpdPIJUqO9n3URH2odigGfDE=
+github.com/ava-labs/hypersdk v0.0.18-0.20240925020906-5e56020fc97a h1:PBw0DXM4uE7yfp+qhqPxtEcZmYvm0Od2DxokHw5q2gM=
+github.com/ava-labs/hypersdk v0.0.18-0.20240925020906-5e56020fc97a/go.mod h1:IH+fJyFJWfrwRR4YHwKVpdPIJUqO9n3URH2odigGfDE=
 github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
