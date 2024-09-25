@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { Token } from '../screens/App'
-import { vmClient } from "../VMClient"
+import { vmClient, NewTokenInfoAction } from "../VMClient"
 interface TokenInfoModalProps {
   token: Token;
 }
@@ -26,7 +26,7 @@ export default function TokenInfoModal({ token }: TokenInfoModalProps) {
 
   const [tokenState, setTokenState] = useState<Token>()
   useEffect(() => {
-    const tokenInfoAction = vmClient.NewTokenInfoAction(token.address)
+    const tokenInfoAction = NewTokenInfoAction(token.address)
     vmClient.executeReadonlyAction(tokenInfoAction).then((res => {
       const result = res as { name: string, symbol: string, metadata: string, supply: bigint, owner: string };
       const newToken: Token = { 

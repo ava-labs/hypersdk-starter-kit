@@ -1,6 +1,7 @@
 import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { useState, useCallback, useEffect } from 'react'
-import { vmClient } from '../VMClient'
+import { vmClient, NewTransferAction } from '../VMClient'
+import { COIN_SYMBOL, TOKEN_ADDRESS } from '../const'
 
 const otherWalletAddress = "00c4cb545f748a28770042f893784ce85b107389004d6a0e0d6d7518eeae1292d9"
 
@@ -46,13 +47,14 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
             // console.log("txId:", txId)
 
 
-            log("info", `Sending ${amountString} ${vmClient.COIN_SYMBOL} to ${otherWalletAddress}`)
+            log("info", `Sending ${amountString} ${COIN_SYMBOL} to ${otherWalletAddress}`)
             setLoading(counter => counter + 1)
             const initialBalance = await vmClient.getBalance(myAddr)
 
-            log("info", `Initial balance: ${vmClient.formatBalance(initialBalance)} ${vmClient.COIN_SYMBOL}`)
+            log("info", `Initial balance: ${vmClient.formatBalance(initialBalance)} ${COIN_SYMBOL}`)
 
-            const payload = vmClient.newTransferAction(otherWalletAddress, amountString)
+            console.log(vmClient.fromFormattedBalance(amountString))
+            const payload = NewTransferAction(otherWalletAddress, TOKEN_ADDRESS, amountString)
             const txInfo = await vmClient.sendTx([payload])
             console.log(txInfo)
 
@@ -66,7 +68,7 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
                 const balance = await vmClient.getBalance(myAddr)
                 if (balance !== initialBalance || Date.now() - timeStarted > totalWaitTime) {
                     balanceChanged = true
-                    log("success", `Balance changed to ${parseFloat(vmClient.formatBalance(balance)).toFixed(6)} ${vmClient.COIN_SYMBOL} in ${((Date.now() - timeStarted) / 1000).toFixed(2)}s`)
+                    log("success", `Balance changed to ${parseFloat(vmClient.formatBalance(balance)).toFixed(6)} ${COIN_SYMBOL} in ${((Date.now() - timeStarted) / 1000).toFixed(2)}s`)
                     break
                 } else {
                     await new Promise(resolve => setTimeout(resolve, 100))
@@ -105,7 +107,7 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
                     </button>
                 </div>
                 <div className="flex items-center my-12">
-                    <div className='text-8xl font-bold'>{parseFloat(vmClient.formatBalance(balance)).toFixed(6)} {vmClient.COIN_SYMBOL}</div>
+                    <div className='text-8xl font-bold'>{parseFloat(vmClient.formatBalance(balance)).toFixed(6)} {COIN_SYMBOL}</div>
                     <button className="ml-4" onClick={() => fetchBalance()}>
                         <ArrowPathIcon className="h-6 w-6 text-gray-500 hover:text-gray-700" />
                     </button>

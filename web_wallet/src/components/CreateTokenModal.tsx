@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { vmClient } from "../VMClient"
+import { vmClient, NewCreateTokenAction, NewTokenInfoAction, NewMintTokenAction } from "../VMClient"
 import { Token } from '../screens/App'
 
 interface CreateTokenModalProps {
@@ -27,26 +27,23 @@ export const CreateTokenModal: React.FC<CreateTokenModalProps> = ({ myAddr, onAd
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // sanity check
-    // const p = vmClient.newTransferAction("00c4cb545f748a28770042f893784ce85b107389004d6a0e0d6d7518eeae1292d9", "1")
-    // const txInfo = await vmClient.sendTx([p])
-    // console.log(txInfo)
-
 
     console.log("Creating token with:", { name, symbol, metadata })
-    const payload = vmClient.NewTokenAction(name, symbol, metadata)
+    const payload = NewCreateTokenAction(name, symbol, metadata)
+    //get address
     const tokenRes = await vmClient.executeReadonlyAction(payload) as { tokenAddress: string }
-    console.log("token address: ", tokenRes.tokenAddress)
+    console.log("expected token address: ", tokenRes.tokenAddress)
+    //send tx
     const txId = await vmClient.sendTx([payload])
-    console.log("txId:", txId)
+    console.log(txId)
 
 
-    const mintPayload = vmClient.MintTokenAction(myAddr, 1000000000, tokenRes.tokenAddress)
+    const mintPayload = NewMintTokenAction(myAddr, "1000000", tokenRes.tokenAddress)
     console.log("mintPayload:", await vmClient.executeReadonlyAction(mintPayload))
     await vmClient.sendTx([mintPayload])
     
 
-    const tokenInfoAction = vmClient.NewTokenInfoAction(tokenRes.tokenAddress)
+    const tokenInfoAction = NewTokenInfoAction(tokenRes.tokenAddress)
     const res = await vmClient.executeReadonlyAction(tokenInfoAction) as unknown as { name: string, symbol: string, metadata: string, supply: string, owner: string }
     console.log(res)
 

@@ -5,6 +5,7 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/hex"
 	"fmt"
 	"log"
@@ -17,15 +18,18 @@ import (
 	"github.com/rs/cors"
 	"golang.org/x/time/rate"
 
+	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/hypersdk-starter/actions"
 	"github.com/ava-labs/hypersdk-starter/consts"
 	"github.com/ava-labs/hypersdk-starter/storage"
 	"github.com/ava-labs/hypersdk-starter/vm"
 	"github.com/ava-labs/hypersdk/api/jsonrpc"
+	"github.com/ava-labs/hypersdk/api/ws"
 	"github.com/ava-labs/hypersdk/auth"
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/crypto/ed25519"
+	"github.com/ava-labs/hypersdk/pubsub"
 	"github.com/ava-labs/hypersdk/utils"
 )
 
@@ -41,6 +45,7 @@ var (
 	hyperSDKRPC *jsonrpc.JSONRPCClient
 	isReady     bool
 	healthMu    sync.RWMutex
+	wsClient    *ws.WebSocketClient
 )
 
 func init() {
@@ -62,6 +67,12 @@ func init() {
 	hyperVMRPC = vm.NewJSONRPCClient(url)
 	hyperSDKRPC = jsonrpc.NewJSONRPCClient(url)
 
+	// Initialize WebSocket client
+	wsClient, err = ws.NewWebSocketClient(url, ws.DefaultHandshakeTimeout, pubsub.MaxPendingMessages, pubsub.MaxReadMessageSize)
+	if err != nil {
+		log.Fatalf("Failed to create WebSocket client: %v", err)
+	}
+
 	address, err := codec.StringToAddress(myAddressHex)
 	if err != nil {
 		log.Fatalf("failed to parse faucet address: %v", err)
@@ -75,18 +86,20 @@ func init() {
 }
 
 func transferCoins(to string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	toAddr, err := codec.StringToAddress(to)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse to address: %w", err)
 	}
-	log.Printf("Transferring %s to %s\n", amtStr, toAddr)
 
 	amt, err := utils.ParseBalance(amtStr, consts.Decimals)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse amount: %w", err)
 	}
 
-	balanceBefore, err := hyperVMRPC.Balance(context.TODO(), toAddr)
+	balanceBefore, err := hyperVMRPC.Balance(ctx, toAddr)
 	if err != nil {
 		return "", fmt.Errorf("failed to get balance: %w", err)
 	}
@@ -98,13 +111,13 @@ func transferCoins(to string) (string, error) {
 		return "Balance is already greater than 1.000, no transfer needed", nil
 	}
 
-	parser, err := hyperVMRPC.Parser(context.TODO())
+	parser, err := hyperVMRPC.Parser(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to get parser: %w", err)
 	}
 
-	submit, _, _, err := hyperSDKRPC.GenerateTransaction(
-		context.TODO(),
+	_, tx, _, err := hyperSDKRPC.GenerateTransaction(
+		ctx,
 		parser,
 		[]chain.Action{&actions.TransferToken{
 			To:           toAddr,
@@ -117,12 +130,34 @@ func transferCoins(to string) (string, error) {
 		return "", fmt.Errorf("failed to generate transaction: %w", err)
 	}
 
-	if err := submit(context.TODO()); err != nil {
-		return "", fmt.Errorf("failed to submit transaction: %w", err)
+	// Register transaction with WebSocket client
+	if err := wsClient.RegisterTx(tx); err != nil {
+		return "", fmt.Errorf("failed to register transaction: %w", err)
 	}
 
-	if err := hyperVMRPC.WaitForBalance(context.TODO(), toAddr, amt); err != nil {
-		return "", fmt.Errorf("failed to wait for balance: %w", err)
+	// Listen for the transaction result
+	var result *chain.Result
+	for {
+		txID, txErr, txResult, err := wsClient.ListenTx(ctx)
+		if err != nil {
+			if ctx.Err() == context.DeadlineExceeded {
+				return "", fmt.Errorf("failed to listen for transaction: %w", ctx.Err())
+			}
+			return "", fmt.Errorf("failed to listen for transaction: %w", err)
+		}
+		if txErr != nil {
+			return "", txErr
+		}
+		if txID == tx.ID() {
+			result = txResult
+			break
+		}
+		log.Printf("Skipping unexpected transaction: %s\n", tx.ID())
+	}
+
+	// Check transaction result
+	if !result.Success {
+		return "", fmt.Errorf("transaction failed: %s", result.Error)
 	}
 
 	return "Coins transferred successfully", nil
@@ -142,7 +177,7 @@ func main() {
 
 	handler := c.Handler(r)
 
-	// performInitialTransfer()
+	performInitialTransfer()
 
 	srv := &http.Server{
 		Addr:         ":" + faucetServerPort,
@@ -173,11 +208,21 @@ func handleAPIDocumentation(w http.ResponseWriter, r *http.Request) {
 }
 
 func performInitialTransfer() {
-	zeroAddressHex := codec.EmptyAddress.String()
-	log.Println("Performing initial transfer to ready check address...")
+	randomBytes := make([]byte, 32)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		log.Fatalf("Failed to generate random bytes: %v", err)
+	}
+	randomId, err := ids.ToID(randomBytes)
+	if err != nil {
+		log.Fatalf("Failed to generate random ID: %v", err)
+	}
+
+	randomAddressHex := codec.CreateAddress(auth.ED25519ID, randomId)
+	log.Printf("Performing initial transfer to ready check address: %s\n", randomAddressHex.String())
 
 	for i := 0; i < 10; i++ {
-		message, err := transferCoins(zeroAddressHex)
+		message, err := transferCoins(randomAddressHex.String())
 		if err == nil {
 			log.Printf("Initial transfer result: %s\n", message)
 			setReady(true)

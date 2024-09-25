@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import CreateTokenModal from '../components/CreateTokenModal'
 import TokenInfoModal from '../components/TokenInfoModal'
 import { Token } from './App'
-import { vmClient } from '../VMClient'
-
+import { vmClient, NewTokenBalanceAction } from '../VMClient'
+import { TOKEN_ADDRESS } from '../const'
 interface TokensProps {
     myAddr: string;
   initialTokens: Token[];
@@ -27,12 +27,13 @@ const Tokens: React.FC<TokensProps> = ({ myAddr, initialTokens, onAddToken }) =>
         const newTokenList: Token[] = []
        for (const token of tokens) {
         if (token.address) {
-            if (token.address == vmClient.TOKEN_ADDRESS) {
+            if (token.address == TOKEN_ADDRESS) {
                 const balance = await vmClient.getBalance(myAddr)
 
                 token.balance = vmClient.formatBalance(balance)
             } else {
-                const balance = await vmClient.getTokenBalance(myAddr, token.address)
+                const payload = NewTokenBalanceAction(token.address, myAddr)
+                const balance = await vmClient.executeReadonlyAction(payload) as bigint
                 token.balance = balance.toString()
             }
         }

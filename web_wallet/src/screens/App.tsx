@@ -9,7 +9,7 @@ import { vmClient } from '../VMClient.ts'
 import { addressHexFromPubKey } from 'hypersdk-client/src/lib/Marshaler.ts'
 import { SignerIface } from 'hypersdk-client/src/client/types'
 import { Tab } from '@headlessui/react'
-
+import { VM_NAME, TOKEN_ADDRESS } from '../const.ts'
 // Add this type definition at the top of the file
 type SignerConnectedEvent = CustomEvent<SignerIface | null>;
 
@@ -39,9 +39,9 @@ function App() {
     initialTokens: [
       {
         name: "CFMMVM",
-        symbol: vmClient.COIN_SYMBOL,
+        symbol: VM_NAME,
         metadata: "A constant-function market-maker VM implementation",
-        address: vmClient.TOKEN_ADDRESS,
+        address: TOKEN_ADDRESS,
         balance: "0",
         totalSupply: '',
         owner: "000000000000000000000000000000000000000000000000000000000000000000"
