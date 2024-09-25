@@ -117,13 +117,9 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
     const [abiError, setAbiError] = useState<string | null>(null)
 
     // Balance fetching
-    const fetchBalance = useCallback(async (waitForChange: boolean = false) => {
+    const fetchBalance = useCallback(async () => {
         setBalanceLoading(true)
         try {
-            if (waitForChange) {
-                await new Promise(resolve => setTimeout(resolve, 3 * 1000))
-                //TODO: actually wait for the balance to change
-            }
             let newBalance = await vmClient.getBalance(myAddr)
 
             setBalance(newBalance)
@@ -172,7 +168,7 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
                         <div className="text-4xl font-bold mr-2">
                             {parseFloat(vmClient.formatBalance(balance)).toFixed(6)} {"COIN"}
                         </div>
-                        <button onClick={() => fetchBalance(false)} className="p-2 rounded-full hover:bg-gray-200">
+                        <button onClick={() => fetchBalance()} className="p-2 rounded-full hover:bg-gray-200">
                             <ArrowPathIcon className="h-5 w-5" />
                         </button>
                     </div>
