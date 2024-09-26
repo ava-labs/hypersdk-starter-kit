@@ -8,6 +8,7 @@ import (
 
 	"github.com/ava-labs/hypersdk-starter/actions"
 	"github.com/ava-labs/hypersdk-starter/consts"
+	"github.com/ava-labs/hypersdk-starter/genesis"
 	"github.com/ava-labs/hypersdk-starter/storage"
 	"github.com/ava-labs/hypersdk/api/indexer"
 	"github.com/ava-labs/hypersdk/api/jsonrpc"
@@ -16,7 +17,6 @@ import (
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/extension/externalsubscriber"
-	"github.com/ava-labs/hypersdk/genesis"
 	"github.com/ava-labs/hypersdk/vm"
 )
 
@@ -34,30 +34,22 @@ func init() {
 
 	errs := &wrappers.Errs{}
 	errs.Add(
-
 		// Token-related actions
 		ActionParser.Register(&actions.CreateToken{}, nil),
 		ActionParser.Register(&actions.MintToken{}, nil),
 		ActionParser.Register(&actions.BurnToken{}, nil),
 		ActionParser.Register(&actions.TransferToken{}, nil),
 
-		// // LP-related actions
+		// LP-related actions
 		ActionParser.Register(&actions.CreateLiquidityPool{}, nil),
 		ActionParser.Register(&actions.AddLiquidity{}, nil),
 		ActionParser.Register(&actions.RemoveLiquidity{}, nil),
 		ActionParser.Register(&actions.Swap{}, nil),
 
-		// // Read only actions
-		ActionParser.Register(&actions.GetTokenAccountBalance{}, nil),
-		ActionParser.Register(&actions.GetTokenInfo{}, nil),
-		ActionParser.Register(&actions.GetLiquidityPoolInfo{}, nil),
-
-		//Auth
 		AuthParser.Register(&auth.ED25519{}, auth.UnmarshalED25519),
 		AuthParser.Register(&auth.SECP256R1{}, auth.UnmarshalSECP256R1),
 		AuthParser.Register(&auth.BLS{}, auth.UnmarshalBLS),
 
-		// Register to parse output
 		OutputParser.Register(&actions.CreateTokenResult{}, nil),
 		OutputParser.Register(&actions.MintTokenResult{}, nil),
 		OutputParser.Register(&actions.BurnTokenResult{}, nil),
@@ -66,8 +58,14 @@ func init() {
 		OutputParser.Register(&actions.AddLiquidityResult{}, nil),
 		OutputParser.Register(&actions.RemoveLiquidityResult{}, nil),
 		OutputParser.Register(&actions.SwapResult{}, nil),
-		OutputParser.Register(&actions.GetTokenAccountBalanceResult{}, nil),
+
+		// Read-only actions
+		ActionParser.Register(&actions.GetTokenInfo{}, nil),
+		ActionParser.Register(&actions.GetTokenAccountBalance{}, nil),
+		ActionParser.Register(&actions.GetLiquidityPoolInfo{}, nil),
+
 		OutputParser.Register(&actions.GetTokenInfoResult{}, nil),
+		OutputParser.Register(&actions.GetTokenAccountBalanceResult{}, nil),
 		OutputParser.Register(&actions.GetLiquidityPoolInfoResult{}, nil),
 	)
 	if errs.Errored() {

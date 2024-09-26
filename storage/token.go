@@ -6,6 +6,7 @@ package storage
 import (
 	"context"
 	"encoding/binary"
+	"fmt"
 
 	"github.com/ava-labs/avalanchego/database"
 
@@ -136,7 +137,7 @@ func MintToken(
 	// Get token info + account
 	tName, tSymbol, tMetadata, tSupply, tOwner, err := GetTokenInfoNoController(ctx, mu, tokenAddress)
 	if err != nil {
-		return err
+		return fmt.Errorf("coin info not found: %w", err)
 	}
 	balance, err := GetTokenAccountBalanceNoController(ctx, mu, tokenAddress, to)
 	if err != nil {

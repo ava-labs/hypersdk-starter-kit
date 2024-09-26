@@ -6,8 +6,6 @@ package consts
 import (
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/version"
-
-	"github.com/ava-labs/hypersdk/codec"
 )
 
 // TypeIDs for actions
@@ -48,10 +46,7 @@ const (
 	Decimals = 9
 )
 
-var (
-	ID          ids.ID
-	CoinAddress codec.Address
-)
+var ID          ids.ID
 
 func init() {
 	b := make([]byte, ids.IDLen)

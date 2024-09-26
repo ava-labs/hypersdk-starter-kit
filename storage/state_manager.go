@@ -6,7 +6,6 @@ package storage
 import (
 	"context"
 
-	"github.com/ava-labs/hypersdk-starter/consts"
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/state"
@@ -35,12 +34,6 @@ func (*StateManager) Deduct(ctx context.Context, addr codec.Address, mu state.Mu
 
 // AddBalance implements chain.StateManager.
 func (*StateManager) AddBalance(ctx context.Context, addr codec.Address, mu state.Mutable, amount uint64, _ bool) error {
-	// TODO: delegate token creation to custom genesis at some point
-	if !TokenExists(ctx, mu, CoinAddress) {
-		if err := SetTokenInfo(ctx, mu, CoinAddress, []byte(consts.Name), []byte(Symbol), []byte(Metadata), 0, codec.EmptyAddress); err != nil {
-			return err
-		}
-	}
 	return MintToken(ctx, mu, CoinAddress, addr, amount)
 }
 
