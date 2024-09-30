@@ -120,7 +120,6 @@ func (a *AddLiquidity) StateKeys(actor codec.Address, _ ids.ID) state.Keys {
 		string(storage.TokenAccountBalanceKey(a.TokenY, actor)):           state.All,
 		string(storage.TokenAccountBalanceKey(a.TokenX, a.LiquidityPool)): state.All,
 		string(storage.TokenAccountBalanceKey(a.TokenY, a.LiquidityPool)): state.All,
-		string(storage.TokenInfoKey(storage.CoinAddress)):                 state.All,
 	}
 }
 

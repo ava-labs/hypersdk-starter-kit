@@ -95,7 +95,6 @@ func (c *CreateLiquidityPool) StateKeys(_ codec.Address, _ ids.ID) state.Keys {
 		string(tokenYKey):  state.Read,
 		string(lpKey):      state.All,
 		string(lpTokenKey): state.All,
-		string(storage.TokenInfoKey(storage.CoinAddress)): state.All,
 	}
 }
 

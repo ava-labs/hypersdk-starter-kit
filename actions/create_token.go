@@ -86,7 +86,6 @@ func (*CreateToken) GetTypeID() uint8 {
 func (c *CreateToken) StateKeys(_ codec.Address, _ ids.ID) state.Keys {
 	return state.Keys{
 		string(storage.TokenInfoKey(storage.TokenAddress(c.Name, c.Symbol, c.Metadata))): state.All,
-		string(storage.TokenInfoKey(storage.CoinAddress)):                                state.All,
 	}
 }
 
