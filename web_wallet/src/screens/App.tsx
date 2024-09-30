@@ -35,7 +35,7 @@ function App() {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <Faucet myAddr={myAddr} minBalance={vmClient.fromFormattedBalance("1")}>
+      <Faucet myAddr={myAddr} minBalance={vmClient.convertToNativeTokens("1")}>
         <Wallet myAddr={myAddr} />
       </Faucet>
     </div>

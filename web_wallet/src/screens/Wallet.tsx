@@ -40,10 +40,10 @@ function Action({ actionName, abi, fetchBalance }: { actionName: string, abi: VM
         try {
             setActionLogs(prev => [...prev, `Action data for ${actionName}: ${JSON.stringify(actionInputs, null, 2)}`])
             const result = isReadOnly
-                ? await vmClient.executeReadonlyAction({ actionName, data: actionInputs })
-                : await vmClient.sendTx([{ actionName, data: actionInputs }])
+                ? await vmClient.simulateAction({ actionName, data: actionInputs })
+                : await vmClient.sendTransaction([{ actionName, data: actionInputs }])
             const endTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            setActionLogs(prev => [...prev, `${endTime} - Success: ${stringify(result)}`])
+            setActionLogs(prev => [...prev, `${endTime} - Success: ${stringify(result, null, 2)}`])
             if (!isReadOnly) {
                 fetchBalance(true)
             }
@@ -166,7 +166,7 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
                 ) : balance !== null ? (
                     <div className="flex items-center">
                         <div className="text-4xl font-bold mr-2">
-                            {parseFloat(vmClient.formatBalance(balance)).toFixed(6)} {"COIN"}
+                            {parseFloat(vmClient.formatNativeTokens(balance)).toFixed(6)} {"COIN"}
                         </div>
                         <button onClick={() => fetchBalance()} className="p-2 rounded-full hover:bg-gray-200">
                             <ArrowPathIcon className="h-5 w-5" />
