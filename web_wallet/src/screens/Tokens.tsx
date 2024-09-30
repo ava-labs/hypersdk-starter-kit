@@ -30,10 +30,10 @@ const Tokens: React.FC<TokensProps> = ({ myAddr, initialTokens, onAddToken }) =>
             if (token.address == TOKEN_ADDRESS) {
                 const balance = await vmClient.getBalance(myAddr)
 
-                token.balance = vmClient.formatBalance(balance)
+                token.balance = vmClient.formatNativeTokens(balance)
             } else {
                 const payload = NewTokenBalanceAction(token.address, myAddr)
-                const balance = await vmClient.executeReadonlyAction(payload) as bigint
+                const balance = await vmClient.simulateAction(payload) as bigint
                 token.balance = balance.toString()
             }
         }

@@ -31,20 +31,20 @@ export const CreateTokenModal: React.FC<CreateTokenModalProps> = ({ myAddr, onAd
     console.log("Creating token with:", { name, symbol, metadata })
     const payload = NewCreateTokenAction(name, symbol, metadata)
     //get address
-    const tokenRes = await vmClient.executeReadonlyAction(payload) as { tokenAddress: string }
+    const tokenRes = await vmClient.simulateAction(payload) as { tokenAddress: string }
     console.log("expected token address: ", tokenRes.tokenAddress)
     //send tx
-    const txId = await vmClient.sendTx([payload])
+    const txId = await vmClient.sendTransaction([payload])
     console.log(txId)
 
 
     const mintPayload = NewMintTokenAction(myAddr, "1000000", tokenRes.tokenAddress)
-    console.log("mintPayload:", await vmClient.executeReadonlyAction(mintPayload))
-    await vmClient.sendTx([mintPayload])
+    console.log("mintPayload:", await vmClient.simulateAction(mintPayload))
+    await vmClient.sendTransaction([mintPayload])
     
 
     const tokenInfoAction = NewTokenInfoAction(tokenRes.tokenAddress)
-    const res = await vmClient.executeReadonlyAction(tokenInfoAction) as unknown as { name: string, symbol: string, metadata: string, supply: string, owner: string }
+    const res = await vmClient.simulateAction(tokenInfoAction) as unknown as { name: string, symbol: string, metadata: string, supply: string, owner: string }
     console.log(res)
 
 

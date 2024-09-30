@@ -115,7 +115,7 @@ function App() {
                 >
                   <div className="text-xs text-gray-500">
                     {Object.keys(categories)[idx] === 'Wallet' && (
-                      <Faucet myAddr={myAddr} minBalance={vmClient.fromFormattedBalance("1")}>
+                      <Faucet myAddr={myAddr} minBalance={vmClient.convertToNativeTokens("1")}>
                         <Wallet myAddr={myAddr} />
                       </Faucet>
                     )}

@@ -20,7 +20,7 @@ export const NewTransferAction = (to: string, tokenAddress: string, value: strin
         data: {
             to,
             tokenAddress,
-            value: vmClient.fromFormattedBalance(value).toString()
+            value: vmClient.convertToNativeTokens(value).toString()
         }
     }
 }
@@ -60,7 +60,7 @@ export const NewMintTokenAction = (to: string, value: string, token: string): Ac
         actionName: "MintToken",
         data: {
             to,
-            value: vmClient.fromFormattedBalance(value).toString(),
+            value: vmClient.convertToNativeTokens(value).toString(),
             token
         }
     }

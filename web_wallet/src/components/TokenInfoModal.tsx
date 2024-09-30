@@ -27,13 +27,13 @@ export default function TokenInfoModal({ token }: TokenInfoModalProps) {
   const [tokenState, setTokenState] = useState<Token>()
   useEffect(() => {
     const tokenInfoAction = NewTokenInfoAction(token.address)
-    vmClient.executeReadonlyAction(tokenInfoAction).then((res => {
+    vmClient.simulateAction(tokenInfoAction).then((res => {
       const result = res as { name: string, symbol: string, metadata: string, supply: bigint, owner: string };
       const newToken: Token = { 
         name: result.name,
         symbol: result.symbol,
         metadata: result.metadata,
-        totalSupply: vmClient.formatBalance(result.supply),
+        totalSupply: vmClient.formatNativeTokens(result.supply),
         owner: result.owner,
         address: token.address,
         balance: token.balance

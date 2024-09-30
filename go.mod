@@ -4,7 +4,7 @@ go 1.22.5
 
 require (
 	github.com/ava-labs/avalanchego v1.11.11-0.20240827034238-fc892827880a
-	github.com/ava-labs/hypersdk v0.0.18-0.20240925020906-5e56020fc97a
+	github.com/ava-labs/hypersdk v0.0.18-0.20240927214628-f1150a1a8113
 	github.com/gorilla/mux v1.8.0
 	github.com/onsi/ginkgo/v2 v2.13.1
 	github.com/rs/cors v1.7.0
