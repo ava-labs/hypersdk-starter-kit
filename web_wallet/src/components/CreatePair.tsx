@@ -1,21 +1,24 @@
 import { useState, useRef } from 'react'
 import { ChevronDownIcon } from 'lucide-react'
 import { Token } from '../screens/App'
+import { vmClient, NewCreateLiquidityPoolAction } from '../VMClient';
+
 interface CreatePairProps {
   tokens: Token[];
 }
 
 // users have to specify a model ID, tokenX, tokenY, and a fee
 const CreatePair: React.FC<CreatePairProps> = ({ tokens }) => {
-  const [sellToken, setSellToken] = useState('CVM')
-  const [buyToken, setBuyToken] = useState('CVM')
+  const [sellToken, setSellToken] = useState(tokens[0])
+  const [buyToken, setBuyToken] = useState(tokens[1])
+
   const [sellDropdownOpen, setSellDropdownOpen] = useState(false)
   const [buyDropdownOpen, setBuyDropdownOpen] = useState(false)
 
   const [sellAmount, setSellAmount] = useState(0)
   const [buyAmount, setBuyAmount] = useState(0)
 
-  const [modelId, setModelId] = useState('')
+  const [modelId, setModelId] = useState(1)
   const [fee, setFee] = useState(0)
 
   const sellDropdownRef = useRef(null)
@@ -57,19 +60,21 @@ const CreatePair: React.FC<CreatePairProps> = ({ tokens }) => {
                     onClick={() => setSellDropdownOpen(!sellDropdownOpen)}
                   >
                     <img src="/placeholder.svg?height=24&width=24" alt="AVAX" className="w-6 h-6 rounded-full bg-blue-500" />
-                    <span>{sellToken}</span>
+                    <span>{sellToken.symbol}</span>
                     <ChevronDownIcon className="w-5 h-5" />
                   </button>
-                  <p className="text-sm text-gray-500 p-1">Balance: </p>
+                  <p className="text-sm text-gray-500 p-1">
+                    Balance: <span className="font-bold">{tokens.find(token => token.symbol === sellToken.symbol)?.balance || 0}</span>
+                  </p>
                   {sellDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-full bg-black rounded-md shadow-lg z-10">
                       {tokens.map((token) => (
                         <button
-                          key={token}
+                          key={token.symbol}
                           className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
                           onClick={() => {
                             
-                              setSellToken(token.symbol)
+                              setSellToken(token)
                               setSellDropdownOpen(false)
                           
                           }}
@@ -116,9 +121,12 @@ const CreatePair: React.FC<CreatePairProps> = ({ tokens }) => {
                     onClick={() => setBuyDropdownOpen(!buyDropdownOpen)}
                   >
                     <img src="/placeholder.svg?height=24&width=24" alt="ETH" className="w-6 h-6 rounded-full bg-blue-500" />
-                    <span>{buyToken}</span>
+                    <span>{buyToken.symbol}</span>
                     <ChevronDownIcon className="w-5 h-5" />
                   </button>
+                  <p className="text-sm text-gray-500 p-1">
+                    Balance: <span className="font-bold">{tokens.find(token => token.symbol === buyToken.symbol)?.balance || 0}</span>
+                  </p>
                   {buyDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-full bg-black rounded-md shadow-lg z-10">
                       {tokens.map((token) => (
@@ -126,7 +134,7 @@ const CreatePair: React.FC<CreatePairProps> = ({ tokens }) => {
                           key={token.symbol}
                           className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
                           onClick={() => {
-                              setBuyToken(token.symbol)
+                              setBuyToken(token)
                               setBuyDropdownOpen(false)
                           }}
                         >
@@ -161,7 +169,26 @@ const CreatePair: React.FC<CreatePairProps> = ({ tokens }) => {
                     />
                   </div>
             {/* Create Button */}
-            <button className="w-full bg-black hover:bg-red-700 text-white font-bold py-4 px-4 rounded-full text-lg transition duration-300 ease-in-out transform hover:scale-105">
+            <button 
+              className="w-full bg-black hover:bg-red-700 text-white font-bold py-4 px-4 rounded-full text-lg transition duration-300 ease-in-out transform hover:scale-105"
+              onClick={async () => {
+              // Add your create pair logic here
+              console.log('Creating pair with the following details:');
+              console.log('Sell Token:', sellToken);
+              console.log('Buy Token:', buyToken);
+              console.log('Sell Amount:', sellAmount);
+              console.log('Buy Amount:', buyAmount);
+              console.log('Model ID:', modelId);
+              console.log('Fee:', fee);
+
+              // Perform the swap
+              const payload = NewCreateLiquidityPoolAction(modelId, buyToken.address, sellToken.address, fee)
+              const success = await vmClient.simulateAction(payload)
+              console.log(success)
+              const res = await vmClient.sendTransaction([payload])
+              console.log(res)
+              }}
+            >
               Create Pair
             </button>
           </div>

@@ -29,8 +29,8 @@ export const NewTokenBalanceAction = (tokenAddress: string, address: string): Ac
     return {
         actionName: "GetTokenAccountBalance",
         data: {
-            tokenAddress,
-            address
+            token: tokenAddress,
+            account: address
         }
     }
 }
@@ -65,8 +65,28 @@ export const NewMintTokenAction = (to: string, value: string, token: string): Ac
         }
     }
 }
-// type MintToken struct {
-// 	To    codec.Address `serialize:"true" json:"to"`
-// 	Value uint64        `serialize:"true" json:"value"`
-// 	Token codec.Address `serialize:"true" json:"token"`
-// }
+
+export const NewCreateLiquidityPoolAction = (functionID: number, tokenX: string, tokenY: string, fee: number): ActionData => {
+    return {
+        actionName: "CreateLiquidityPool",
+        data: {
+            functionID,
+            tokenX,
+            tokenY,
+            fee: fee
+        }
+    }
+}
+
+export const NewAddLiquidityAction = (amountX: number, amountY: number, tokenX: string, tokenY: string, liquidityPool: string): ActionData => {
+    return {
+        actionName: "AddLiquidity",
+        data: {
+            amountX,
+            amountY,
+            tokenX,
+            tokenY,
+            liquidityPool
+        }
+    }
+}

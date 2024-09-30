@@ -66,6 +66,7 @@ func (m *MintToken) StateKeys(actor codec.Address, _ ids.ID) state.Keys {
 	return state.Keys{
 		string(storage.TokenInfoKey(m.Token)):                  state.All,
 		string(storage.TokenAccountBalanceKey(m.Token, actor)): state.All,
+		string(storage.TokenInfoKey(storage.CoinAddress)):      state.All,
 	}
 }
 

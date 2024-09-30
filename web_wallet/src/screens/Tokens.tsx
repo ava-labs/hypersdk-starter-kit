@@ -25,7 +25,7 @@ const Tokens: React.FC<TokensProps> = ({ myAddr, initialTokens, onAddToken }) =>
     try {
       const fetchBalances = async () => {
         const newTokenList: Token[] = []
-       for (const token of tokens) {
+       for (const token of initialTokens) {
         if (token.address) {
             if (token.address == TOKEN_ADDRESS) {
                 const balance = await vmClient.getBalance(myAddr)
@@ -33,8 +33,8 @@ const Tokens: React.FC<TokensProps> = ({ myAddr, initialTokens, onAddToken }) =>
                 token.balance = vmClient.formatNativeTokens(balance)
             } else {
                 const payload = NewTokenBalanceAction(token.address, myAddr)
-                const balance = await vmClient.simulateAction(payload) as bigint
-                token.balance = balance.toString()
+                const res = await vmClient.simulateAction(payload) as {balance: bigint}
+                token.balance = res.balance.toString()
             }
         }
         newTokenList.push(token)

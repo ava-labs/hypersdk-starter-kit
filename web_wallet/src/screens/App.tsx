@@ -39,7 +39,7 @@ function App() {
     initialTokens: [
       {
         name: "CFMMVM",
-        symbol: VM_NAME,
+        symbol: "CVM",
         metadata: "A constant-function market-maker VM implementation",
         address: TOKEN_ADDRESS,
         balance: "0",
