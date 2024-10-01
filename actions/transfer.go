@@ -8,6 +8,7 @@ import (
 	"errors"
 
 	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/hypersdk-starter/consts"
 	"github.com/ava-labs/hypersdk-starter/storage"
 
 	"github.com/ava-labs/hypersdk/chain"
@@ -38,7 +39,7 @@ type Transfer struct {
 }
 
 func (*Transfer) GetTypeID() uint8 {
-	return 0
+	return consts.TransferID
 }
 
 func (t *Transfer) StateKeys(actor codec.Address, _ ids.ID) state.Keys {
@@ -98,5 +99,5 @@ type TransferResult struct {
 }
 
 func (*TransferResult) GetTypeID() uint8 {
-	return 0
+	return consts.TransferID
 }

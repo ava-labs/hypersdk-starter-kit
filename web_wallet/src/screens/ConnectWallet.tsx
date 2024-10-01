@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { vmClient } from '../VMClient'
+import { useEffect, useState } from 'react'
+import { isFaucetReady, vmClient } from '../VMClient'
 
 type SignerType = "metamask-snap" | "ephemeral";
 
@@ -76,7 +76,66 @@ export default function ConnectWallet() {
                         </button>
                     </div>
                 </div>
+                <div className="mt-8">
+                    <IsReadyWidget />
+                </div>
             </div>
         </div>
     )
+}
+
+
+function IsReadyWidget() {
+    const [faucetStatus, setFaucetStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+    const [vmApiStatus, setVmApiStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+    const [coreApiStatus, setCoreApiStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+
+    useEffect(() => {
+        const checkServices = async () => {
+            // Check Faucet
+            try {
+                const faucetReady = await isFaucetReady();
+                setFaucetStatus(faucetReady ? 'ready' : 'error');
+            } catch {
+                setFaucetStatus('error');
+            }
+
+            // Check VM API
+            try {
+                await vmClient.getBalance('0x0000000000000000000000000000000000000000');
+                setVmApiStatus('ready');
+            } catch {
+                setVmApiStatus('error');
+            }
+
+            // Check Core API
+            try {
+                await vmClient.getAbi();
+                setCoreApiStatus('ready');
+            } catch {
+                setCoreApiStatus('error');
+            }
+        };
+
+        checkServices();
+    }, []);
+
+    const getStatusWithEmoji = (item: string, status: 'loading' | 'ready' | 'error') => {
+        switch (status) {
+            case 'loading':
+                return `⏳ checking ${item}...`;
+            case 'ready':
+                return `✅ ${item} is ready`;
+            case 'error':
+                return `❌ ${item} is not ready`;
+        }
+    };
+
+    return (
+        <div className="flex justify-between items-center px-4 py-2 bg-gray-100 rounded-lg">
+            <span className="text-sm">{getStatusWithEmoji("Faucet", faucetStatus)}</span>
+            <span className="text-sm">{getStatusWithEmoji("VM API", vmApiStatus)}</span>
+            <span className="text-sm">{getStatusWithEmoji("Core API", coreApiStatus)}</span>
+        </div>
+    );
 }
