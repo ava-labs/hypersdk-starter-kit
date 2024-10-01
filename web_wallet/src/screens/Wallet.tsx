@@ -5,6 +5,11 @@ import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { stringify } from 'lossless-json'
 import { ExecutedBlock } from 'hypersdk-client/src/client/apiTransformers';
 
+import TimeAgo from 'javascript-time-ago'
+import timeAgoEn from 'javascript-time-ago/locale/en'
+TimeAgo.addDefaultLocale(timeAgoEn)
+const ago = new TimeAgo('en-US')
+
 const getDefaultValue = (fieldType: string) => {
     if (fieldType === 'Address') return "00" + "00".repeat(27) + "00deadc0de"
     if (fieldType === '[]uint8') return btoa('Luigi');
@@ -64,9 +69,8 @@ function Action({ actionName, abi, fetchBalance }: { actionName: string, abi: VM
     if (!action) {
         return <div>Action not found</div>
     }
-
     return (
-        <div key={action.id} className="mb-6 p-4 border border-gray-300 rounded">
+        <div key={action.id} className="mb-6 p-4 border border-gray-300 rounded  text-sm">
             <h3 className="text-xl font-semibold mb-2">{action.name}</h3>
             <div className="mb-4">
                 <h4 className="font-semibold mb-1">Input Fields:</h4>
@@ -75,11 +79,11 @@ function Action({ actionName, abi, fetchBalance }: { actionName: string, abi: VM
                         return <p key={field.name} className="text-red-500">Warning: Array type not supported for {field.name}</p>
                     }
                     return (
-                        <div key={field.name} className="mb-2">
-                            <label className="block text-sm font-medium text-gray-700">{field.name}: {field.type}</label>
+                        <div key={field.name} className="mb-3">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{field.name}: {field.type}</label>
                             <input
                                 type="text"
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
                                 value={actionInputs[field.name] ?? ""}
                                 onChange={(e) => handleInputChange(field.name, e.target.value)}
                             />
@@ -192,12 +196,12 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
         </div>
     )
 }
-
 export function LatestBlocks() {
     const [blocks, setBlocks] = useState([] as ExecutedBlock[]);
 
     useEffect(() => {
         const unsubscribe = vmClient.listenToBlocks((block) => {
+            console.log("New block", block)
             setBlocks((prevBlocks) => [block, ...prevBlocks].slice(0, 5));
         });
 
@@ -221,8 +225,22 @@ export function LatestBlocks() {
                 ) : (
                     blocks.map((block) => (
                         <div key={block.height} className="mb-4 last:mb-0">
-                            <h3 className="font-semibold">Block {block.height}</h3>
-                            <pre>{stringify(block, null, 2)}</pre>
+                            <h3 className="text-xl font-bold">Block #{block.height}</h3>
+                            <p className="text-sm text-gray-600">({ago.format(block.timestamp, 'round')})</p>
+                            <div className="mt-2">
+                                <p className="text-xs text-gray-500 truncate">Parent: <span className="font-mono">{block.parent}</span></p>
+                                <p className="text-xs text-gray-500 truncate">State Root: <span className="font-mono">{block.stateRoot}</span></p>
+                                <p className="text-sm font-semibold mt-2">{block.transactions.length} Transaction{block.transactions.length === 1 ? '' : 's'}</p>
+                            </div>
+                            {block.transactions.map((tx, index) => (
+                                <div key={index} className="mt-3 p-2 bg-white rounded shadow">
+                                    <p className="font-semibold">{tx.response.success ? '✅ Success' : '❌ Failed'}</p>
+                                    <p className="text-xs mt-1">Sender: <span className="font-mono">tx.sender</span></p>
+                                    <div className="mt-2 overflow-x-auto">
+                                        <pre className="text-xs">{JSON.stringify(tx.actions, null, 2)}</pre>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ))
                 )}
@@ -230,4 +248,5 @@ export function LatestBlocks() {
         </div>
     );
 }
+
 
