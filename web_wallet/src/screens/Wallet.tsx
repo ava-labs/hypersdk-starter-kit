@@ -83,7 +83,7 @@ function Action({ actionName, abi, fetchBalance }: { actionName: string, abi: VM
                             <label className="block text-sm font-medium text-gray-700 mb-1">{field.name}: {field.type}</label>
                             <input
                                 type="text"
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
+                                className="mt-1 block w-full rounded-md border border-gray-200 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
                                 value={actionInputs[field.name] ?? ""}
                                 onChange={(e) => handleInputChange(field.name, e.target.value)}
                             />
@@ -106,7 +106,6 @@ function Action({ actionName, abi, fetchBalance }: { actionName: string, abi: VM
                 </button>
             </div>
             <div className="bg-gray-100 p-4 rounded-md">
-                <h4 className="font-semibold mb-2 text-gray-700">Log:</h4>
                 <pre className="whitespace-pre-wrap text-sm">{actionLogs.join('\n') || 'No logs yet.'}</pre>
             </div>
         </div>
