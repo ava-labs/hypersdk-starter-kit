@@ -153,37 +153,51 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
 
     return (
         <div className="w-full bg-white p-8">
-            <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-2">Address:</h2>
-                <div className="text-md font-mono break-all bg-gray-100 p-3 rounded">{myAddr}</div>
-            </div>
-            <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-2">Balance:</h2>
-                {balanceLoading ? (
-                    <div>Loading balance...</div>
-                ) : balanceError ? (
-                    <div>Error loading balance: {balanceError}</div>
-                ) : balance !== null ? (
-                    <div className="flex items-center">
-                        <div className="text-4xl font-bold mr-2">
-                            {parseFloat(vmClient.formatNativeTokens(balance)).toFixed(6)} {"COIN"}
-                        </div>
-                        <button onClick={() => fetchBalance()} className="p-2 rounded-full hover:bg-gray-200">
-                            <ArrowPathIcon className="h-5 w-5" />
-                        </button>
+            <div className="lg:flex lg:space-x-8">
+                <div className="lg:w-2/3">
+                    <div className="mb-6">
+                        <h2 className="text-lg font-semibold mb-2">Address:</h2>
+                        <div className="text-md font-mono break-all bg-gray-100 p-3 rounded">{myAddr}</div>
                     </div>
-                ) : null}
-            </div>
-            <div>
-                {abiLoading ? (
-                    <div>Loading ABI...</div>
-                ) : abiError ? (
-                    <div>Error loading ABI: {abiError}</div>
-                ) : abi ? (
-                    abi.actions.map(action => (
-                        <Action key={action.id} actionName={action.name} abi={abi} fetchBalance={fetchBalance} />
-                    ))
-                ) : null}
+                    <div className="mb-6">
+                        <h2 className="text-lg font-semibold mb-2">Balance:</h2>
+                        {balanceLoading ? (
+                            <div>Loading balance...</div>
+                        ) : balanceError ? (
+                            <div>Error loading balance: {balanceError}</div>
+                        ) : balance !== null ? (
+                            <div className="flex items-center">
+                                <div className="text-4xl font-bold mr-2">
+                                    {parseFloat(vmClient.formatNativeTokens(balance)).toFixed(6)} {"COIN"}
+                                </div>
+                                <button onClick={() => fetchBalance()} className="p-2 rounded-full hover:bg-gray-200">
+                                    <ArrowPathIcon className="h-5 w-5" />
+                                </button>
+                            </div>
+                        ) : null}
+                    </div>
+                    <div>
+                        {abiLoading ? (
+                            <div>Loading ABI...</div>
+                        ) : abiError ? (
+                            <div>Error loading ABI: {abiError}</div>
+                        ) : abi ? (
+                            abi.actions.map(action => (
+                                <Action key={action.id} actionName={action.name} abi={abi} fetchBalance={fetchBalance} />
+                            ))
+                        ) : null}
+                    </div>
+                </div>
+                <div className="lg:w-2/3 mt-8 lg:mt-0"> {/* Changed width to match main content */}
+                    <h2 className="text-lg font-semibold mb-4">Latest Transactions</h2>
+                    <div className="bg-gray-100 p-4 rounded">
+                        <p className="mb-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        <p className="mb-2">Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        <p className="mb-2">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+                        <p className="mb-2">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.</p>
+                        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.</p>
+                    </div>
+                </div>
             </div>
         </div>
     )

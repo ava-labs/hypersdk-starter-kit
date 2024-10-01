@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ava-labs/hypersdk-starter/actions"
+	"github.com/ava-labs/hypersdk-starter/consts"
 	"github.com/ava-labs/hypersdk-starter/vm"
 	"github.com/ava-labs/hypersdk/api/indexer"
 	"github.com/ava-labs/hypersdk/api/jsonrpc"
@@ -134,15 +135,7 @@ func (g *simpleTxWorkload) GenerateTxWithAssertion(ctx context.Context) (*chain.
 	}
 
 	return tx, func(ctx context.Context, require *require.Assertions, uri string) {
-		indexerCli := indexer.NewClient(uri)
-		success, _, err := indexerCli.WaitForTransaction(ctx, txCheckInterval, tx.ID())
-		require.NoError(err)
-		require.True(success)
-		lcli := vm.NewJSONRPCClient(uri)
-		balance, err := lcli.Balance(ctx, aother)
-		require.NoError(err)
-		require.Equal(uint64(1), balance)
-		// TODO: check transaction output (not currently available via API)
+		confirmTx(ctx, require, uri, tx.ID(), aother, 1)
 	}, nil
 }
 
@@ -231,15 +224,30 @@ func (g *mixedAuthWorkload) GenerateTxWithAssertion(ctx context.Context) (*chain
 	g.balance = expectedBalance
 
 	return tx, func(ctx context.Context, require *require.Assertions, uri string) {
-		indexerCli := indexer.NewClient(uri)
-		success, _, err := indexerCli.WaitForTransaction(ctx, txCheckInterval, tx.ID())
-		require.NoError(err)
-		require.True(success)
-		lcli := vm.NewJSONRPCClient(uri)
-		balance, err := lcli.Balance(ctx, receiver.address)
-		require.NoError(err)
-		require.Equal(expectedBalance, balance)
-		// TODO: check tx fee + units (not currently available via API)
-		// TODO: check transaction output (not currently available via API)
+		confirmTx(ctx, require, uri, tx.ID(), receiver.address, expectedBalance)
 	}, nil
+}
+
+func confirmTx(ctx context.Context, require *require.Assertions, uri string, txID ids.ID, receiverAddr codec.Address, receiverExpectedBalance uint64) {
+	indexerCli := indexer.NewClient(uri)
+	success, _, err := indexerCli.WaitForTransaction(ctx, txCheckInterval, txID)
+	require.NoError(err)
+	require.True(success)
+	lcli := vm.NewJSONRPCClient(uri)
+	balance, err := lcli.Balance(ctx, receiverAddr)
+	require.NoError(err)
+	require.Equal(receiverExpectedBalance, balance)
+	txRes, _, err := indexerCli.GetTx(ctx, txID)
+	require.NoError(err)
+	// TODO: perform exact expected fee, units check, and output check
+	require.NotZero(txRes.Fee)
+	require.Len(txRes.Outputs, 1)
+	transferOutputBytes := []byte(txRes.Outputs[0])
+	require.Equal(consts.TransferID, transferOutputBytes[0])
+	reader := codec.NewReader(transferOutputBytes, len(transferOutputBytes))
+	transferOutputTyped, err := vm.OutputParser.Unmarshal(reader)
+	require.NoError(err)
+	transferOutput, ok := transferOutputTyped.(*actions.TransferResult)
+	require.True(ok)
+	require.Equal(receiverExpectedBalance, transferOutput.ReceiverBalance)
 }

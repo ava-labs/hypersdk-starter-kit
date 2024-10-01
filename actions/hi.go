@@ -9,6 +9,7 @@ import (
 
 	"github.com/ava-labs/avalanchego/ids"
 
+	"github.com/ava-labs/hypersdk-starter/consts"
 	"github.com/ava-labs/hypersdk-starter/storage"
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
@@ -35,11 +36,11 @@ type HiResult struct {
 }
 
 func (h *HiResult) GetTypeID() uint8 {
-	return 1
+	return consts.HiID
 }
 
 func (*Hi) GetTypeID() uint8 {
-	return 1
+	return consts.HiID
 }
 
 func (h *Hi) StateKeys(actor codec.Address, _ ids.ID) state.Keys {

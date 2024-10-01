@@ -4,7 +4,7 @@ go 1.22.5
 
 require (
 	github.com/ava-labs/avalanchego v1.11.11-0.20240827034238-fc892827880a
-	github.com/ava-labs/hypersdk v0.0.18-0.20240927214628-f1150a1a8113
+	github.com/ava-labs/hypersdk v0.0.18-0.20240930132124-02085f8793d0
 	github.com/fatih/color v1.13.0
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.5.1
