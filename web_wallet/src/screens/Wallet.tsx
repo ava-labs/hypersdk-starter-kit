@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useReducer } from 'react'
 import { vmClient } from '../VMClient'
 import { VMABI } from 'hypersdk-client/src/lib/Marshaler';
 import { ArrowPathIcon } from '@heroicons/react/20/solid'
@@ -159,11 +159,11 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
             <div className="lg:flex lg:space-x-8">
                 <div className="lg:w-2/3">
                     <div className="mb-6">
-                        <h2 className="text-lg font-semibold mb-2">Address:</h2>
-                        <div className="text-md font-mono break-all bg-gray-100 p-3 rounded">{myAddr}</div>
+                        <h2 className="text-lg font-semibold mb-2">Address</h2>
+                        <div className="text-md font-mono break-all bg-gray-100 p-3 rounded text-sm truncate">{myAddr}</div>
                     </div>
                     <div className="mb-6">
-                        <h2 className="text-lg font-semibold mb-2">Balance:</h2>
+                        <h2 className="text-lg font-semibold mb-2">Balance</h2>
                         {balanceLoading ? (
                             <div>Loading balance...</div>
                         ) : balanceError ? (
@@ -196,8 +196,10 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
         </div>
     )
 }
+
 export function LatestBlocks() {
     const [blocks, setBlocks] = useState([] as ExecutedBlock[]);
+    const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
     useEffect(() => {
         const unsubscribe = vmClient.listenToBlocks((block) => {
@@ -205,10 +207,15 @@ export function LatestBlocks() {
             setBlocks((prevBlocks) => [block, ...prevBlocks].slice(0, 5));
         });
 
+        const intervalId = setInterval(() => {
+            forceUpdate();
+        }, 10000);
+
         return () => {
             (async () => {
                 try {
                     (await unsubscribe)();
+                    clearInterval(intervalId);
                 } catch (error) {
                     console.error('Error unsubscribing:', error);
                 }
@@ -218,13 +225,13 @@ export function LatestBlocks() {
 
     return (
         <div className="lg:w-1/3 mt-8 lg:mt-0">
-            <h2 className="text-lg font-semibold mb-4">Latest Blocks</h2>
-            <div className="bg-gray-100 p-4 rounded">
+            <h2 className="text-lg font-semibold mb-2">Latest Blocks</h2>
+            <div>
                 {blocks.length === 0 ? (
                     <p>Waiting for new blocks (empty blocks are skipped)...</p>
                 ) : (
                     blocks.map((block) => (
-                        <div key={block.height} className="mb-4 last:mb-0">
+                        <div key={block.height} className="mb-4 last:mb-0 bg-gray-100 p-4 rounded">
                             <h3 className="text-xl font-bold">Block #{block.height}</h3>
                             <p className="text-sm text-gray-600">({ago.format(block.timestamp, 'round')})</p>
                             <div className="mt-2">
