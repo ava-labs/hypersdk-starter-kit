@@ -3,6 +3,7 @@ import { vmClient } from '../VMClient'
 import { VMABI } from 'hypersdk-client/src/lib/Marshaler';
 import { ArrowPathIcon } from '@heroicons/react/20/solid'
 import { stringify } from 'lossless-json'
+import { ExecutedBlock } from 'hypersdk-client/src/client/apiTransformers';
 
 const getDefaultValue = (fieldType: string) => {
     if (fieldType === 'Address') return "00" + "00".repeat(27) + "00deadc0de"
@@ -120,9 +121,7 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
     const fetchBalance = useCallback(async () => {
         setBalanceLoading(true)
         try {
-            let newBalance = await vmClient.getBalance(myAddr)
-
-            setBalance(newBalance)
+            setBalance(await vmClient.getBalance(myAddr))
             setBalanceError(null)
         } catch (e) {
             console.error("Failed to fetch balance:", e)
@@ -188,17 +187,47 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
                         ) : null}
                     </div>
                 </div>
-                <div className="lg:w-2/3 mt-8 lg:mt-0"> {/* Changed width to match main content */}
-                    <h2 className="text-lg font-semibold mb-4">Latest Transactions</h2>
-                    <div className="bg-gray-100 p-4 rounded">
-                        <p className="mb-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                        <p className="mb-2">Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                        <p className="mb-2">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
-                        <p className="mb-2">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.</p>
-                        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.</p>
-                    </div>
-                </div>
+                <LatestBlocks />
             </div>
         </div>
     )
 }
+
+export function LatestBlocks() {
+    const [blocks, setBlocks] = useState([] as ExecutedBlock[]);
+
+    useEffect(() => {
+        const unsubscribe = vmClient.listenToBlocks((block) => {
+            setBlocks((prevBlocks) => [block, ...prevBlocks].slice(0, 5));
+        });
+
+        return () => {
+            (async () => {
+                try {
+                    (await unsubscribe)();
+                } catch (error) {
+                    console.error('Error unsubscribing:', error);
+                }
+            })();
+        };
+    }, []);
+
+    return (
+        <div className="lg:w-1/3 mt-8 lg:mt-0">
+            <h2 className="text-lg font-semibold mb-4">Latest Blocks</h2>
+            <div className="bg-gray-100 p-4 rounded">
+                {blocks.length === 0 ? (
+                    <p>Waiting for new blocks (empty blocks are skipped)...</p>
+                ) : (
+                    blocks.map((block) => (
+                        <div key={block.height} className="mb-4 last:mb-0">
+                            <h3 className="font-semibold">Block {block.height}</h3>
+                            <pre>{stringify(block, null, 2)}</pre>
+                        </div>
+                    ))
+                )}
+            </div>
+        </div>
+    );
+}
+

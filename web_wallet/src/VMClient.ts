@@ -13,3 +13,21 @@ export async function requestFaucetTransfer(address: string): Promise<void> {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
 }
+
+export async function isFaucetReady(): Promise<boolean> {
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+        const response = await fetch(`${FAUCET_HOST}/readyz`, {
+            method: 'GET',
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        return response.ok;
+    } catch (error) {
+        return false;
+    }
+}
