@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -74,6 +75,8 @@ func init() {
 }
 
 func transferCoins(to string) (string, error) {
+	to = strings.TrimPrefix(to, "0x")
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
