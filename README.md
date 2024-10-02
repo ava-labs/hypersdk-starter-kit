@@ -16,7 +16,7 @@ Open [http://localhost:5173](http://localhost:5173) to see the frontend. Play ar
 
 That's how it should look with Metamask Snap signing:
 
-![Screenshot](assets/screenshot.png)
+![Screenshot](assets/screenshot_v2.png)
 
 This is the explorer:
 
