@@ -9,28 +9,35 @@
 ## 0. Clone this repo
 `git clone https://github.com/ava-labs/hypersdk-starter.git`
 
-## 1. LKaunch Whole Stack
+## 1. Launch this example
 
 Run: `docker compose up -d --build devnet faucet frontend`. Might take 5 minutes to download dependencies.
 
-For devcontainers or codespaces, forward ports 8765 for faucet, 9650 for the chain, and 5173 for the frontend.
-
-Open [http://localhost:5173](http://localhost:5173) to see the frontend. Play around with it. Try both the Temporary key and Metamask snap (from npm, not local).
-
-That's how it should look with Metamask Snap signing:
-
-![Screenshot](assets/screenshot_v2.png)
+For devcontainers or codespaces, forward ports `8765` for faucet, `9650` for the chain, and `5173` for the frontend.
 
 When finished, shut everything down with: `docker compose down`
 
 ## 2. Play around with the MorpheusVM
-The VM included in this repo is a copy of [MorpheusVM](https://github.com/ava-labs/hypersdk/tree/main/examples/morpheusvm). MorpheusVM is a simpliest HyperSDK VM possible with only one action - Transfer.
+This repo includes a copy of [MorpheusVM](https://github.com/ava-labs/hypersdk/tree/main/examples/morpheusvm), the simplest possible HyperSDK VM. It supports a single action (Transfer) for moving funds and tracking balances.
 
 ### 2.1 Connect wallet
+Open [http://localhost:5173](http://localhost:5173) to see the frontend.
 
-### 2.2 Call a read-only action
+![Auth options](assets/auth.png)
+
+
+We recommend you using a Snap (requires [Metamask Flask](https://chromewebstore.google.com/detail/metamask-flask-developmen/ljfoeinjpaedjfecbmggjgodbgkmjkjk) installed) for the full UX, but a temporary wallet would work well enough too.
+
+### 2.2 Execute a read-only action
+
+Any action can be executed on-chain (in transaction) with the results persisted to a block of the chain, or off-chain, meaning read-only. As MorpheusVM has only one action, let's first try to execute it read-only. It shows expected balances of the sender and receiver. You can see the logic defined in `actions/transfer.go`.
+
+![Read-only action](assets/read-only.png)
+
 
 ### 2.3 Issue a transaction
+
+### 2.4 Check logs
 
 ## 3. Add your own custom action
 
@@ -156,8 +163,8 @@ Please learn more on [npm:hypersdk-client](https://www.npmjs.com/package/hypersd
 ## Notes
 - You can launch everything without Docker:
   - Faucet: `go run ./cmd/faucet/`
-  - Chain: `./scripts/run.sh`
+  - Chain: `./scripts/run.sh`, `./scripts/stop.sh` to stop
   - Frontend: `npm run dev` in `web_wallet`
 - Be aware of potential port conflicts if issues arise. `docker rm -f $(docker ps -a -q)` is your friend.
-- For VM development you don't have to know Javascript - you can use an existing frontend container
+- For VM development you don't have to know Javascript - you can use an existing frontend - all the actions would be added automatically
 
