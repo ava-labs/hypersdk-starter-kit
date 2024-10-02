@@ -6,4 +6,3 @@ export const API_HOST = DEVELOPMENT_MODE ? 'http://localhost:9650' : ""
 
 export const VM_NAME = 'morpheusvm';
 export const VM_RPC_PREFIX = 'morpheusapi';
-export const DECIMALS = 9;

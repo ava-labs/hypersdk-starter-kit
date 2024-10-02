@@ -1,8 +1,8 @@
-import { API_HOST, DECIMALS, FAUCET_HOST, VM_NAME, VM_RPC_PREFIX } from "./const";
+import { API_HOST, FAUCET_HOST, VM_NAME, VM_RPC_PREFIX } from "./const";
 import { HyperSDKClient } from "hypersdk-client/src/client"
 
 
-export const vmClient = new HyperSDKClient(API_HOST, VM_NAME, VM_RPC_PREFIX, DECIMALS);
+export const vmClient = new HyperSDKClient(API_HOST, VM_NAME, VM_RPC_PREFIX);
 
 export async function requestFaucetTransfer(address: string): Promise<void> {
     const response = await fetch(`${FAUCET_HOST}/faucet/${address}`, {

@@ -8,7 +8,7 @@ services:
     ports:
       - "127.0.0.1:5173:80"
     healthcheck:
-      test: [ "CMD", "curl", "-X", "POST", "http://localhost:5173/"]
+      test: [ "CMD", "curl", "-X", "POST", "http://localhost:5173/" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,8 +25,6 @@ services:
     restart: always
     ports:
       - "127.0.0.1:9650:9650"
-    environment:
-      - PREFUND_ADDRESS=morpheus1qrar5gu3mx0syrkxesd66yzk0h8ep7sy8dejzu4crgkjkcynnj8k6qh5wjj
     volumes:
       - devnet_go_mod:/go/pkg/mod
       - devnet_go_build:/root/.cache/go-build
@@ -37,17 +35,6 @@ services:
       retries: 5
       start_period: 300s
 
-  explorer:
-    container_name: explorer
-    restart: always
-    ports:
-      - "127.0.0.1:3000:3000"
-    image: containerman17/hypersdk-explorer:latest
-    environment:
-      INDEXER_API_URL: http://devnet:9650/ext/bc/morpheusvm/indexer
-    depends_on:
-      - devnet
-      
   faucet:
     container_name: faucet
     build:
@@ -69,28 +56,7 @@ services:
       devnet:
         condition: service_healthy
 
-  proxy:
-    container_name: proxy
-    restart: always
-    profiles: [ "prod" ] # this prevents the proxy from being run by default
-    build:
-      dockerfile: Dockerfile.proxy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - caddy_data:/data
-      - caddy_config:/config
-    environment:
-      - SERVE_DOMAIN
-    depends_on:
-      - devnet
-      - faucet
-      - frontend
-
 volumes:
-  caddy_data:
-  caddy_config:
   devnet_go_mod:
   devnet_go_build:
 
