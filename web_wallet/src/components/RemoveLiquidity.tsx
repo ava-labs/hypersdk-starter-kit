@@ -67,7 +67,7 @@ export default function RemoveLiquidity({ pools, onRemoveLiquidity, refreshPool 
                   Info
                 </button>
                 <button 
-                  className="bg-black hover:bg-red-700 text-white font-bold py-2 px-3 rounded-full text-sm transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-full text-sm transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                   onClick={() => handleRemoveLiquidityModal(pair)}
                 >
                   Remove

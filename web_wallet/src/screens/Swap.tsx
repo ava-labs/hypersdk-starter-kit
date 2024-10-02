@@ -148,50 +148,39 @@ const Swap: React.FC<SwapProps> = ({ tokens, pools }) => {
         {/* Buy Section */}
         <div className="border border-gray-700 rounded-xl p-4">
           <label htmlFor="buyAmount" className="block text-lg font-medium text-gray-500 mb-2">
-          Buy
+          Receive
           </label>
-          <div className="flex items-center justify-between">
-          <input
-            type="text"
-            id="buyAmount"
-            className="bg-transparent text-5xl font-bold text-gray-500 w-full focus:outline-none"
-            placeholder="0"
-            value={buyAmount}
-            onChange={(e) => {
-            if (e.target.value === '') {
-              setBuyAmount(0)
-            } else {
-              setBuyAmount(parseFloat(e.target.value))
-            }
-            }}
-          />
-          <div className="relative" ref={buyDropdownRef}>
-            <button
-            className="flex items-center space-x-2 bg-black hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-full"
-            onClick={() => setBuyDropdownOpen(!buyDropdownOpen)}
-            >
-            <span>{buyToken.symbol}</span>
-            <ChevronDownIcon className="w-5 h-5" />
-            </button>
-            <p className="text-sm text-gray-500 p-1">{buyToken.balance} </p>
-            {buyDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-full bg-black rounded-md shadow-lg z-10">
-              {tokens.map((token) => (
+            <div className="flex items-center justify-between">
+            <label className="bg-transparent text-5xl font-bold text-gray-500 w-full focus:outline-none">
+              {buyAmount}
+            </label>
+            <div className="relative" ref={buyDropdownRef}>
               <button
-                key={token.address}
-                className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
-                onClick={() => {
+              className="flex items-center space-x-2 bg-black hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-full"
+              onClick={() => setBuyDropdownOpen(!buyDropdownOpen)}
+              >
+              <span>{buyToken.symbol}</span>
+              <ChevronDownIcon className="w-5 h-5" />
+              </button>
+              <p className="text-sm text-gray-500 p-1">{buyToken.balance} </p>
+              {buyDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-full bg-black rounded-md shadow-lg z-10">
+                {tokens.map((token) => (
+                <button
+                  key={token.address}
+                  className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
+                  onClick={() => {
                   setBuyToken(token)
                   setBuyDropdownOpen(false)
-                }}
-              >
-                {token.symbol}
-              </button>
-              ))}
+                  }}
+                >
+                  {token.symbol}
+                </button>
+                ))}
+              </div>
+              )}
             </div>
-            )}
-          </div>
-          </div>
+            </div>
         </div>
 
         {/* Swap Button */}
