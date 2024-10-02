@@ -1,20 +1,37 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { ChevronDownIcon } from 'lucide-react'
 import { Token } from '../screens/App'
 import { NewCreateLiquidityPoolAction, NewAddLiquidityAction, vmClient } from '../VMClient'
 
 interface AddLiquidityProps {
   tokens: Token[];
+  pools: LiquidityPair[];
   onAddLiquidity: (pair: LiquidityPair) => void;
+  refreshPool: () => void;
 }
 
 interface LiquidityPair {
   poolAddress: string,
   poolTokenAddress: string,
+  info?: LiquidityPairInfo
+}
+
+interface LiquidityPairInfo {
+  tokenX: string,
+  tokenY: string,
+  fee: number,
+  feeTo: string,
+  functionID: number,
+  reserveX: number,
+  reserveY: number,
+  liquidityToken: string,
+  kLast: number,
+  balance?: number
 }
 
 
-const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, onAddLiquidity }) => {
+const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, pools, onAddLiquidity, refreshPool }) => {
+  const [logText, setLogText] = useState("")
   const [sellToken, setSellToken] = useState(tokens[0])
   const [buyToken, setBuyToken] = useState(tokens[0])
   const [sellDropdownOpen, setSellDropdownOpen] = useState(false)
@@ -28,24 +45,57 @@ const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, onAddLiquidity }) =
   const sellDropdownRef = useRef(null)
   const buyDropdownRef = useRef(null)
 
+  const log = useCallback((level: "success" | "error" | "info", text: string) => {
+    const now = new Date();
+    const time = now.toLocaleTimeString('en-US', { hour12: false });
+    const emoji = level === 'success' ? '✅' : level === 'error' ? '❌' : 'ℹ️';
+    setLogText(prevLog => `${prevLog}\n${time} ${emoji} ${text}`);
+    }, []);
+
   const handleAddLiquidity = async () => {
-    let tx
 
     // Create liquidity pool
-    const payload = NewCreateLiquidityPoolAction(functionID, sellToken.address, buyToken.address, parseFloat(fee))
-    const res = await vmClient.simulateAction(payload) as {poolAddress: string, poolTokenAddress: string}
-    tx = await vmClient.sendTransaction([payload])
-    console.log(tx)
+    try {
+      const payload = NewCreateLiquidityPoolAction(functionID, sellToken.address, buyToken.address, parseFloat(fee))
+      const res = await vmClient.simulateAction(payload) as {poolAddress: string, poolTokenAddress: string}
+      const addLiqPayload = NewAddLiquidityAction(sellAmount.toString(), buyAmount.toString(), sellToken.address, buyToken.address, res.poolAddress)
+      await vmClient.sendTransaction([payload])     
+      log("info", `Creating liquidity pool ${res.poolAddress}`)
 
-    onAddLiquidity(tx.result as unknown as LiquidityPair)
-    
+      console.log(await vmClient.simulateAction(addLiqPayload))
+      await vmClient.sendTransaction([addLiqPayload])
+      log("info", `Liquidity added to pool ${res.poolAddress}`)
 
-    // Add liquidity
-    const addLiqPayload = NewAddLiquidityAction(sellAmount.toString(), buyAmount.toString(), sellToken.address, buyToken.address, res.poolAddress)
-    const sim = await vmClient.simulateAction(addLiqPayload)
-    console.log(sim)
-    tx = await vmClient.sendTransaction([addLiqPayload])
-    console.log(tx)
+
+      onAddLiquidity(res)
+      setBuyAmount(0)
+      setSellAmount(0)
+
+    } catch (error) {       // pool already exists
+      log("info", `Pool already exists!`)
+      const pool = pools.find(
+        (p) =>
+          (p.info?.tokenX === sellToken.address && p.info?.tokenY === buyToken.address) ||
+          (p.info?.tokenX === buyToken.address && p.info?.tokenY === sellToken.address)
+      );
+
+      if (pool) {
+        try {
+          const addLiqPayload = NewAddLiquidityAction(sellAmount.toString(), buyAmount.toString(), sellToken.address, buyToken.address, pool.poolAddress);
+          const res = await vmClient.simulateAction(addLiqPayload)
+          console.log(res)
+          await vmClient.sendTransaction([addLiqPayload]);
+          log("info", `Liquidity added to pool ${pool.poolAddress}`)
+
+          refreshPool()
+          setBuyAmount(0)
+          setSellAmount(0)
+        }
+        catch (error) {
+          log("error", `Failed to add liquidity: ${(error as { message?: string })?.message || String(error)}`);
+        }
+      }
+    }
   }
 
   const handleSwapTokens = () => {
@@ -202,7 +252,12 @@ const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, onAddLiquidity }) =
           </div>
         </div>
       </div>
-    </div>
+      <div className="mt-8 border border-gray-300 rounded p-4 min-h-16">
+            <pre className="font-mono text-sm">
+                {logText}
+            </pre>
+        </div>
+      </div>
   )
 }
 

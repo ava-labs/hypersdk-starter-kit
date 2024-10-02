@@ -90,3 +90,39 @@ export const NewAddLiquidityAction = (amountX: string, amountY: string, tokenX: 
         }
     }
 }
+
+export const NewGetLiquidityPoolAction = (poolAddress: string): ActionData => {
+   return (
+         {
+              actionName: "GetLiquidityPoolInfo",
+              data: {
+                liquidityPoolAddress: poolAddress
+              }
+         }
+   )
+}
+
+export const NewSwapAction = (tokenX: string, tokenY: string, amountIn: string, tokenIn: string, lpAddress: string): ActionData => {
+    return {
+        actionName: "Swap",
+        data: {
+            tokenX,
+            tokenY,
+            amountIn: vmClient.convertToNativeTokens(amountIn).toString(),
+            tokenIn,
+            lpAddress
+        }
+    }
+}
+
+export const NewRemoveLiquidityAction = (burnAmount: string, liquidityPool: string, tokenX: string, tokenY: string): ActionData => {
+    return {
+        actionName: "RemoveLiquidity",
+        data: {
+            burnAmount: vmClient.convertToNativeTokens(burnAmount).toString(),
+            liquidityPool,
+            tokenX,
+            tokenY
+        }
+    }
+}

@@ -111,15 +111,15 @@ func (*AddLiquidity) GetTypeID() uint8 {
 func (a *AddLiquidity) StateKeys(actor codec.Address, _ ids.ID) state.Keys {
 	lpToken := storage.LiqudityPoolTokenAddress(a.LiquidityPool)
 	return state.Keys{
-		string(storage.LiquidityPoolKey(a.LiquidityPool)):                state.All,
-		string(storage.TokenInfoKey(lpToken)):                            state.All,
-		string(storage.TokenAccountBalanceKey(lpToken, actor)):           state.All,
-		string(storage.TokenAccountBalanceKey(lpToken, a.LiquidityPool)): state.All,
-
-		string(storage.TokenAccountBalanceKey(a.TokenX, actor)):           state.All,
-		string(storage.TokenAccountBalanceKey(a.TokenY, actor)):           state.All,
-		string(storage.TokenAccountBalanceKey(a.TokenX, a.LiquidityPool)): state.All,
-		string(storage.TokenAccountBalanceKey(a.TokenY, a.LiquidityPool)): state.All,
+		string(storage.LiquidityPoolKey(a.LiquidityPool)):                   state.All,
+		string(storage.TokenInfoKey(lpToken)):                               state.All,
+		string(storage.TokenAccountBalanceKey(lpToken, actor)):              state.All,
+		string(storage.TokenAccountBalanceKey(lpToken, a.LiquidityPool)):    state.All,
+		string(storage.TokenAccountBalanceKey(lpToken, codec.EmptyAddress)): state.All,
+		string(storage.TokenAccountBalanceKey(a.TokenX, actor)):             state.All,
+		string(storage.TokenAccountBalanceKey(a.TokenY, actor)):             state.All,
+		string(storage.TokenAccountBalanceKey(a.TokenX, a.LiquidityPool)):   state.All,
+		string(storage.TokenAccountBalanceKey(a.TokenY, a.LiquidityPool)):   state.All,
 	}
 }
 

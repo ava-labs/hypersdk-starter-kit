@@ -9,7 +9,7 @@ import { vmClient } from '../VMClient.ts'
 import { addressHexFromPubKey } from 'hypersdk-client/src/lib/Marshaler.ts'
 import { SignerIface } from 'hypersdk-client/src/client/types'
 import { Tab } from '@headlessui/react'
-import { VM_NAME, TOKEN_ADDRESS } from '../const.ts'
+import { TOKEN_ADDRESS } from '../const.ts'
 // Add this type definition at the top of the file
 type SignerConnectedEvent = CustomEvent<SignerIface | null>;
 
@@ -30,24 +30,60 @@ export interface Token {
 interface TokensProps {
   initialTokens: Token[];
 }
+interface LiquidityPair {
+  poolAddress: string,
+  poolTokenAddress: string,
+  info?: LiquidityPairInfo
+}
+
+interface LiquidityPairInfo {
+  tokenX: string,
+  tokenY: string,
+  fee: number,
+  feeTo: string,
+  functionID: number,
+  reserveX: number,
+  reserveY: number,
+  liquidityToken: string,
+  kLast: number,
+  balance?: number
+}
+
+const tokenProps: TokensProps = {
+  initialTokens: [
+    {
+      name: "CFMMVM",
+      symbol: "CVM",
+      metadata: "A constant-function market-maker VM implementation",
+      address: TOKEN_ADDRESS,
+      balance: "0",
+      totalSupply: '',
+      owner: "000000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+};
 
 function App() {
   const [signerConnected, setSignerConnected] = useState<boolean>(false)
   const [myAddr, setMyAddr] = useState<string>("")
+  const [tokenList, setTokenList] = useState<Token[]>(tokenProps.initialTokens)
+  const [pools, setPools] = useState<LiquidityPair[]>([])
 
-  const tokenProps: TokensProps = {
-    initialTokens: [
-      {
-        name: "CFMMVM",
-        symbol: "CVM",
-        metadata: "A constant-function market-maker VM implementation",
-        address: TOKEN_ADDRESS,
-        balance: "0",
-        totalSupply: '',
-        owner: "000000000000000000000000000000000000000000000000000000000000000000"
-      }
-    ]
+  const handleAddToken = (newToken: Token) => {
+    setTokenList([...tokenList, newToken])
   };
+
+  const handleAddPool = (pair: LiquidityPair) => {
+    setPools([...pools, pair])
+  }
+  
+  const handleRemovePool = (pair: LiquidityPair) => {
+    setPools(pools.filter((p) => p.poolAddress !== pair.poolAddress))
+  }
+
+  const handleRefresh = (pools: LiquidityPair[]) => {
+    setPools(pools)
+  }
 
   useEffect(() => {
     const handleSignerConnected = (event: SignerConnectedEvent) => {
@@ -65,12 +101,6 @@ function App() {
     return () => vmClient.removeEventListener('signerConnected', handleSignerConnected as EventListener)
   }, [])
 
-  const [tokenList, setTokenList] = useState<Token[]>(tokenProps.initialTokens)
-
-  const handleAddToken = (newToken: Token) => {
-    console.log("Adding token:", newToken)
-    setTokenList([...tokenList, newToken])
-  };
 
   const [categories] = useState({
     'Wallet': [],
@@ -120,8 +150,8 @@ function App() {
                       </Faucet>
                     )}
                     {Object.keys(categories)[idx] === 'Tokens' && <Tokens myAddr={myAddr} initialTokens={tokenList} onAddToken={handleAddToken}/>}
-                    {Object.keys(categories)[idx] === 'Pool' && <Pool tokens={tokenList}/>}
-                    {Object.keys(categories)[idx] === 'Swap' && <Swap tokens={tokenList}/>}
+                    {Object.keys(categories)[idx] === 'Pool' && <Pool tokens={tokenList} myAddr={myAddr} pools={pools} handleAddLiquidity={handleAddPool} handleRemoveLiquidity={handleRemovePool} handleRefresh={handleRefresh}/>}
+                    {Object.keys(categories)[idx] === 'Swap' && <Swap tokens={tokenList} pools={pools}/>}
                   </div>
                 </Tab.Panel>
               ))}

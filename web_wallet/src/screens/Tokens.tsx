@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import CreateTokenModal from '../components/CreateTokenModal'
 import TokenInfoModal from '../components/TokenInfoModal'
 import { Token } from './App'
@@ -15,8 +15,17 @@ interface TokensProps {
 
 const Tokens: React.FC<TokensProps> = ({ myAddr, initialTokens, onAddToken }) => {
   const [tokens, setTokens] = useState<Token[]>(initialTokens)
+  const [logText, setLogText] = useState("")
+
+  const log = useCallback((level: "success" | "error" | "info", text: string) => {
+    const now = new Date();
+    const time = now.toLocaleTimeString('en-US', { hour12: false });
+    const emoji = level === 'success' ? '✅' : level === 'error' ? '❌' : 'ℹ️';
+    setLogText(prevLog => `${prevLog}\n${time} ${emoji} ${text}`);
+}, []);
 
   const addToken = (token: Token) => {
+    log("info", `Adding token ${token.symbol}`)
     setTokens([...tokens, token])
     onAddToken(token)
   }
@@ -34,7 +43,7 @@ const Tokens: React.FC<TokensProps> = ({ myAddr, initialTokens, onAddToken }) =>
             } else {
                 const payload = NewTokenBalanceAction(token.address, myAddr)
                 const res = await vmClient.simulateAction(payload) as {balance: bigint}
-                token.balance = res.balance.toString()
+                token.balance =  vmClient.formatNativeTokens(res.balance)
             }
         }
         newTokenList.push(token)
@@ -90,6 +99,11 @@ const Tokens: React.FC<TokensProps> = ({ myAddr, initialTokens, onAddToken }) =>
         {tokens.length === 0 && (
           <p className="text-center text-gray-500 mt-4">No tokens added yet.</p>
         )}
+      </div>
+      <div className="mt-8 border border-gray-300 rounded p-4 min-h-16">
+          <pre className="font-mono text-sm">
+              {logText}
+          </pre>
       </div>
     </div>
   )

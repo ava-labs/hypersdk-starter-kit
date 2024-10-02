@@ -15,6 +15,7 @@ export const CreateTokenModal: React.FC<CreateTokenModalProps> = ({ myAddr, onAd
   const [symbol, setSymbol] = useState("")
   const [metadata, setMetadata] = useState("")
   const [isOpen, setIsOpen] = useState(false)
+  const [mintAmount, setMintAmount] = useState("1000000")
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -28,21 +29,15 @@ export const CreateTokenModal: React.FC<CreateTokenModalProps> = ({ myAddr, onAd
     e.preventDefault()
 
 
-    console.log("Creating token with:", { name, symbol, metadata })
     const payload = NewCreateTokenAction(name, symbol, metadata)
-    //get address
     const tokenRes = await vmClient.simulateAction(payload) as { tokenAddress: string }
-    console.log("expected token address: ", tokenRes.tokenAddress)
-    //send tx
 
-    const mintPayload = NewMintTokenAction(myAddr, "1000000", tokenRes.tokenAddress)
-
+    const mintPayload = NewMintTokenAction(myAddr, mintAmount, tokenRes.tokenAddress)
 
     await vmClient.sendTransaction([payload, mintPayload])
     
     const tokenInfoAction = NewTokenInfoAction(tokenRes.tokenAddress)
     const res = await vmClient.simulateAction(tokenInfoAction) as unknown as { name: string, symbol: string, metadata: string, supply: string, owner: string }
-    console.log(res)
 
 
     const token: Token = {
@@ -131,6 +126,19 @@ export const CreateTokenModal: React.FC<CreateTokenModalProps> = ({ myAddr, onAd
                     onChange={(e) => setMetadata(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                     rows={3}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="mintAmount" className="block text-sm font-medium text-gray-700 mb-1">
+                    Mint Amount
+                  </label>
+                  <input
+                    id="mintAmount"
+                    type="text"
+                    value={mintAmount}
+                    onChange={(e) => setMintAmount(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                    required
                   />
                 </div>
                 <div className="flex justify-end space-x-2">

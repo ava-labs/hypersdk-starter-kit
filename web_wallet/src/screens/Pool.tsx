@@ -3,6 +3,7 @@ import AddLiquidity from '../components/AddLiquidity';
 import RemoveLiquidity from '../components/RemoveLiquidity';
 import { Tab } from '@headlessui/react'
 import { Token } from './App';
+import { NewGetLiquidityPoolAction, NewTokenBalanceAction, vmClient } from '../VMClient'
 
 function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ')
@@ -10,23 +11,61 @@ function classNames(...classes: string[]) {
 
 interface PoolProps {
   tokens: Token[];
+  pools: LiquidityPair[];
+  myAddr: string
+  handleAddLiquidity: (pair: LiquidityPair) => void;
+  handleRemoveLiquidity: (pair: LiquidityPair) => void;
+  handleRefresh: (pool: LiquidityPair[]) => void;
 }
 
 interface LiquidityPair {
   poolAddress: string,
   poolTokenAddress: string,
+  info?: LiquidityPairInfo
 }
 
-const Pool: React.FC<PoolProps> = ({ tokens }) => {
+interface LiquidityPairInfo {
+  tokenX: string,
+  tokenY: string,
+  fee: number,
+  feeTo: string,
+  functionID: number,
+  reserveX: number,
+  reserveY: number,
+  liquidityToken: string,
+  kLast: number,
+  balance?: number
+}
 
-    const [pools, setPools] = useState<LiquidityPair[]>([])
+const Pool: React.FC<PoolProps> = ({ tokens, pools, myAddr, handleAddLiquidity, handleRemoveLiquidity, handleRefresh }) => {
 
-    const handleRemoveLiquidity = (pair: LiquidityPair) => {
-        setPools(pools.filter((p) => p.poolAddress !== pair.poolAddress))
+
+    const refresh = async () => {
+      const updatedPools = await Promise.all(
+        pools.map(async (pair) => {
+          const poolInfo = NewGetLiquidityPoolAction(pair.poolAddress);
+          const res = await vmClient.simulateAction(poolInfo) as LiquidityPairInfo;
+          const balancePayload = NewTokenBalanceAction(pair.poolTokenAddress, myAddr);
+          const balanceRes = await vmClient.simulateAction(balancePayload) as { balance: number };
+          pair.info = res;
+          pair.info.balance = balanceRes.balance;
+          return pair;
+        })
+      );
+
+        handleRefresh(updatedPools)
     }
 
-    const handleAddLiquidity = (pair: LiquidityPair) => {
-        setPools([...pools, pair])
+    const addLiquidity = async (pair: LiquidityPair) => {
+        // Get info for the Pool and the users token balance
+        const poolInfo = NewGetLiquidityPoolAction(pair.poolAddress)
+        const res = await vmClient.simulateAction(poolInfo) as LiquidityPairInfo
+        const balancePayload = NewTokenBalanceAction(pair.poolTokenAddress, myAddr)
+        const balanceRes = await vmClient.simulateAction(balancePayload) as {balance: number}
+        pair.info = res
+        pair.info.balance = balanceRes.balance
+        console.log(pair.info)
+        handleAddLiquidity(pair)
     }
 
     const [categories] = useState({
@@ -67,8 +106,8 @@ const Pool: React.FC<PoolProps> = ({ tokens }) => {
               )}
             >
               <div className="text-xs text-gray-500">
-                {Object.keys(categories)[idx] === 'Add Liquidity' && <AddLiquidity tokens={tokens} onAddLiquidity={handleAddLiquidity} />}
-                {Object.keys(categories)[idx] === 'Remove Liquidity' && <RemoveLiquidity pools={pools} onRemoveLiquidity={handleRemoveLiquidity}/>}
+                {Object.keys(categories)[idx] === 'Add Liquidity' && <AddLiquidity tokens={tokens} pools={pools} onAddLiquidity={addLiquidity} refreshPool={refresh} />}
+                {Object.keys(categories)[idx] === 'Remove Liquidity' && <RemoveLiquidity pools={pools} onRemoveLiquidity={handleRemoveLiquidity} refreshPool={refresh}/>}
               </div>
             </Tab.Panel>
           ))}

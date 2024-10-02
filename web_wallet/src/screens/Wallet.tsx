@@ -39,14 +39,6 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
         setLogText("")
         try {
 
-            // sanity check
-            // const p = vmClient.NewTokenAction("name", "symbol", "metadata")
-            // const tokenRes = await vmClient.executeReadonlyAction(p) as { tokenAddress: string }
-            // console.log("token address: ", tokenRes.tokenAddress)
-            // const txId = await vmClient.sendTx([p])
-            // console.log("txId:", txId)
-
-
             log("info", `Sending ${amountString} ${COIN_SYMBOL} to ${otherWalletAddress}`)
             setLoading(counter => counter + 1)
             const initialBalance = await vmClient.getBalance(myAddr)
@@ -54,8 +46,7 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
             log("info", `Initial balance: ${vmClient.formatNativeTokens(initialBalance)} ${COIN_SYMBOL}`)
 
             const payload = NewTransferAction(otherWalletAddress, TOKEN_ADDRESS, amountString)
-            const txInfo = await vmClient.sendTransaction([payload])
-            console.log(txInfo)
+            await vmClient.sendTransaction([payload])
 
             log("success", `Transaction sent, waiting for the balance change`)
 
