@@ -1,5 +1,11 @@
 # HyperSDK Starter
 
+HyperSDK Starter includes:
+- Boilerplate VM based on [MorpheusVM](https://github.com/ava-labs/hypersdk/tree/main/examples/morpheusvm)
+- Universal frontend
+- Metamask Snap wallet
+- A quick start guide (this document)
+
 ## Prerequisites
 - Docker (recent version)
 - Optional: Golang v1.22.5+
