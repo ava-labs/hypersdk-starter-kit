@@ -8,8 +8,8 @@ interface SwapProps {
 
 const Swap: React.FC<SwapProps> = ({ tokens }) => {
 
-  const [sellToken, setSellToken] = useState('CVM')
-  const [buyToken, setBuyToken] = useState('CVM')
+  const [sellToken, setSellToken] = useState(tokens[0])
+  const [buyToken, setBuyToken] = useState(tokens[0])
   const [sellDropdownOpen, setSellDropdownOpen] = useState(false)
   const [buyDropdownOpen, setBuyDropdownOpen] = useState(false)
 
@@ -60,11 +60,10 @@ const Swap: React.FC<SwapProps> = ({ tokens }) => {
             className="flex items-center space-x-2 bg-black hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-full"
             onClick={() => setSellDropdownOpen(!sellDropdownOpen)}
             >
-            <img src="/placeholder.svg?height=24&width=24" alt="CVM" className="w-6 h-6 rounded-full bg-blue-500" />
-            <span>{sellToken}</span>
+            <span>{sellToken.symbol}</span>
             <ChevronDownIcon className="w-5 h-5 " />
             </button>
-            <p className="text-sm text-gray-500 p-1">Balance: </p>
+            <p className="text-sm text-gray-500 p-1">{sellToken.balance} </p>
             {sellDropdownOpen && (
             <div className="absolute right-0 mt-2 w-full bg-black rounded-md shadow-lg z-10">
               {tokens.map((token) => (
@@ -116,10 +115,10 @@ const Swap: React.FC<SwapProps> = ({ tokens }) => {
             className="flex items-center space-x-2 bg-black hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-full"
             onClick={() => setBuyDropdownOpen(!buyDropdownOpen)}
             >
-            <img src="/placeholder.svg?height=24&width=24" alt="ETH" className="w-6 h-6 rounded-full bg-blue-500" />
-            <span>{buyToken}</span>
+            <span>{buyToken.symbol}</span>
             <ChevronDownIcon className="w-5 h-5" />
             </button>
+            <p className="text-sm text-gray-500 p-1">{sellToken.balance} </p>
             {buyDropdownOpen && (
             <div className="absolute right-0 mt-2 w-full bg-black rounded-md shadow-lg z-10">
               {tokens.map((token) => (
@@ -127,7 +126,7 @@ const Swap: React.FC<SwapProps> = ({ tokens }) => {
                 key={token.address}
                 className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
                 onClick={() => {
-                  setBuyToken(token.symbol)
+                  setBuyToken(token)
                   setBuyDropdownOpen(false)
                 }}
               >

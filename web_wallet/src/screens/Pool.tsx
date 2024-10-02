@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import AddLiquidity from '../components/AddLiquidity';
 import RemoveLiquidity from '../components/RemoveLiquidity';
-import CreatePair from '../components/CreatePair';
 import { Tab } from '@headlessui/react'
 import { Token } from './App';
 
@@ -13,10 +12,24 @@ interface PoolProps {
   tokens: Token[];
 }
 
+interface LiquidityPair {
+  poolAddress: string,
+  poolTokenAddress: string,
+}
+
 const Pool: React.FC<PoolProps> = ({ tokens }) => {
 
+    const [pools, setPools] = useState<LiquidityPair[]>([])
+
+    const handleRemoveLiquidity = (pair: LiquidityPair) => {
+        setPools(pools.filter((p) => p.poolAddress !== pair.poolAddress))
+    }
+
+    const handleAddLiquidity = (pair: LiquidityPair) => {
+        setPools([...pools, pair])
+    }
+
     const [categories] = useState({
-        'Create Pair': [],
         'Add Liquidity': [],
         'Remove Liquidity': []
       })
@@ -54,9 +67,8 @@ const Pool: React.FC<PoolProps> = ({ tokens }) => {
               )}
             >
               <div className="text-xs text-gray-500">
-                {Object.keys(categories)[idx] === 'Add Liquidity' && <AddLiquidity tokens={tokens} />}
-                {Object.keys(categories)[idx] === 'Remove Liquidity' && <RemoveLiquidity />}
-                {Object.keys(categories)[idx] === 'Create Pair' && <CreatePair tokens={tokens} />}
+                {Object.keys(categories)[idx] === 'Add Liquidity' && <AddLiquidity tokens={tokens} onAddLiquidity={handleAddLiquidity} />}
+                {Object.keys(categories)[idx] === 'Remove Liquidity' && <RemoveLiquidity pools={pools} onRemoveLiquidity={handleRemoveLiquidity}/>}
               </div>
             </Tab.Panel>
           ))}

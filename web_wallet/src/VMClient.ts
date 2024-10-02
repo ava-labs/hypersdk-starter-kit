@@ -78,12 +78,12 @@ export const NewCreateLiquidityPoolAction = (functionID: number, tokenX: string,
     }
 }
 
-export const NewAddLiquidityAction = (amountX: number, amountY: number, tokenX: string, tokenY: string, liquidityPool: string): ActionData => {
+export const NewAddLiquidityAction = (amountX: string, amountY: string, tokenX: string, tokenY: string, liquidityPool: string): ActionData => {
     return {
         actionName: "AddLiquidity",
         data: {
-            amountX,
-            amountY,
+            amountX:  vmClient.convertToNativeTokens(amountX).toString(),
+            amountY: vmClient.convertToNativeTokens(amountY).toString(),
             tokenX,
             tokenY,
             liquidityPool
