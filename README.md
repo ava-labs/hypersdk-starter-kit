@@ -34,10 +34,22 @@ Any action can be executed on-chain (in transaction) with the results persisted 
 
 ![Read-only action](assets/read-only.png)
 
-
 ### 2.3 Issue a transaction
 
+Now let's write some data into the chain. Just click the "Execute in transaction" button, all the fields are already populated with sane defaults.
+
+![Sign](assets/sign.png)
+
+After being being mined, the transaction will appear in the right column. If you open another window and make a transaction there, it will still appear in the right column as it monitors all non-empty block on the chain.
+
 ### 2.4 Check logs
+
+Logs are located inside docker container. So to see them you'll have to open a bash terminal inside the container into the foolder with the current network:
+```bash
+docker exec -it devnet bash -c "cd /root/.tmpnet/networks/latest_morpheusvm-e2e-tests && bash"
+```
+
+That is not perfect DevX and we are working on it.
 
 ## 3. Add your own custom action
 
