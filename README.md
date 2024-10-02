@@ -1,9 +1,9 @@
 # HyperSDK Starter
 
 ## Prerequisites
-- Golang v1.22.5+
-- NodeJS v20+
 - Docker (recent version)
+- Optional: Golang v1.22.5+
+- Optional: NodeJS v20+
 - Optional: [Metamask Flask](https://chromewebstore.google.com/detail/metamask-flask-developmen/ljfoeinjpaedjfecbmggjgodbgkmjkjk). Disable normal Metamask, Core wallet, and other wallets. *Do not use your real private key with Flask*.
 
 ## 0. Clone this repo
