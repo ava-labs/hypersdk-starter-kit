@@ -1,6 +1,6 @@
 # HyperSDK Starter
 
-## 0. Prerequisites
+## Prerequisites
 - Golang v1.22.5+
 - NodeJS v20+
 - Docker (recent version)
