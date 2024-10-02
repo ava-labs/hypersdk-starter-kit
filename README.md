@@ -3,64 +3,62 @@
 ## 0. Prerequisites
 - Golang v1.22.5+
 - NodeJS v20+
-- Docker (Somewhat recent)
-- Optional: [Metamask Flask](https://chromewebstore.google.com/detail/metamask-flask-developmen/ljfoeinjpaedjfecbmggjgodbgkmjkjk). Disable normal Metamask, Core wallet, and any other wallets. *Do not use your actual private key with Flask*.
+- Docker (recent version)
+- Optional: [Metamask Flask](https://chromewebstore.google.com/detail/metamask-flask-developmen/ljfoeinjpaedjfecbmggjgodbgkmjkjk). Disable normal Metamask, Core wallet, and other wallets. *Do not use your real private key with Flask*.
 
 ## 0. Clone this repo
 `git clone https://github.com/ava-labs/hypersdk-starter.git`
 
 ## 1. Launch this example
 
-Run: `docker compose up -d --build devnet faucet frontend`. Might take 5 minutes to download dependencies.
+Run: `docker compose up -d --build devnet faucet frontend`. This may take 5 minutes to download dependencies.
 
 For devcontainers or codespaces, forward ports `8765` for faucet, `9650` for the chain, and `5173` for the frontend.
 
-When finished, shut everything down with: `docker compose down`
+When finished, stop everything with: `docker compose down`
 
-## 2. Play around with the MorpheusVM
-This repo includes a copy of [MorpheusVM](https://github.com/ava-labs/hypersdk/tree/main/examples/morpheusvm), the simplest possible HyperSDK VM. It supports a single action (Transfer) for moving funds and tracking balances.
+## 2. Explore MorpheusVM
+This repo includes [MorpheusVM](https://github.com/ava-labs/hypersdk/tree/main/examples/morpheusvm), the simplest HyperSDK VM. It supports one action (Transfer) for moving funds and tracking balances.
 
 ### 2.1 Connect wallet
 Open [http://localhost:5173](http://localhost:5173) to see the frontend.
 
 ![Auth options](assets/auth.png)
 
-
-We recommend you using a Snap (requires [Metamask Flask](https://chromewebstore.google.com/detail/metamask-flask-developmen/ljfoeinjpaedjfecbmggjgodbgkmjkjk) installed) for the full UX, but a temporary wallet would work well enough too.
+We recommend using a Snap (requires [Metamask Flask](https://chromewebstore.google.com/detail/metamask-flask-developmen/ljfoeinjpaedjfecbmggjgodbgkmjkjk)) for the full experience, but a temporary wallet works too.
 
 ### 2.2 Execute a read-only action
 
-Any action can be executed on-chain (in transaction) with the results persisted to a block of the chain, or off-chain, meaning read-only. As MorpheusVM has only one action, let's first try to execute it read-only. It shows expected balances of the sender and receiver. You can see the logic defined in `actions/transfer.go`.
+Actions can be executed on-chain (in a transaction) with results saved to a block, or off-chain (read-only). MorpheusVM has one action. Try executing it read-only. It shows expected balances of the sender and receiver. See the logic in `actions/transfer.go`.
 
 ![Read-only action](assets/read-only.png)
 
 ### 2.3 Issue a transaction
 
-Now let's write some data into the chain. Just click the "Execute in transaction" button, all the fields are already populated with sane defaults.
+Now, write data to the chain. Click "Execute in transaction". All fields are pre-filled with default values.
 
 ![Sign](assets/sign.png)
 
-After being being mined, the transaction will appear in the right column. If you open another window and make a transaction there, it will still appear in the right column as it monitors all non-empty block on the chain.
+After mining, the transaction appears in the right column. This column shows all non-empty blocks on the chain.
 
-### 2.4 Check logs
+### 2.4 Check Logs
 
-Logs are located inside docker container. So to see them you'll have to open a bash terminal inside the container into the foolder with the current network:
+Logs are located inside the Docker container. To view them, you'll need to open a bash terminal inside the container and navigate to the folder with the current network:
 ```bash
 docker exec -it devnet bash -c "cd /root/.tmpnet/networks/latest_morpheusvm-e2e-tests && bash"
 ```
 
-That is not perfect DevX and we are working on it.
+This isn’t the best developer experience, and we’re working on improving it.
 
-## 3. Add your own custom action
+## 3. Add Your Own Custom Action
 
-Think of actions in HyperSDK like functions in EVMs. They have inputs, outputs, and the execution logic. 
+Think of actions in HyperSDK like functions in EVMs. They have inputs, outputs, and execution logic.
 
-Let's add the `Greeting` action. The action does not change anything, only prints your balance and the current date. But if it is executed in the transaction, the output will be recorded in a block on the chain. 
+Let's add the `Greeting` action. This action doesn’t change anything; it simply prints your balance and the current date. However, if it's executed in a transaction, the output will be recorded in a block on the chain.
 
-### 3.1 Create an action file
+### 3.1 Create an Action File
 
-Put this into `actions/greeting.go`. The code has some comments, but for more information please explore [the docs folder in hypersdk](https://github.com/ava-labs/hypersdk/tree/main/docs).
-
+Place the following code in `actions/greeting.go`. The code includes some comments, but for more details, check out [the docs folder in HyperSDK](https://github.com/ava-labs/hypersdk/tree/main/docs).
 ```golang
 package actions
 
@@ -151,56 +149,55 @@ func (g *GreetingResult) GetTypeID() uint8 {
 	return consts.HiID
 }
 ```
+### 3.2 Register the Action
 
-### 3.2 Register the action
+Now, you need to make both the VM and clients (via ABI) aware of this action.
 
-Now you have to make both VM and clients (via ABI) aware of the existance of this action. 
-
-For that, you have to register your action in `vm/vm.go` after the `ActionParser.Register(&actions.Transfer{}, nil),` line:
+To do this, register your action in `vm/vm.go` after the line `ActionParser.Register(&actions.Transfer{}, nil):`
 ```golang
 ActionParser.Register(&actions.Greeting{}, nil),
 ```
 
-And register it's output after the `OutputParser.Register(&actions.TransferResult{}, nil),` line:
+Then, register its output after the line `OutputParser.Register(&actions.TransferResult{}, nil):`
 ```golang
 OutputParser.Register(&actions.GreetingResult{}, nil),
 ```
 
-### 3.3 Rebuild your VM
+### 3.3 Rebuild Your VM
 ```bash
 docker compose down -t 1; docker compose up -d --build devnet faucet frontend
 ```
 
-### 3.4 Test your new action
-HyperSDK uses ABI - an autogenerated describtion of all the actions of your VM. Thanks to that, the frontend already has information on how to work with this action. Every action you add, will be displayed on the frontend and supported by wallet right after the node restarts!
+### 3.4 Test Your New Action
 
-So plug in your name and see the result:
+HyperSDK uses ABI, an autogenerated description of all the actions in your VM. Thanks to this, the frontend already knows how to interact with your new action. Every action you add will be displayed on the frontend and supported by the wallet as soon as the node restarts.
+
+Now, enter your name and see the result:
 
 ![Greeting result](assets/greeting.png)
 
-You can also send it as a transaction, but that would not make too much sense, since there is nothing to be written to the chain's state. 
+You can also send it as a transaction, but this doesn't make much sense since there’s nothing to write to the chain's state.
 
-### 3.5 Next steps
+### 3.5 Next Steps
 
-Congrats! You just created your first action for HyperSDK. 
+Congrats! You've just created your first action for HyperSDK.
 
-That is almost a  half of the things you need to build your own blockchain on HyperSDK. What is left is the state management and you can find it in `storage/storage.go`. Please expore on your own and enjoy your journey!
+This covers nearly half of what you need to build your own blockchain on HyperSDK. The remaining part is state management, which you can explore in `storage/storage.go`. Dive in and enjoy your journey!
 
 ## 4. Develop a Frontend
-1. If you launched anythyng, Bring down everything: `docker compose down`
-2. Start only the devnet, and faucet: `docker compose up -d --build devnet faucet`
+1. If you started anything, bring everything down: `docker compose down`
+2. Start only the devnet and faucet: `docker compose up -d --build devnet faucet`
 3. Navigate to the web wallet: `cd web_wallet`
 4. Install dependencies and start the dev server: `npm i && npm run dev`
 
-Ensure ports `8765` (faucet), `9650` (chain), and `5173` (frontend) are forwarded.
+Make sure ports `8765` (faucet), `9650` (chain), and `5173` (frontend) are forwarded.
 
-Please learn more on [npm:hypersdk-client](https://www.npmjs.com/package/hypersdk-client) and in the `web_wallet` folder of this repo.
+Learn more from [npm:hypersdk-client](https://www.npmjs.com/package/hypersdk-client) and the `web_wallet` folder in this repo.
 
 ## Notes
 - You can launch everything without Docker:
   - Faucet: `go run ./cmd/faucet/`
-  - Chain: `./scripts/run.sh`, `./scripts/stop.sh` to stop
+  - Chain: `./scripts/run.sh`, and use `./scripts/stop.sh` to stop
   - Frontend: `npm run dev` in `web_wallet`
-- Be aware of potential port conflicts if issues arise. `docker rm -f $(docker ps -a -q)` is your friend.
-- For VM development you don't have to know Javascript - you can use an existing frontend - all the actions would be added automatically
-
+- Be aware of potential port conflicts. If issues arise, `docker rm -f $(docker ps -a -q)` will help.
+- For VM development, you don’t need to know JavaScript—you can use an existing frontend, and all actions will be added automatically.
