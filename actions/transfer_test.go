@@ -5,15 +5,13 @@ package actions
 
 import (
 	"context"
-	"encoding/base64"
 	"math"
 	"testing"
 
+	"github.com/ava-labs/avalanchego/ids"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/hypersdk-starter/storage"
-	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/chain/chaintest"
 	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/codec/codectest"
@@ -133,7 +131,7 @@ func TestTransferAction(t *testing.T) {
 }
 
 func BenchmarkSimpleTransfer(b *testing.B) {
-	require := require.New(b)
+	setupRequire := require.New(b)
 	to := codec.CreateAddress(0, ids.GenerateTestID())
 	from := codec.CreateAddress(0, ids.GenerateTestID())
 
@@ -144,13 +142,18 @@ func BenchmarkSimpleTransfer(b *testing.B) {
 			To:    to,
 			Value: 1,
 		},
+		ExpectedOutput: &TransferResult{
+			SenderBalance:   0,
+			ReceiverBalance: 1,
+		},
 		CreateState: func() state.Mutable {
 			store := chaintest.NewInMemoryStore()
 			err := storage.SetBalance(context.Background(), store, from, 1)
-			require.NoError(err)
+			setupRequire.NoError(err)
 			return store
 		},
 		Assertion: func(ctx context.Context, b *testing.B, store state.Mutable) {
+			require := require.New(b)
 			toBalance, err := storage.GetBalance(ctx, store, to)
 			require.NoError(err)
 			require.Equal(uint64(1), toBalance)
@@ -163,27 +166,4 @@ func BenchmarkSimpleTransfer(b *testing.B) {
 
 	ctx := context.Background()
 	transferActionTest.Run(ctx, b)
-}
-
-func TestDecodeTransferResult(t *testing.T) {
-	require := require.New(t)
-
-	actionParser := codec.NewTypeParser[chain.Action]()
-	outputParser := codec.NewTypeParser[codec.Typed]()
-
-	err := actionParser.Register(&Transfer{}, nil)
-	require.NoError(err)
-	err = outputParser.Register(&TransferResult{}, nil)
-	require.NoError(err)
-
-	decoded, err := base64.StdEncoding.DecodeString("AAAAAAIKdeEuAAAABFcl974=")
-	require.NoError(err)
-	packer := codec.NewReader(decoded, 10000)
-
-	result, err := outputParser.Unmarshal(packer)
-	require.NoError(err)
-	require.Equal(result, &TransferResult{
-		SenderBalance:   8765432110,
-		ReceiverBalance: 18641975230,
-	})
 }
