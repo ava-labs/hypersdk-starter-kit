@@ -6,7 +6,6 @@ package main
 import (
 	"context"
 	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,61 +19,32 @@ import (
 	"golang.org/x/time/rate"
 
 	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/hypersdk-starter/actions"
 	"github.com/ava-labs/hypersdk-starter/consts"
 	"github.com/ava-labs/hypersdk-starter/vm"
-	"github.com/ava-labs/hypersdk/api/jsonrpc"
-	"github.com/ava-labs/hypersdk/api/ws"
-	"github.com/ava-labs/hypersdk/auth"
-	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
-	"github.com/ava-labs/hypersdk/crypto/ed25519"
-	"github.com/ava-labs/hypersdk/pubsub"
 	"github.com/ava-labs/hypersdk/utils"
 )
 
 const (
-	amtStr           = "10.00"
 	faucetServerPort = "8765"
 )
 
 var (
-	priv        ed25519.PrivateKey
-	factory     chain.AuthFactory
-	hyperVMRPC  *vm.JSONRPCClient
-	hyperSDKRPC *jsonrpc.JSONRPCClient
-	isReady     bool
-	healthMu    sync.RWMutex
-	wsClient    *ws.WebSocketClient
+	hyperVMRPC *vm.JSONRPCClient
+	isReady    bool
+	healthMu   sync.RWMutex
 )
 
 func init() {
-	privBytes, err := hex.DecodeString(os.Getenv("FAUCET_PRIVATE_KEY_HEX"))
-	if err != nil {
-		log.Fatalf("failed to load private key: %v", err)
-	}
-	priv = ed25519.PrivateKey(privBytes)
-	factory = auth.NewED25519Factory(priv)
-
-	myAddressHex := auth.NewED25519Address(priv.PublicKey()).String()
-	log.Printf("Faucet address: %s\n", myAddressHex)
-
 	rpcEndpoint := os.Getenv("RPC_ENDPOINT")
 	if rpcEndpoint == "" {
 		log.Fatalf("RPC_ENDPOINT is not set")
 	}
 	url := fmt.Sprintf("%s/ext/bc/%s", rpcEndpoint, consts.Name)
 	hyperVMRPC = vm.NewJSONRPCClient(url)
-	hyperSDKRPC = jsonrpc.NewJSONRPCClient(url)
-
-	// Initialize WebSocket client
-	wsClient, err = ws.NewWebSocketClient(url, ws.DefaultHandshakeTimeout, pubsub.MaxPendingMessages, pubsub.MaxReadMessageSize)
-	if err != nil {
-		log.Fatalf("Failed to create WebSocket client: %v", err)
-	}
 }
 
-func transferCoins(to string) (string, error) {
+func faucetDrip(to string) (string, error) {
 	to = strings.TrimPrefix(to, "0x")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -83,11 +53,6 @@ func transferCoins(to string) (string, error) {
 	toAddr, err := codec.StringToAddress(to)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse to address: %w", err)
-	}
-
-	amt, err := utils.ParseBalance(amtStr)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse amount: %w", err)
 	}
 
 	balanceBefore, err := hyperVMRPC.Balance(ctx, toAddr)
@@ -102,55 +67,12 @@ func transferCoins(to string) (string, error) {
 		return "Balance is already greater than 1.000, no transfer needed", nil
 	}
 
-	parser, err := hyperVMRPC.Parser(ctx)
+	txID, err := hyperVMRPC.FaucetDrip(ctx, toAddr)
 	if err != nil {
-		return "", fmt.Errorf("failed to get parser: %w", err)
+		return "", fmt.Errorf("failed to drip from faucet: %w", err)
 	}
 
-	_, tx, _, err := hyperSDKRPC.GenerateTransaction(
-		ctx,
-		parser,
-		[]chain.Action{&actions.Transfer{
-			To:    toAddr,
-			Value: amt,
-		}},
-		factory,
-	)
-	if err != nil {
-		return "", fmt.Errorf("failed to generate transaction: %w", err)
-	}
-
-	// Register transaction with WebSocket client
-	if err := wsClient.RegisterTx(tx); err != nil {
-		return "", fmt.Errorf("failed to register transaction: %w", err)
-	}
-
-	// Listen for the transaction result
-	var result *chain.Result
-	for {
-		txID, txErr, txResult, err := wsClient.ListenTx(ctx)
-		if err != nil {
-			if ctx.Err() == context.DeadlineExceeded {
-				return "", fmt.Errorf("failed to listen for transaction: %w", ctx.Err())
-			}
-			return "", fmt.Errorf("failed to listen for transaction: %w", err)
-		}
-		if txErr != nil {
-			return "", txErr
-		}
-		if txID == tx.ID() {
-			result = txResult
-			break
-		}
-		log.Printf("Skipping unexpected transaction: %s\n", tx.ID())
-	}
-
-	// Check transaction result
-	if !result.Success {
-		return "", fmt.Errorf("transaction failed: %s", result.Error)
-	}
-
-	return "Coins transferred successfully", nil
+	return fmt.Sprintf("Faucet drip successful. Transaction ID: %s", txID), nil
 }
 
 func main() {
@@ -186,6 +108,7 @@ func main() {
 		log.Fatal(err)
 	}
 }
+
 func handleAPIDocumentation(w http.ResponseWriter, r *http.Request) {
 	apiDoc := `Faucet API Guide
 
@@ -208,11 +131,11 @@ func performInitialTransfer() {
 		log.Fatalf("Failed to generate random ID: %v", err)
 	}
 
-	randomAddressHex := codec.CreateAddress(auth.ED25519ID, randomId)
+	randomAddressHex := codec.CreateAddress(0, randomId)
 	log.Printf("Performing initial transfer to ready check address: %s\n", randomAddressHex.String())
 
 	for i := 0; i < 10; i++ {
-		message, err := transferCoins(randomAddressHex.String())
+		message, err := faucetDrip(randomAddressHex.String())
 		if err == nil {
 			log.Printf("Initial transfer result: %s\n", message)
 			setReady(true)
@@ -223,7 +146,7 @@ func performInitialTransfer() {
 		time.Sleep(time.Duration(i+1) * time.Second)
 	}
 
-	log.Fatal("Faucet initialization failed after 5 attempts. Exiting.")
+	log.Fatal("Faucet initialization failed after 10 attempts. Exiting.")
 }
 
 func setReady(status bool) {
@@ -277,10 +200,10 @@ func handleFaucetRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message, err := transferCoins(address)
+	message, err := faucetDrip(address)
 	if err != nil {
-		log.Printf("Failed to transfer coins: %v\n", err)
-		http.Error(w, fmt.Sprintf("Failed to transfer coins: %v", err), http.StatusInternalServerError)
+		log.Printf("Failed to drip from faucet: %v\n", err)
+		http.Error(w, fmt.Sprintf("Failed to drip from faucet: %v", err), http.StatusInternalServerError)
 		return
 	}
 

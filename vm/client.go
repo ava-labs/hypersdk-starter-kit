@@ -88,6 +88,22 @@ func (cli *JSONRPCClient) WaitForBalance(
 	})
 }
 
+func (cli *JSONRPCClient) FaucetDrip(ctx context.Context, addr codec.Address) (string, error) {
+	resp := new(FaucetDripReply)
+	err := cli.requester.SendRequest(
+		ctx,
+		"faucetDrip",
+		&FaucetDripArgs{
+			Address: addr,
+		},
+		resp,
+	)
+	if err != nil {
+		return "", err
+	}
+	return resp.TxID, nil
+}
+
 func (cli *JSONRPCClient) Parser(ctx context.Context) (chain.Parser, error) {
 	g, err := cli.Genesis(ctx)
 	if err != nil {

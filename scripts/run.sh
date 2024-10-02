@@ -85,6 +85,8 @@ if [[ ${MODE} == "run" ]]; then
   additional_args+=("--reuse-network")
 fi
 
+echo "FAUCET_PRIVATE_KEY_HEX=$FAUCET_PRIVATE_KEY_HEX"
+export FAUCET_PRIVATE_KEY_HEX
 echo "running e2e tests"
 ./tests/e2e/e2e.test \
 --ginkgo.v \
