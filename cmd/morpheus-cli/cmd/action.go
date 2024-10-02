@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ava-labs/hypersdk-starter/actions"
-	"github.com/ava-labs/hypersdk-starter/consts"
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/cli/prompt"
 )
@@ -43,7 +42,7 @@ var transferCmd = &cobra.Command{
 		}
 
 		// Select amount
-		amount, err := prompt.Amount("amount", consts.Decimals, balance, nil)
+		amount, err := prompt.Amount("amount", balance, nil)
 		if err != nil {
 			return err
 		}

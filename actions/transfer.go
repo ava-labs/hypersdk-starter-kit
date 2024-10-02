@@ -8,12 +8,13 @@ import (
 	"errors"
 
 	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/hypersdk-starter/consts"
-	"github.com/ava-labs/hypersdk-starter/storage"
 
+	"github.com/ava-labs/hypersdk-starter/storage"
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/state"
+
+	mconsts "github.com/ava-labs/hypersdk-starter/consts"
 )
 
 const (
@@ -39,18 +40,14 @@ type Transfer struct {
 }
 
 func (*Transfer) GetTypeID() uint8 {
-	return consts.TransferID
+	return mconsts.TransferID
 }
 
-func (t *Transfer) StateKeys(actor codec.Address, _ ids.ID) state.Keys {
+func (t *Transfer) StateKeys(actor codec.Address) state.Keys {
 	return state.Keys{
 		string(storage.BalanceKey(actor)): state.Read | state.Write,
 		string(storage.BalanceKey(t.To)):  state.All,
 	}
-}
-
-func (*Transfer) StateKeysMaxChunks() []uint16 {
-	return []uint16{storage.BalanceChunks, storage.BalanceChunks}
 }
 
 func (t *Transfer) Execute(
@@ -99,5 +96,5 @@ type TransferResult struct {
 }
 
 func (*TransferResult) GetTypeID() uint8 {
-	return consts.TransferID
+	return mconsts.TransferID // Common practice is to use the action ID
 }

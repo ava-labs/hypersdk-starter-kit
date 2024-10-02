@@ -85,7 +85,7 @@ func transferCoins(to string) (string, error) {
 		return "", fmt.Errorf("failed to parse to address: %w", err)
 	}
 
-	amt, err := utils.ParseBalance(amtStr, consts.Decimals)
+	amt, err := utils.ParseBalance(amtStr)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse amount: %w", err)
 	}
@@ -94,9 +94,9 @@ func transferCoins(to string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to get balance: %w", err)
 	}
-	log.Printf("Balance before: %s\n", utils.FormatBalance(balanceBefore, consts.Decimals))
+	log.Printf("Balance before: %s\n", utils.FormatBalance(balanceBefore))
 
-	threshold, _ := utils.ParseBalance("1.000", consts.Decimals)
+	threshold, _ := utils.ParseBalance("1.000")
 	if balanceBefore > threshold {
 		log.Printf("Balance is already greater than 1.000, no transfer needed\n")
 		return "Balance is already greater than 1.000, no transfer needed", nil

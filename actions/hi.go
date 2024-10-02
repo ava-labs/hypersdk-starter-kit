@@ -43,7 +43,7 @@ func (*Hi) GetTypeID() uint8 {
 	return consts.HiID
 }
 
-func (h *Hi) StateKeys(actor codec.Address, _ ids.ID) state.Keys {
+func (h *Hi) StateKeys(actor codec.Address) state.Keys {
 	return state.Keys{
 		string(storage.BalanceKey(actor)): state.Read,
 	}
