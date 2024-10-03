@@ -8,6 +8,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -49,10 +50,26 @@ var (
 )
 
 func init() {
-	privBytes, err := hex.DecodeString(os.Getenv("FAUCET_PRIVATE_KEY_HEX"))
-	if err != nil {
-		log.Fatalf("failed to load private key: %v", err)
+	var privBytes []byte
+	var err error
+
+	// Check if FAUCET_PRIVATE_KEY_HEX is set in the environment
+	envPrivKey := os.Getenv("FAUCET_PRIVATE_KEY_HEX")
+	if envPrivKey != "" {
+		privBytes, err = hex.DecodeString(envPrivKey)
+		if err != nil {
+			log.Fatalf("failed to decode private key from environment: %v", err)
+		}
+	} else {
+		// If not set in the environment, try to load from ./demo.pk file
+		privBytes, err = ioutil.ReadFile("./demo.pk")
+		if err != nil {
+			log.Fatalf("failed to load private key from file: %v", err)
+		}
+		// Trim any whitespace or newline characters
+		privBytes = []byte(strings.TrimSpace(string(privBytes)))
 	}
+
 	priv = ed25519.PrivateKey(privBytes)
 	factory = auth.NewED25519Factory(priv)
 
@@ -61,7 +78,7 @@ func init() {
 
 	rpcEndpoint := os.Getenv("RPC_ENDPOINT")
 	if rpcEndpoint == "" {
-		log.Fatalf("RPC_ENDPOINT is not set")
+		rpcEndpoint = "http://localhost:9650"
 	}
 	url := fmt.Sprintf("%s/ext/bc/%s", rpcEndpoint, consts.Name)
 	hyperVMRPC = vm.NewJSONRPCClient(url)

@@ -258,7 +258,7 @@ export function LatestBlocks() {
                                     <p className="font-semibold text-gray-800">{tx.response.success ? '✅ Success' : '❌ Failed'}</p>
                                     <p className="text-xs mt-2 text-gray-600">Sender: <span className="font-mono">tx.sender</span></p>
                                     <div className="mt-3 overflow-x-auto">
-                                        <pre className="text-xs text-gray-700">{JSON.stringify(tx.actions, null, 2)}</pre>
+                                        <pre className="text-xs text-gray-700">{stringify({ actions: tx.actions, outputs: tx.response.outputs }, null, 2)}</pre>
                                     </div>
                                 </div>
                             ))}
