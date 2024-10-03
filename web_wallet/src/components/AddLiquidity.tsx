@@ -72,7 +72,6 @@ const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, pools, onAddLiquidi
       setSellAmount(0)
 
     } catch (error) {       // pool already exists
-      log("info", `Pool already exists!`)
       const pool = pools.find(
         (p) =>
           (p.info?.tokenX === sellToken.address && p.info?.tokenY === buyToken.address) ||
@@ -80,6 +79,7 @@ const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, pools, onAddLiquidi
       );
 
       if (pool) {
+        log("info", `Pool already exists!`)
         try {
           const addLiqPayload = NewAddLiquidityAction(sellAmount.toString(), buyAmount.toString(), sellToken.address, buyToken.address, pool.poolAddress);
           const res = await vmClient.simulateAction(addLiqPayload)

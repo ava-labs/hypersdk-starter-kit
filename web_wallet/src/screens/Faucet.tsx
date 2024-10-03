@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { vmClient, requestFaucetTransfer } from '../VMClient'
+import { requestFaucetTransfer, vmClient } from '../VMClient'
 
 interface FaucetProps {
     minBalance: bigint
@@ -19,8 +19,7 @@ export default function Faucet({ children, minBalance, myAddr }: FaucetProps) {
         async function performFaucetRequest() {
             setLoading(l => l + 1)
             try {
-                const initialBalance = await vmClient.getBalance(myAddr) // need to fetch native token address
-    
+                const initialBalance = await vmClient.getBalance(myAddr)
                 if (initialBalance <= minBalance) {
 
 

@@ -31,7 +31,6 @@ export const CreateTokenModal: React.FC<CreateTokenModalProps> = ({ myAddr, onAd
 
     const payload = NewCreateTokenAction(name, symbol, metadata)
     const tokenRes = await vmClient.simulateAction(payload) as { tokenAddress: string }
-
     const mintPayload = NewMintTokenAction(myAddr, mintAmount, tokenRes.tokenAddress)
 
     await vmClient.sendTransaction([payload, mintPayload])

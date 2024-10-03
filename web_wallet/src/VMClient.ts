@@ -26,6 +26,9 @@ export const NewTransferAction = (to: string, tokenAddress: string, value: strin
 }
 
 export const NewTokenBalanceAction = (tokenAddress: string, address: string): ActionData => {
+    if (address.startsWith("0x")) {
+        address = address.slice(2);
+    }
     return {
         actionName: "GetTokenAccountBalance",
         data: {
@@ -39,7 +42,7 @@ export const NewTokenInfoAction = (token: string): ActionData => {
     return {
         actionName: "GetTokenInfo",
         data: {
-            token
+            token: token
         }
     }
 }
@@ -56,12 +59,15 @@ export const NewCreateTokenAction = (name: string, symbol: string, metadata: str
 }
 
 export const NewMintTokenAction = (to: string, value: string, token: string): ActionData => {
+    if (to.startsWith("0x")) {
+        to = to.slice(2);
+    }
     return {
         actionName: "MintToken",
         data: {
             to,
             value: vmClient.convertToNativeTokens(value).toString(),
-            token
+            token: token
         }
     }
 }
