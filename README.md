@@ -1,4 +1,4 @@
-# HyperSDK Starter
+# HyperSDK Starter Kit
 
 HyperSDK Starter includes:
 - Boilerplate VM based on [MorpheusVM](https://github.com/ava-labs/hypersdk/tree/main/examples/morpheusvm)
