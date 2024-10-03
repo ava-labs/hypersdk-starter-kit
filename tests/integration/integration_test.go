@@ -15,7 +15,7 @@ import (
 	"github.com/ava-labs/hypersdk/tests/integration"
 
 	lconsts "github.com/ava-labs/hypersdk-starter/consts"
-	cmfmmWorkload "github.com/ava-labs/hypersdk-starter/tests/workload"
+	morpheusWorkload "github.com/ava-labs/hypersdk-starter/tests/workload"
 	ginkgo "github.com/onsi/ginkgo/v2"
 )
 
@@ -25,7 +25,7 @@ func TestIntegration(t *testing.T) {
 
 var _ = ginkgo.BeforeSuite(func() {
 	require := require.New(ginkgo.GinkgoT())
-	genesis, workloadFactory, err := cmfmmWorkload.New(0 /* minBlockGap: 0ms */)
+	genesis, workloadFactory, err := morpheusWorkload.New(0 /* minBlockGap: 0ms */)
 	require.NoError(err)
 
 	genesisBytes, err := json.Marshal(genesis)
@@ -42,7 +42,6 @@ var _ = ginkgo.BeforeSuite(func() {
 		genesisBytes,
 		lconsts.ID,
 		vm.CreateParser,
-		vm.JSONRPCEndpoint,
 		workloadFactory,
 		randomEd25519AuthFactory,
 	)

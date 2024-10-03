@@ -21,7 +21,7 @@ var (
 	ErrOutputMintValueZero            = errors.New("mint value is zero")
 	ErrOutputBurnValueZero            = errors.New("burn value is zero")
 	ErrOutputTransferValueZero        = errors.New("transfer value is zero")
-	ErrOutputInsufficientTokenBalance = errors.New("insufficient token balance")
+	ErrOutputInsufficientTokenBalance = errors.New("insufficient tokeån balance")
 
 	// LP-related errors
 	ErrOutputInvalidFee                 = errors.New("proposed fee is not between 0 and 100")

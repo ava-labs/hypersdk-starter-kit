@@ -25,7 +25,7 @@ const owner = "cfmmvm-e2e-tests"
 var flagVars *e2e.FlagVars
 
 func TestE2e(t *testing.T) {
-	ginkgo.RunSpecs(t, "CFMMVM e2e test suites")
+	ginkgo.RunSpecs(t, "cfmmvm e2e test suites")
 }
 
 func init() {
@@ -45,9 +45,12 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	expectedABI, err := abi.NewABI(vm.ActionParser.GetRegisteredTypes(), vm.OutputParser.GetRegisteredTypes())
 	require.NoError(err)
 
+	parser, err := vm.CreateParser(genesisBytes)
+	require.NoError(err)
+
 	// Import HyperSDK e2e test coverage and inject MorpheusVM name
 	// and workload factory to orchestrate the test.
-	he2e.SetWorkload(consts.Name, workloadFactory, expectedABI)
+	he2e.SetWorkload(consts.Name, workloadFactory, parser, expectedABI)
 
 	tc := e2e.NewTestContext()
 

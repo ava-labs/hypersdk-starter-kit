@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -72,20 +73,11 @@ func init() {
 	if err != nil {
 		log.Fatalf("Failed to create WebSocket client: %v", err)
 	}
-
-	address, err := codec.StringToAddress(myAddressHex)
-	if err != nil {
-		log.Fatalf("failed to parse faucet address: %v", err)
-	}
-	faucetBalance, err := hyperVMRPC.Balance(context.TODO(), address)
-	if err != nil {
-		log.Fatalf("failed to get faucet balance: %v", err)
-	}
-	log.Printf("Faucet balance: %s\n", utils.FormatBalance(faucetBalance, consts.Decimals))
-	log.Printf("Token Address: %s\n", storage.CoinAddress.String())
 }
 
 func transferCoins(to string) (string, error) {
+	to = strings.TrimPrefix(to, "0x")
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -94,7 +86,7 @@ func transferCoins(to string) (string, error) {
 		return "", fmt.Errorf("failed to parse to address: %w", err)
 	}
 
-	amt, err := utils.ParseBalance(amtStr, consts.Decimals)
+	amt, err := utils.ParseBalance(amtStr)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse amount: %w", err)
 	}
@@ -103,9 +95,9 @@ func transferCoins(to string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to get balance: %w", err)
 	}
-	log.Printf("Balance before: %s\n", utils.FormatBalance(balanceBefore, consts.Decimals))
+	log.Printf("Balance before: %s\n", utils.FormatBalance(balanceBefore))
 
-	threshold, _ := utils.ParseBalance("1.000", consts.Decimals)
+	threshold, _ := utils.ParseBalance("1.000")
 	if balanceBefore > threshold {
 		log.Printf("Balance is already greater than 1.000, no transfer needed\n")
 		return "Balance is already greater than 1.000, no transfer needed", nil

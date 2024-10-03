@@ -1,7 +1,7 @@
 #####
 # Source of precompiled avalanchego
 #####
-ARG INSTALL_AVALANCHEGO_VERSION_SHORT=d729e5c7
+ARG INSTALL_AVALANCHEGO_VERSION_SHORT=d366a137
 FROM avaplatform/avalanchego:${INSTALL_AVALANCHEGO_VERSION_SHORT} AS avalanchego
 
 #####
@@ -12,7 +12,7 @@ FROM golang:1.22-bookworm AS hypersdk-downloader
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y curl && apt clean && rm -rf /var/lib/apt/lists/*
 
 
-ARG INSTALL_AVALANCHEGO_VERSION=d729e5c7ef9f008c3e89cd7131148ad3acda2e34
+ARG INSTALL_AVALANCHEGO_VERSION=v1.11.12-rc.2
 COPY --from=avalanchego /avalanchego/build/avalanchego /root/.hypersdk/avalanchego-${INSTALL_AVALANCHEGO_VERSION}/avalanchego
 
 
