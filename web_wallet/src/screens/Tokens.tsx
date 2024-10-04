@@ -13,7 +13,6 @@ interface TokensProps {
 }
 
 const Tokens: React.FC<TokensProps> = ({ myAddr, initialTokens, onAddToken }) => {
-  const [tokens, setTokens] = useState<Token[]>(initialTokens)
   const [logText, setLogText] = useState("")
 
   const log = useCallback((level: "success" | "error" | "info", text: string) => {
@@ -24,8 +23,7 @@ const Tokens: React.FC<TokensProps> = ({ myAddr, initialTokens, onAddToken }) =>
 }, []);
 
   const addToken = (token: Token) => {
-    log("info", `Adding token ${token.symbol}`)
-    setTokens([...tokens, token])
+    log("success", `Token Created and Minted | Symbol: ${token.symbol} Total Supply: ${token.totalSupply}`)
     onAddToken(token)
   }
 
@@ -48,7 +46,7 @@ const Tokens: React.FC<TokensProps> = ({ myAddr, initialTokens, onAddToken }) =>
               </tr>
             </thead>
             <tbody>
-              {tokens.map((token, index) => (
+              {initialTokens.map((token, index) => (
                 <tr key={index} className="border-b">
                   <td className="px-6 py-4 font-medium whitespace-nowrap">
                     {token.symbol}
@@ -66,7 +64,7 @@ const Tokens: React.FC<TokensProps> = ({ myAddr, initialTokens, onAddToken }) =>
           </table>
         </div>
 
-        {tokens.length === 0 && (
+        {initialTokens.length === 0 && (
           <p className="text-center text-gray-500 mt-4">No tokens added yet.</p>
         )}
       </div>

@@ -74,6 +74,8 @@ const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, pools, onAddLiquidi
         catch (error) {
           log("error", `Failed to add liquidity: ${(error as { message?: string })?.message || String(error)}`);
         }
+      } else {
+        log("error", `Failed to create liquidity pool: ${(error as { message?: string })?.message || String(error)}`);
       }
     }
   }
