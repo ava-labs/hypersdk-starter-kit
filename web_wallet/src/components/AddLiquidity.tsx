@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { ChevronDownIcon } from 'lucide-react'
-import { Token } from '../screens/App'
+import { Token, LiquidityPair } from '../VMClient.tsx'
 import { NewCreateLiquidityPoolAction, NewAddLiquidityAction, vmClient } from '../VMClient'
 
 interface AddLiquidityProps {
@@ -9,26 +9,6 @@ interface AddLiquidityProps {
   onAddLiquidity: (pair: LiquidityPair) => void;
   refreshPool: () => void;
 }
-
-interface LiquidityPair {
-  poolAddress: string,
-  poolTokenAddress: string,
-  info?: LiquidityPairInfo
-}
-
-interface LiquidityPairInfo {
-  tokenX: string,
-  tokenY: string,
-  fee: number,
-  feeTo: string,
-  functionID: number,
-  reserveX: number,
-  reserveY: number,
-  liquidityToken: string,
-  kLast: number,
-  balance?: number
-}
-
 
 const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, pools, onAddLiquidity, refreshPool }) => {
   const [logText, setLogText] = useState("")

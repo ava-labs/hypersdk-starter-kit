@@ -2,6 +2,41 @@ import { ActionData } from "hypersdk-client/src/snap";
 import { API_HOST, DECIMALS, FAUCET_HOST, VM_NAME, VM_RPC_PREFIX } from "./const";
 import { HyperSDKClient } from "hypersdk-client/src/client"
 
+
+export interface Token {
+    name: string;
+    symbol: string
+    metadata: string;
+    address: string;
+    balance: string;
+    totalSupply: string;
+    owner: string;
+  }
+  
+export interface TokensProps {
+    initialTokens: Token[];
+  }
+export interface LiquidityPair {
+    poolAddress: string,
+    poolTokenAddress: string,
+    info?: LiquidityPairInfo
+    tokenXSymbol?: string
+    tokenYSymbol?: string
+  }
+  
+export interface LiquidityPairInfo {
+    tokenX: string,
+    tokenY: string,
+    fee: number,
+    feeTo: string,
+    functionID: number,
+    reserveX: number,
+    reserveY: number,
+    liquidityToken: string,
+    kLast: number,
+    balance?: number
+  }
+
 export const vmClient = new HyperSDKClient(API_HOST, VM_NAME, VM_RPC_PREFIX, DECIMALS);
 
 export async function requestFaucetTransfer(address: string): Promise<void> {

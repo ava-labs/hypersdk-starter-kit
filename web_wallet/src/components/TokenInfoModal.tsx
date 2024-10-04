@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { Token } from '../screens/App'
-import { vmClient, NewTokenInfoAction } from "../VMClient"
+import { vmClient, NewTokenInfoAction, Token } from "../VMClient"
 interface TokenInfoModalProps {
   token: Token;
 }

@@ -6,6 +6,7 @@ import Swap from './Swap.tsx'
 import Faucet from "./Faucet.tsx"
 import Pool from './Pool.tsx'
 import { vmClient, NewTokenBalanceAction } from '../VMClient.ts'
+import { Token, TokensProps, LiquidityPair } from '../VMClient.tsx'
 import { addressHexFromPubKey } from 'hypersdk-client/src/lib/Marshaler.ts'
 import { SignerIface } from 'hypersdk-client/src/client/types'
 import { Tab } from '@headlessui/react'
@@ -15,38 +16,6 @@ type SignerConnectedEvent = CustomEvent<SignerIface | null>;
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
-}
-
-export interface Token {
-  name: string;
-  symbol: string
-  metadata: string;
-  address: string;
-  balance: string;
-  totalSupply: string;
-  owner: string;
-}
-
-interface TokensProps {
-  initialTokens: Token[];
-}
-interface LiquidityPair {
-  poolAddress: string,
-  poolTokenAddress: string,
-  info?: LiquidityPairInfo
-}
-
-interface LiquidityPairInfo {
-  tokenX: string,
-  tokenY: string,
-  fee: number,
-  feeTo: string,
-  functionID: number,
-  reserveX: number,
-  reserveY: number,
-  liquidityToken: string,
-  kLast: number,
-  balance?: number
 }
 
 const tokenProps: TokensProps = {

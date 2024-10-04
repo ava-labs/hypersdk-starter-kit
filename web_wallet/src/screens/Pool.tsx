@@ -2,7 +2,7 @@ import { useState } from 'react';
 import AddLiquidity from '../components/AddLiquidity';
 import RemoveLiquidity from '../components/RemoveLiquidity';
 import { Tab } from '@headlessui/react'
-import { Token } from './App';
+import { Token, LiquidityPair, LiquidityPairInfo } from '../VMClient.tsx'
 import { NewGetLiquidityPoolAction, NewTokenBalanceAction, vmClient } from '../VMClient'
 
 function classNames(...classes: string[]) {
@@ -18,27 +18,7 @@ interface PoolProps {
   handleRefresh: (pool: LiquidityPair[]) => void;
 }
 
-interface LiquidityPair {
-  poolAddress: string,
-  poolTokenAddress: string,
-  info?: LiquidityPairInfo
-}
-
-interface LiquidityPairInfo {
-  tokenX: string,
-  tokenY: string,
-  fee: number,
-  feeTo: string,
-  functionID: number,
-  reserveX: number,
-  reserveY: number,
-  liquidityToken: string,
-  kLast: number,
-  balance?: number
-}
-
 const Pool: React.FC<PoolProps> = ({ tokens, pools, myAddr, handleAddLiquidity, handleRemoveLiquidity, handleRefresh }) => {
-
 
     const refresh = async () => {
       const updatedPools = await Promise.all(

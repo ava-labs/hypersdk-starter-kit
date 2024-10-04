@@ -5,7 +5,6 @@ import { COIN_SYMBOL, TOKEN_ADDRESS } from '../const'
 
 const otherWalletAddress = "00c4cb545f748a28770042f893784ce85b107389004d6a0e0d6d7518eeae1292d9"
 
-
 export default function Wallet({ myAddr }: { myAddr: string }) {
     const [loading, setLoading] = useState(0)
     const [logText, setLogText] = useState("")

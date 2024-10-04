@@ -1,17 +1,16 @@
 "use client"
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import CreateTokenModal from '../components/CreateTokenModal'
 import TokenInfoModal from '../components/TokenInfoModal'
-import { Token } from './App'
-import { vmClient, NewTokenBalanceAction } from '../VMClient'
-import { TOKEN_ADDRESS } from '../const'
+import { Token } from '../VMClient.tsx'
+
+
 interface TokensProps {
-    myAddr: string;
+  myAddr: string;
   initialTokens: Token[];
   onAddToken: (token: Token) => void;
 }
-
 
 const Tokens: React.FC<TokensProps> = ({ myAddr, initialTokens, onAddToken }) => {
   const [tokens, setTokens] = useState<Token[]>(initialTokens)

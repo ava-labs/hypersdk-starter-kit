@@ -1,28 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { LiquidityPair } from '../VMClient.tsx'
 import { vmClient, NewRemoveLiquidityAction, NewTokenInfoAction } from '../VMClient'
-
-interface LiquidityPair {
-  poolAddress: string,
-  poolTokenAddress: string,
-  info?: LiquidityPairInfo,
-  tokenXSymbol?: string,
-  tokenYSymbol?: string
-}
-
-interface LiquidityPairInfo {
-  tokenX: string,
-  tokenY: string,
-  fee: number,
-  feeTo: string,
-  functionID: number,
-  reserveX: number,
-  reserveY: number,
-  liquidityToken: string,
-  kLast: number,
-  balance?: number
-}
-
 
 interface RemoveLiquidityProps {
     pools: LiquidityPair[];
