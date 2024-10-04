@@ -5,7 +5,7 @@ import Tokens from './Tokens'
 import Swap from './Swap.tsx'
 import Faucet from "./Faucet.tsx"
 import Pool from './Pool.tsx'
-import { vmClient } from '../VMClient.ts'
+import { vmClient, NewTokenBalanceAction } from '../VMClient.ts'
 import { addressHexFromPubKey } from 'hypersdk-client/src/lib/Marshaler.ts'
 import { SignerIface } from 'hypersdk-client/src/client/types'
 import { Tab } from '@headlessui/react'
@@ -100,6 +100,30 @@ function App() {
 
     return () => vmClient.removeEventListener('signerConnected', handleSignerConnected as EventListener)
   }, [])
+
+  useEffect(() => {
+    if (myAddr) {
+      const fetchBalances = async () => {
+        const newTokenList: Token[] = []
+        for (const token of tokenList) {
+          if (token.address) {
+            if (token.address == TOKEN_ADDRESS) {
+              const balance = await vmClient.getBalance(myAddr)
+              token.balance = vmClient.formatNativeTokens(balance)
+            } else {
+              const payload = NewTokenBalanceAction(token.address, myAddr)
+              const res = await vmClient.simulateAction(payload) as { balance: bigint }
+              token.balance = vmClient.formatNativeTokens(res.balance)
+            }
+          }
+          newTokenList.push(token)
+        }
+        setTokenList(newTokenList)
+      }
+      fetchBalances()
+    }
+    
+}, [myAddr, tokenList])
 
 
   const [categories] = useState({

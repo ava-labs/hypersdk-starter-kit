@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { ChevronDownIcon } from 'lucide-react'
 import { Token } from './App'
 import {NewSwapAction, vmClient} from '../VMClient'
@@ -27,6 +27,7 @@ interface LiquidityPairInfo {
 }
 
 const Swap: React.FC<SwapProps> = ({ tokens, pools }) => {
+  const [logText, setLogText] = useState("")
 
   const [sellToken, setSellToken] = useState(tokens[0])
   const [buyToken, setBuyToken] = useState(tokens[0])
@@ -34,18 +35,25 @@ const Swap: React.FC<SwapProps> = ({ tokens, pools }) => {
   const [buyDropdownOpen, setBuyDropdownOpen] = useState(false)
 
   const [sellAmount, setSellAmount] = useState(0)
-  const [buyAmount, setBuyAmount] = useState(0)
+  const [buyAmount, setBuyAmount] = useState('0')
 
   const sellDropdownRef = useRef(null)
   const buyDropdownRef = useRef(null)
 
+  const log = useCallback((level: "success" | "error" | "info", text: string) => {
+    const now = new Date();
+    const time = now.toLocaleTimeString('en-US', { hour12: false });
+    const emoji = level === 'success' ? '✅' : level === 'error' ? '❌' : 'ℹ️';
+    setLogText(prevLog => `${prevLog}\n${time} ${emoji} ${text}`);
+    }, []);
+    
   const handleSwapTokens = () => {
 
     setSellToken(buyToken)
     setBuyToken(sellToken)
 
-    setSellAmount(buyAmount)
-    setBuyAmount(sellAmount)
+    setSellAmount(parseFloat(buyAmount))
+    setBuyAmount(sellAmount.toString())
   }
 
   const swap = async () => {
@@ -64,11 +72,46 @@ const Swap: React.FC<SwapProps> = ({ tokens, pools }) => {
       return;
     }
     console.log(pool.poolAddress)
-    const payload = NewSwapAction(sellToken.address, buyToken.address, sellAmount.toString(), sellToken.address, pool.poolAddress)
-    console.log(payload)
-    const res = await vmClient.simulateAction(payload) as {amountOut: number, tokenOut: string}
-    console.log(res)
+    try {
+      const payload = NewSwapAction(sellToken.address, buyToken.address, sellAmount.toString(), sellToken.address, pool.poolAddress)
+      const res = await vmClient.simulateAction(payload) as {amountOut: number, tokenOut: string}
+      log('info', `Swap simulation Successful. Received ${res.amountOut} ${res.tokenOut}`)
+      await vmClient.sendTransaction([payload])
+      log('success', `Swap Successful. Received ${res.amountOut} ${res.tokenOut}`)
+      setSellAmount(0)
+      setBuyAmount('0')
+
+    } catch {
+      log('error', 'Swap Failed')
+    }
   }
+
+  useEffect(() => {
+    if (!pools) {
+      console.error('Pools array is undefined');
+      return;
+    }
+
+    const pool = pools.find((pool) => {
+      return (pool.info?.tokenX === sellToken.address && pool.info?.tokenY === buyToken.address) ||
+       (pool.info?.tokenX === buyToken.address && pool.info?.tokenY === sellToken.address);
+    });
+
+    if (!pool) {
+      console.error('No matching pool found');
+      return;
+    }
+    const getExpectedOutput = async () => {
+      try {
+        const payload = NewSwapAction(sellToken.address, buyToken.address, sellAmount.toString(), sellToken.address, pool.poolAddress)
+        const res = await vmClient.simulateAction(payload) as {amountOut: number, tokenOut: string}
+        setBuyAmount(vmClient.formatNativeTokens(BigInt(res.amountOut)))
+      } catch {
+        setBuyAmount('0')
+      }
+    }
+    getExpectedOutput()
+  }, [sellAmount, sellToken, buyToken, pools])
 
   return (
     <div className="bg-transparent min-h-screen">
@@ -142,7 +185,7 @@ const Swap: React.FC<SwapProps> = ({ tokens, pools }) => {
           </label>
             <div className="flex items-center justify-between">
             <label className="bg-transparent text-5xl font-bold text-gray-500 w-full focus:outline-none">
-              {buyAmount}
+              {buyAmount.substring(0,5)}
             </label>
             <div className="relative" ref={buyDropdownRef}>
               <button
@@ -181,7 +224,13 @@ const Swap: React.FC<SwapProps> = ({ tokens, pools }) => {
         </button>
         </div>
       </div>
+      
       </div>
+      <div className="mt-8 border border-gray-300 rounded p-4 min-h-16">
+            <pre className="font-mono text-sm">
+                {logText}
+            </pre>
+        </div>      
     </div>
   )
 }

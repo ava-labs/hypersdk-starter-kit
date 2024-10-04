@@ -9,6 +9,8 @@ import (
 	smath "github.com/ava-labs/avalanchego/utils/math"
 )
 
+const feeMultiplier = 1_000
+
 var _ Model = (*ConstantProduct)(nil)
 
 type ConstantProduct struct {
@@ -146,31 +148,38 @@ func (c *ConstantProduct) Swap(
 	if err != nil {
 		return 0, nil
 	}
-	var output uint64
+
+	var (
+		output uint64
+		alpha  = c.reserveX
+		beta   = c.reserveY
+	)
+
 	if swappingX {
-		// Swapping X for Y
-		num, err := smath.Mul(1000, k)
-		if err != nil {
-			return 0, err
-		}
-		denomLeft, err := smath.Mul(1000, c.reserveX)
-		if err != nil {
-			return 0, err
-		}
-		denomRight, err := smath.Mul(amountIn, c.fee)
-		if err != nil {
-			return 0, err
-		}
-		denom, err := smath.Add(denomLeft, denomRight)
-		if err != nil {
-			return 0, err
-		}
+		alpha, beta = beta, alpha
+	}
 
-		output, err = smath.Sub(c.reserveY, num/denom)
-		if err != nil {
-			return 0, err
-		}
+	adjustedFee, err := smath.Sub(feeMultiplier, c.fee)
+	if err != nil {
+		return 0, err
+	}
+	denomRight, err := smath.Mul(amountIn, adjustedFee)
+	if err != nil {
+		return 0, err
+	}
+	denomRight /= feeMultiplier
 
+	denom, err := smath.Add(alpha, denomRight)
+	if err != nil {
+		return 0, err
+	}
+
+	output, err = smath.Sub(beta, k/denom)
+	if err != nil {
+		return 0, err
+	}
+
+	if swappingX {
 		c.reserveX, err = smath.Add(c.reserveX, amountIn)
 		if err != nil {
 			return 0, err
@@ -179,44 +188,18 @@ func (c *ConstantProduct) Swap(
 		if err != nil {
 			return 0, err
 		}
-		return output, nil
 	} else {
-		// Swapping Y for X
-		num, err := smath.Mul(1000, k)
-		if err != nil {
-			return 0, err
-		}
-
-		denomLeft, err := smath.Mul(1000, c.reserveY)
-		if err != nil {
-			return 0, err
-		}
-		denomRight, err := smath.Mul(amountIn, c.fee)
-		if err != nil {
-			return 0, err
-		}
-
-		denom, err := smath.Add(denomLeft, denomRight)
-		if err != nil {
-			return 0, err
-		}
-
-		output, err = smath.Sub(c.reserveX, num/denom)
-		if err != nil {
-			return 0, err
-		}
-
 		c.reserveX, err = smath.Sub(c.reserveX, output)
 		if err != nil {
 			return 0, err
 		}
-
 		c.reserveY, err = smath.Add(c.reserveY, amountIn)
 		if err != nil {
 			return 0, err
 		}
-		return output, nil
 	}
+
+	return output, nil
 }
 
 func (c *ConstantProduct) GetState() (uint64, uint64, uint64) {

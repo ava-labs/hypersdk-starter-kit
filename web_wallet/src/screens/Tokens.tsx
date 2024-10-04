@@ -30,35 +30,6 @@ const Tokens: React.FC<TokensProps> = ({ myAddr, initialTokens, onAddToken }) =>
     onAddToken(token)
   }
 
-  useEffect(() => {
-    try {
-      const fetchBalances = async () => {
-        const newTokenList: Token[] = []
-       for (const token of initialTokens) {
-        if (token.address) {
-            if (token.address == TOKEN_ADDRESS) {
-                const balance = await vmClient.getBalance(myAddr)
-
-                token.balance = vmClient.formatNativeTokens(balance)
-            } else {
-                const payload = NewTokenBalanceAction(token.address, myAddr)
-                const res = await vmClient.simulateAction(payload) as {balance: bigint}
-                token.balance =  vmClient.formatNativeTokens(res.balance)
-            }
-        }
-        newTokenList.push(token)
-       }
-         setTokens(newTokenList)
-    }
-    fetchBalances()
-    }
-    catch (e) {
-        console.error(e)
-    }
-
-  }
-    , [myAddr, tokens])
-
   return (
     <div className="w-full h-full flex flex-col bg-white">
       <h1 className="text-2xl font-bold p-4 border-b">My Token Management</h1>

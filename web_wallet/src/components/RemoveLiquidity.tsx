@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { vmClient, NewRemoveLiquidityAction } from '../VMClient'
+import { vmClient, NewRemoveLiquidityAction, NewTokenInfoAction } from '../VMClient'
 
 interface LiquidityPair {
   poolAddress: string,
   poolTokenAddress: string,
-  info?: LiquidityPairInfo
+  info?: LiquidityPairInfo,
+  tokenXSymbol?: string,
+  tokenYSymbol?: string
 }
 
 interface LiquidityPairInfo {
@@ -45,6 +47,24 @@ export default function RemoveLiquidity({ pools, onRemoveLiquidity, refreshPool 
     setShowInfoModal(true)
   }
 
+  useEffect(() => {
+      const fetchTokenInfo = async (tokenAddress: string) => {
+        const action = NewTokenInfoAction(tokenAddress)
+        const result = await vmClient.simulateAction(action) as { name: string, symbol: string, metadata: string, supply: bigint, owner: string }
+        return result
+      }
+
+      pools.forEach(async (pool) => {
+        if (pool.info) {
+          const tokenInfoX = await fetchTokenInfo(pool.info.tokenX)
+          const tokenInfoY = await fetchTokenInfo(pool.info.tokenY)
+          pool.tokenXSymbol = tokenInfoX.symbol
+          pool.tokenYSymbol = tokenInfoY.symbol
+        }
+      })
+    }, [pools])
+
+
   return (
     <div className="bg-transparent min-h-screen">
       <div className="flex items-center justify-center mt-20">
@@ -55,8 +75,9 @@ export default function RemoveLiquidity({ pools, onRemoveLiquidity, refreshPool 
               <div key={pair.poolAddress} className="border border-gray-700 rounded-xl p-4 space-y-4">
               <div className="flex justify-between items-center">
               <div className="flex-1 text-center">
-              <div className="text-xs text-gray-600">Pool Address</div>
-              <div className="text-sm font-medium text-black">{pair.poolAddress.substring(0, 12)}...</div>
+              <div className="text-xs text-gray-600">Pair</div>
+              <div className="text-sm font-medium text-black">{pair.tokenXSymbol} / {pair.tokenYSymbol}</div>
+              
               </div>
               <div className="flex-1 text-center">
                 <div className="flex justify-center space-x-4">
@@ -113,7 +134,6 @@ function RemoveLiquidityModal({ isOpen, onClose, pair, handleRemove, handleRefre
       const action = NewRemoveLiquidityAction(amount, pair.poolAddress, pair.info.tokenX, pair.info.tokenY)
       console.log(await vmClient.simulateAction(action))
       await vmClient.sendTransaction([action])
-
     }
     handleRefresh()
     handleRemove(pair)
@@ -134,23 +154,23 @@ function RemoveLiquidityModal({ isOpen, onClose, pair, handleRemove, handleRefre
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="bg-gray-800 rounded-lg p-6 w-full max-w-md m-4 shadow-xl"
+            transition={{ duration: 0.2 }}
+            className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-2xl font-bold mb-4 text-white">Remove Liquidity</h2>
+            <h2 className="text-xl font-bold mb-4 text-black">Remove Liquidity</h2>
             <form onSubmit={(e) => { e.preventDefault(); handleRemoveLiquidity(); }} className="space-y-4">
               <div className="space-y-4">
                 <div className="flex items-center">
-                  <label className="block text-sm font-medium text-gray-300 w-1/3">
+                  <label className="block text-sm font-medium text-gray-700 w-1/3">
                     Current Liquidity Token Balance
                   </label>
-                  <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white">
+                  <p className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black">
                     {pair.info?.balance?.toString()}
                   </p>
                 </div>
                 <div className="flex items-center">
-                  <label htmlFor="amount" className="block text-sm font-medium text-gray-300 w-1/3">
+                  <label htmlFor="amount" className="block text-sm font-medium text-gray-700 w-1/3">
                     Amount to Remove
                   </label>
                   <input
@@ -158,7 +178,7 @@ function RemoveLiquidityModal({ isOpen, onClose, pair, handleRemove, handleRefre
                     id="amount"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white focus:ring-red-500 focus:border-red-500"
+                    className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter amount"
                   />
                 </div>
@@ -167,7 +187,7 @@ function RemoveLiquidityModal({ isOpen, onClose, pair, handleRemove, handleRefre
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                 >
                   Cancel
                 </button>
@@ -188,143 +208,117 @@ function RemoveLiquidityModal({ isOpen, onClose, pair, handleRemove, handleRefre
 
 
 const LiquidityInfoModal = ({ isOpen, onClose, pair }: { isOpen: boolean; onClose: () => void; pair: LiquidityPair }) => {
-
-return (
-  <AnimatePresence>
-    {isOpen && (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-40 flex items-center justify-center"
-        onClick={onClose}
-      >
+  return (
+    <AnimatePresence>
+      {isOpen && (
         <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="bg-gray-800 rounded-lg p-6 w-full max-w-md m-4 shadow-xl overflow-y-auto max-h-full"
-          onClick={(e) => e.stopPropagation()}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-40 flex items-center justify-center"
+          onClick={onClose}
         >
-          <h2 className="text-2xl font-bold mb-4 text-white">Liquidity Pair Info</h2>
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-bold mb-4 text-black">Liquidity Pair Info</h2>
             <div className="space-y-4">
-            <div className="flex items-center">
-              <label className="block text-sm font-medium text-gray-300 w-1/3">
-              Pool Address
-              </label>
-              <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white break-words">
-              {pair.poolAddress}
-              </p>
-            </div>
-            <div className="flex items-center">
-              <label className="block text-sm font-medium text-gray-300 w-1/3">
-              Pool Token Address
-              </label>
-              <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white break-words">
-              {pair.poolTokenAddress}
-              </p>
-            </div>
-            {pair.info && (
-              <>
               <div className="flex items-center">
-                <label className="block text-sm font-medium text-gray-300 w-1/3">
-                Token X
-                </label>
-                <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white break-words">
-                {pair.info.tokenX}
+                <label className="block text-sm font-medium text-gray-700 w-1/3">Pool Address</label>
+                <p className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black break-words">
+                  {pair.poolAddress}
                 </p>
               </div>
               <div className="flex items-center">
-                <label className="block text-sm font-medium text-gray-300 w-1/3">
-                Token Y
-                </label>
-                <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white break-words">
-                {pair.info.tokenY}
+                <label className="block text-sm font-medium text-gray-700 w-1/3">Pool Token Address</label>
+                <p className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black break-words">
+                  {pair.poolTokenAddress}
                 </p>
               </div>
-              <div className="flex items-center">
-                <label className="block text-sm font-medium text-gray-300 w-1/3">
-                Fee
-                </label>
-                <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white break-words">
-                {pair.info.fee.toString()}
-                </p>
-              </div>
-              <div className="flex items-center">
-                <label className="block text-sm font-medium text-gray-300 w-1/3">
-                Fee To
-                </label>
-                <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white break-words">
-                {pair.info.feeTo}
-                </p>
-              </div>
-              <div className="flex items-center">
-                <label className="block text-sm font-medium text-gray-300 w-1/3">
-                Function ID
-                </label>
-                <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white break-words">
-                {pair.info.functionID.toString()}
-                </p>
-              </div>
-              <div className="flex items-center">
-                <label className="block text-sm font-medium text-gray-300 w-1/3">
-                Reserve X
-                </label>
-                <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white break-words">
-                {vmClient.formatNativeTokens(BigInt(pair.info.reserveX))}
-                </p>
-              </div>
-              <div className="flex items-center">
-                <label className="block text-sm font-medium text-gray-300 w-1/3">
-                Reserve Y
-                </label>
-                <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white break-words">
-                {vmClient.formatNativeTokens(BigInt(pair.info.reserveY))}
-                </p>
-              </div>
-              <div className="flex items-center">
-                <label className="block text-sm font-medium text-gray-300 w-1/3">
-                Liquidity Token
-                </label>
-                <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white break-words">
-                {pair.info.liquidityToken}
-                </p>
-              </div>
-              <div className="flex items-center">
-                <label className="block text-sm font-medium text-gray-300 w-1/3">
-                K Last
-                </label>
-                <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white break-words">
-                {pair.info.kLast.toString()}
-                </p>
-              </div>
-              {pair.info.balance && (
-                <div className="flex items-center">
-                <label className="block text-sm font-medium text-gray-300 w-1/3">
-                  My Balance
-                </label>
-                <p className="mt-1 block w-2/3 shadow-sm sm:text-sm border-gray-600 rounded-md bg-gray-700 p-2 text-white break-words">
-                  {pair.info.balance.toString()}
-                </p>
-                </div>
+              {pair.info && (
+                <>
+                  <div className="flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 w-1/3">Token X</label>
+                    <p className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black break-words">
+                      {pair.info.tokenX}
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 w-1/3">Token Y</label>
+                    <p className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black break-words">
+                      {pair.info.tokenY}
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 w-1/3">Fee</label>
+                    <p className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black break-words">
+                      {pair.info.fee.toString()}
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 w-1/3">Fee To</label>
+                    <p className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black break-words">
+                      {pair.info.feeTo}
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 w-1/3">Function ID</label>
+                    <p className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black break-words">
+                      {pair.info.functionID.toString()}
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 w-1/3">Reserve X</label>
+                    <p className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black break-words">
+                      {vmClient.formatNativeTokens(BigInt(pair.info.reserveX))}
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 w-1/3">Reserve Y</label>
+                    <p className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black break-words">
+                      {vmClient.formatNativeTokens(BigInt(pair.info.reserveY))}
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 w-1/3">Liquidity Token</label>
+                    <p className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black break-words">
+                      {pair.info.liquidityToken}
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 w-1/3">K Last</label>
+                    <p className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black break-words">
+                      {pair.info.kLast.toString()}
+                    </p>
+                  </div>
+                  {pair.info.balance && (
+                    <div className="flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 w-1/3">My Balance</label>
+                      <p className="mt-1 block w-2/3 border border-gray-300 rounded-md bg-gray-100 p-2 text-black break-words">
+                        {pair.info.balance.toString()}
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
-              </>
-            )}
             </div>
-          <div className="flex justify-end space-x-2 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-            >
-              Close
-            </button>
-          </div>
+            <div className="flex justify-end space-x-2 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              >
+                Close
+              </button>
+            </div>
+          </motion.div>
         </motion.div>
-      </motion.div>
-    )}
-  </AnimatePresence>
-) 
-
-}
+      )}
+    </AnimatePresence>
+  );
+};
