@@ -205,7 +205,7 @@ const AddLiquidity: React.FC<AddLiquidityProps> = ({ tokens, pools, onAddLiquidi
               className="bg-transparent text-2xl font-bold text-gray-500 w-full focus:outline-none"
               placeholder="Function ID"
               value={functionID}
-              onChange={(e) => setFunctionID(e.target.value)}
+              onChange={(e) => setFunctionID(parseInt(e.target.value))}
               />
             </div>
 
