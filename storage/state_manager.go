@@ -48,7 +48,7 @@ func (*StateManager) AddBalance(ctx context.Context, addr codec.Address, mu stat
 func (*StateManager) SponsorStateKeys(addr codec.Address) state.Keys {
 	return state.Keys{
 		string(TokenAccountBalanceKey(CoinAddress, addr)): state.All,
-		string(TokenInfoKey(CoinAddress)):                 state.All,
+		// string(TokenInfoKey(CoinAddress)):                 state.All,
 	}
 }
 
