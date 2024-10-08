@@ -3,7 +3,7 @@ import { vmClient } from '../VMClient'
 import { VMABI } from 'hypersdk-client/src/lib/Marshaler';
 import { ArrowPathIcon, ClipboardIcon } from '@heroicons/react/24/outline'
 import { stringify } from 'lossless-json'
-import { ExecutedBlock } from 'hypersdk-client/src/client/apiTransformers';
+import { Block } from 'hypersdk-client/src/client/apiTransformers';
 
 import TimeAgo from 'javascript-time-ago'
 import timeAgoEn from 'javascript-time-ago/locale/en'
@@ -211,8 +211,8 @@ export default function Wallet({ myAddr }: { myAddr: string }) {
     )
 }
 
-export function LatestBlocks() {
-    const [blocks, setBlocks] = useState([] as ExecutedBlock[]);
+function LatestBlocks() {
+    const [blocks, setBlocks] = useState([] as Block[]);
     const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
     useEffect(() => {
@@ -238,35 +238,52 @@ export function LatestBlocks() {
     }, []);
 
     return (
-        <div className="lg:w-1/3 mt-8 lg:mt-0">
+        <div className="lg:w-1/2 mt-8 lg:mt-0">
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">Latest Blocks</h2>
             <div>
                 {blocks.length === 0 ? (
                     <p className="text-gray-600">Waiting for new blocks (empty blocks are skipped)...</p>
                 ) : (
-                    blocks.map((block) => (
-                        <div key={block.height} className="mb-6 last:mb-0 bg-white p-6 rounded-lg shadow-md">
-                            <h3 className="text-2xl font-bold text-gray-800">Block #{block.height}</h3>
-                            <p className="text-sm text-gray-600 mb-3">{ago.format(block.timestamp, 'round')}</p>
-                            <div className="mb-4">
-                                <p className="text-xs text-gray-500 truncate">Parent: <span className="font-mono">{block.parent}</span></p>
-                                <p className="text-xs text-gray-500 truncate">State Root: <span className="font-mono">{block.stateRoot}</span></p>
-                            </div>
-                            <p className="text-sm font-semibold mb-3 text-gray-700">{block.transactions.length} Transaction{block.transactions.length === 1 ? '' : 's'}</p>
-                            {block.transactions.map((tx, index) => (
-                                <div key={index} className="mt-4 p-4 bg-gray-100 rounded-md shadow-sm">
-                                    <p className="font-semibold text-gray-800">{tx.response.success ? '✅ Success' : '❌ Failed'}</p>
-                                    <p className="text-xs mt-2 text-gray-600">Sender: <span className="font-mono">tx.sender</span></p>
-                                    <div className="mt-3 overflow-x-auto">
-                                        <pre className="text-xs text-gray-700">{JSON.stringify(tx.actions, null, 2)}</pre>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ))
+                    blocks.map((block) => <RenderBlock key={block.block.height} block={block} />)
                 )}
             </div>
         </div>
     );
 }
+function RenderBlock({ block }: { block: Block }) {
+    const [showFullJson, setShowFullJson] = useState(false);
 
+    return (
+        <div key={block.block.height} className="mb-6 last:mb-0 bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-2xl font-bold text-gray-800">Block #{block.block.height}</h3>
+            <p className="text-sm text-gray-600 mb-3">{ago.format(block.block.timestamp, 'round')}</p>
+            <div className="mb-4">
+                <p className="text-xs text-gray-500 truncate">Parent: <span className="font-mono">{block.block.parent}</span></p>
+                <p className="text-xs text-gray-500 truncate">State Root: <span className="font-mono">{block.block.stateRoot}</span></p>
+            </div>
+            <p className="text-sm font-semibold mb-3 text-gray-700">{block.block.txs.length} Transaction{block.block.txs.length === 1 ? '' : 's'}</p>
+            {block.block.txs.map((tx, index) => (
+                <div key={index} className="mt-4 p-4 bg-gray-100 rounded-md shadow-sm">
+                    <p className="font-semibold text-gray-800">{block.results[index].success ? '✅ Success' : '❌ Failed'}</p>
+                    <p className="text-xs mt-2 text-gray-600">Sender: <span className="font-mono">tx.sender</span></p>
+                    <div className="mt-3 overflow-x-auto">
+                        <pre className="text-xs text-gray-700">{stringify(tx.actions, null, 2)}</pre>
+                    </div>
+                </div>
+            ))}
+            <div className="mt-4">
+                <button
+                    onClick={() => setShowFullJson(!showFullJson)}
+                    className="text-blue-600 hover:text-blue-800 transition duration-300"
+                >
+                    {showFullJson ? 'Hide' : 'Show'} Full JSON
+                </button>
+                {showFullJson && (
+                    <div className='mt-2 bg-gray-100 p-4 rounded-md shadow-sm overflow-x-auto'>
+                        <pre className='text-xs text-gray-700'>{stringify(block, null, 2)}</pre>
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}
