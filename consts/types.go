@@ -5,6 +5,7 @@ package consts
 
 const (
 	// Action TypeIDs
-	TransferID uint8 = 0
-	HiID       uint8 = 1
+	TransferID    uint8 = 0
+	ClaimDomainID uint8 = 1
+	WhoisID       uint8 = 2
 )

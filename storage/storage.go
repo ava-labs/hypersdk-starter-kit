@@ -35,9 +35,11 @@ const (
 	heightPrefix    = 0x1
 	timestampPrefix = 0x2
 	feePrefix       = 0x3
+	domainPrefix    = 0x4
 )
 
 const BalanceChunks uint16 = 1
+const DomainChunks uint16 = 1
 
 var (
 	heightKey    = []byte{heightPrefix}
@@ -192,4 +194,45 @@ func TimestampKey() (k []byte) {
 
 func FeeKey() (k []byte) {
 	return feeKey
+}
+
+// [domainPrefix] + [domain]
+func DomainOwnerKey(domain string) (k []byte) {
+	k = make([]byte, 1+len(domain)+consts.Uint16Len)
+	k[0] = domainPrefix
+	copy(k[1:], domain)
+	binary.BigEndian.PutUint16(k[1+len(domain):], DomainChunks)
+	return
+}
+
+func GetDomainOwner(
+	ctx context.Context,
+	im state.Immutable,
+	domain string,
+) (codec.Address, bool, error) {
+	key := DomainOwnerKey(domain)
+	addrBytes, err := im.GetValue(ctx, key)
+	if err != nil {
+		if errors.Is(err, database.ErrNotFound) {
+			return codec.EmptyAddress, false, nil
+		}
+		return codec.EmptyAddress, false, fmt.Errorf("failed to get domain owner: %w", err)
+	}
+
+	owner, err := codec.ToAddress(addrBytes)
+	if err != nil {
+		return codec.EmptyAddress, false, fmt.Errorf("failed to decode domain owner: %w", err)
+	}
+
+	return owner, true, nil
+}
+
+func SetDomainOwner(
+	ctx context.Context,
+	mu state.Mutable,
+	domain string,
+	owner codec.Address,
+) error {
+	key := DomainOwnerKey(domain)
+	return mu.Insert(ctx, key, owner[:])
 }
