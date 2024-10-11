@@ -6,9 +6,9 @@ package vm
 import (
 	"github.com/ava-labs/avalanchego/utils/wrappers"
 
-	"github.com/ava-labs/hypersdk-starter/actions"
-	"github.com/ava-labs/hypersdk-starter/consts"
-	"github.com/ava-labs/hypersdk-starter/storage"
+	"github.com/ava-labs/hypersdk-starter-kit/actions"
+	"github.com/ava-labs/hypersdk-starter-kit/consts"
+	"github.com/ava-labs/hypersdk-starter-kit/storage"
 	"github.com/ava-labs/hypersdk/auth"
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"

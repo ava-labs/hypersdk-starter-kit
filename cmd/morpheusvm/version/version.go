@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ava-labs/hypersdk-starter/consts"
+	"github.com/ava-labs/hypersdk-starter-kit/consts"
 )
 
 func init() {

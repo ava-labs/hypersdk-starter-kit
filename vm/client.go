@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ava-labs/hypersdk-starter/consts"
-	"github.com/ava-labs/hypersdk-starter/storage"
+	"github.com/ava-labs/hypersdk-starter-kit/consts"
+	"github.com/ava-labs/hypersdk-starter-kit/storage"
 	"github.com/ava-labs/hypersdk/api/jsonrpc"
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
@@ -106,15 +106,15 @@ func (p *Parser) Rules(_ int64) chain.Rules {
 	return p.genesis.Rules
 }
 
-func (*Parser) ActionRegistry() chain.ActionRegistry {
+func (*Parser) ActionCodec() *codec.TypeParser[chain.Action] {
 	return ActionParser
 }
 
-func (*Parser) OutputRegistry() chain.OutputRegistry {
+func (*Parser) OutputCodec() *codec.TypeParser[codec.Typed] {
 	return OutputParser
 }
 
-func (*Parser) AuthRegistry() chain.AuthRegistry {
+func (*Parser) AuthCodec() *codec.TypeParser[chain.Auth] {
 	return AuthParser
 }
 
