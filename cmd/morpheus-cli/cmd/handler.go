@@ -8,8 +8,8 @@ import (
 
 	"github.com/ava-labs/avalanchego/ids"
 
-	"github.com/ava-labs/hypersdk-starter/consts"
-	"github.com/ava-labs/hypersdk-starter/vm"
+	"github.com/ava-labs/hypersdk-starter-kit/consts"
+	"github.com/ava-labs/hypersdk-starter-kit/vm"
 	"github.com/ava-labs/hypersdk/api/jsonrpc"
 	"github.com/ava-labs/hypersdk/api/ws"
 	"github.com/ava-labs/hypersdk/auth"
@@ -38,7 +38,7 @@ func (h *Handler) Root() *cli.Handler {
 }
 
 func (h *Handler) DefaultActor() (
-	ids.ID, *cli.PrivateKey, chain.AuthFactory,
+	ids.ID, *auth.PrivateKey, chain.AuthFactory,
 	*jsonrpc.JSONRPCClient, *vm.JSONRPCClient, *ws.WebSocketClient, error,
 ) {
 	addr, priv, err := h.h.GetDefaultKey(true)
@@ -73,7 +73,7 @@ func (h *Handler) DefaultActor() (
 		return ids.Empty, nil, nil, nil, nil, nil, err
 	}
 	// For [defaultActor], we always send requests to the first returned URI.
-	return chainID, &cli.PrivateKey{
+	return chainID, &auth.PrivateKey{
 			Address: addr,
 			Bytes:   priv,
 		}, factory, jcli,

@@ -9,13 +9,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/hypersdk-starter/vm"
+	"github.com/ava-labs/hypersdk-starter-kit/vm"
 	"github.com/ava-labs/hypersdk/auth"
 	"github.com/ava-labs/hypersdk/crypto/ed25519"
 	"github.com/ava-labs/hypersdk/tests/integration"
 
-	lconsts "github.com/ava-labs/hypersdk-starter/consts"
-	morpheusWorkload "github.com/ava-labs/hypersdk-starter/tests/workload"
+	lconsts "github.com/ava-labs/hypersdk-starter-kit/consts"
+	morpheusWorkload "github.com/ava-labs/hypersdk-starter-kit/tests/workload"
 	ginkgo "github.com/onsi/ginkgo/v2"
 )
 
@@ -25,7 +25,7 @@ func TestIntegration(t *testing.T) {
 
 var _ = ginkgo.BeforeSuite(func() {
 	require := require.New(ginkgo.GinkgoT())
-	genesis, workloadFactory, err := morpheusWorkload.New(0 /* minBlockGap: 0ms */)
+	genesis, workloadFactory, _, err := morpheusWorkload.New(0 /* minBlockGap: 0ms */)
 	require.NoError(err)
 
 	genesisBytes, err := json.Marshal(genesis)

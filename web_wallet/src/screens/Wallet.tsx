@@ -46,7 +46,7 @@ function Action({ actionName, abi, fetchBalance }: { actionName: string, abi: VM
         try {
             setActionLogs(prev => [...prev, `Action data for ${actionName}: ${JSON.stringify(actionInputs, null, 2)}`])
             const result = isReadOnly
-                ? await vmClient.simulateAction({ actionName, data: actionInputs })
+                ? await vmClient.executeActions([{ actionName, data: actionInputs }])
                 : await vmClient.sendTransaction([{ actionName, data: actionInputs }])
             const endTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             setActionLogs(prev => [...prev, `${endTime} - Success: ${stringify(result, null, 2)}`])

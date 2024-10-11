@@ -9,8 +9,10 @@ import (
 )
 
 const (
-	Name   = "morpheusvm"
-	Symbol = "RED"
+	HRP      = "morpheus"
+	Name     = "morpheusvm"
+	Symbol   = "RED"
+	Decimals = 9
 )
 
 var ID ids.ID

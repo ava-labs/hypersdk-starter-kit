@@ -13,7 +13,7 @@ HyperSDK Starter includes:
 - Optional: [Metamask Flask](https://chromewebstore.google.com/detail/metamask-flask-developmen/ljfoeinjpaedjfecbmggjgodbgkmjkjk). Disable normal Metamask, Core wallet, and other wallets. *Do not use your real private key with Flask*.
 
 ## 0. Clone this repo
-`git clone https://github.com/ava-labs/hypersdk-starter.git`
+`git clone https://github.com/ava-labs/hypersdk-starter-kit.git`
 
 ## 1. Launch this example
 
@@ -75,8 +75,8 @@ import (
 
 	"github.com/ava-labs/avalanchego/ids"
 
-	"github.com/ava-labs/hypersdk-starter/consts"
-	"github.com/ava-labs/hypersdk-starter/storage"
+	"github.com/ava-labs/hypersdk-starter-kit/consts"
+	"github.com/ava-labs/hypersdk-starter-kit/storage"
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/state"

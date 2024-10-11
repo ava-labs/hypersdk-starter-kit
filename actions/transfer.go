@@ -9,12 +9,12 @@ import (
 
 	"github.com/ava-labs/avalanchego/ids"
 
-	"github.com/ava-labs/hypersdk-starter/storage"
+	"github.com/ava-labs/hypersdk-starter-kit/storage"
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
 	"github.com/ava-labs/hypersdk/state"
 
-	mconsts "github.com/ava-labs/hypersdk-starter/consts"
+	mconsts "github.com/ava-labs/hypersdk-starter-kit/consts"
 )
 
 const (
