@@ -207,3 +207,6 @@ Learn more from [npm:hypersdk-client](https://www.npmjs.com/package/hypersdk-cli
   - Frontend: `npm run dev` in `web_wallet`
 - Be aware of potential port conflicts. If issues arise, `docker rm -f $(docker ps -a -q)` will help.
 - For VM development, you don’t need to know JavaScript—you can use an existing frontend, and all actions will be added automatically.
+- If the frontend works with an ephemeral private key but doesn't work with the Snap, delete the Snap, refresh the page, and try again. The Snap might be outdated.
+- Instead of using `./build/morpheus-cli` commands, please directly use `go run ./cmd/morpheus-cli/` for the CLI.
+- Always ensure that you have the `hypersdk-client` npm version and the golang `github.com/ava-labs/hypersdk` version from the same commit of the starter kit. HyperSDK evolves rapidly.
