@@ -1,12 +1,13 @@
 import { useState, useCallback, useEffect, useReducer } from 'react'
 import { vmClient } from '../VMClient'
-import { VMABI } from 'hypersdk-client/src/lib/Marshaler';
+import { addressHexFromPubKey, VMABI } from 'hypersdk-client/src/lib/Marshaler';
 import { ArrowPathIcon, ClipboardIcon } from '@heroicons/react/24/outline'
 import { stringify } from 'lossless-json'
 import { Block } from 'hypersdk-client/src/client/apiTransformers';
 
 import TimeAgo from 'javascript-time-ago'
 import timeAgoEn from 'javascript-time-ago/locale/en'
+import { hexToBytes } from '@noble/curves/abstract/utils';
 TimeAgo.addDefaultLocale(timeAgoEn)
 const ago = new TimeAgo('en-US')
 
@@ -263,13 +264,16 @@ function RenderBlock({ block }: { block: Block }) {
             </div>
             <p className="text-sm font-semibold mb-3 text-gray-700">{block.block.txs.length} Transaction{block.block.txs.length === 1 ? '' : 's'}</p>
             {block.block.txs.map((tx, index) => (
-                <div key={index} className="mt-4 p-4 bg-gray-100 rounded-md shadow-sm">
+                <>
                     <p className="font-semibold text-gray-800">{block.results[index].success ? '✅ Success' : '❌ Failed'}</p>
-                    <p className="text-xs mt-2 text-gray-600">Sender: <span className="font-mono">tx.sender</span></p>
-                    <div className="mt-3 overflow-x-auto">
-                        <pre className="text-xs text-gray-700">{stringify(tx.actions, null, 2)}</pre>
+                    <p className="text-xs mt-2 text-gray-600">Sender: <span className="font-mono">{addressHexFromPubKey(hexToBytes(tx.auth.signer))}</span></p>
+
+                    <div key={index} className="mt-4 p-4 bg-gray-100 rounded-md shadow-sm">
+                        <div className="mt-3 overflow-x-auto">
+                            <pre className="text-xs text-gray-700">{stringify({ actions: tx.actions, outputs: block.results[index].outputs }, null, 2)}</pre>
+                        </div>
                     </div>
-                </div>
+                </>
             ))}
             <div className="mt-4">
                 <button
