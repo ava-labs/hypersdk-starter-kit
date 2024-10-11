@@ -57,7 +57,7 @@ function Action({ actionName, abi, fetchBalance }: { actionName: string, abi: VM
         } catch (e) {
             console.error(e)
             const errorTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            setActionLogs(prev => [...prev, `${errorTime} - Error: ${e}`])
+            setActionLogs(prev => [...prev, `${errorTime} - Error: ${(e as Error)?.message ?? String(e)}`])
         }
     }
 
@@ -264,7 +264,7 @@ function RenderBlock({ block }: { block: Block }) {
             </div>
             <p className="text-sm font-semibold mb-3 text-gray-700">{block.block.txs.length} Transaction{block.block.txs.length === 1 ? '' : 's'}</p>
             {block.block.txs.map((tx, index) => (
-                <>
+                <div key={index}>
                     <p className="font-semibold text-gray-800">{block.results[index].success ? '✅ Success' : '❌ Failed'}</p>
                     <p className="text-xs mt-2 text-gray-600">Sender: <span className="font-mono">{addressHexFromPubKey(hexToBytes(tx.auth.signer))}</span></p>
 
@@ -273,7 +273,7 @@ function RenderBlock({ block }: { block: Block }) {
                             <pre className="text-xs text-gray-700">{stringify({ actions: tx.actions, outputs: block.results[index].outputs }, null, 2)}</pre>
                         </div>
                     </div>
-                </>
+                </div>
             ))}
             <div className="mt-4">
                 <button

@@ -18,7 +18,7 @@
     "@noble/curves": "^1.4.2",
     "@scure/base": "^1.1.7",
     "@types/javascript-time-ago": "^2.0.8",
-    "hypersdk-client": "^0.4.11",
+    "hypersdk-client": "file:../../hypersdk-client",
     "javascript-time-ago": "^2.5.11",
     "lossless-json": "^4.0.1",
     "react": "^18.3.1",
