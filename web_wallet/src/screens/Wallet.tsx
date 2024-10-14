@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect, useReducer } from 'react'
 import { vmClient } from '../VMClient'
-import { addressHexFromPubKey, VMABI } from 'hypersdk-client/src/lib/Marshaler';
+import { addressHexFromPubKey, VMABI } from 'hypersdk-client/dist/Marshaler';
 import { ArrowPathIcon, ClipboardIcon } from '@heroicons/react/24/outline'
 import { stringify } from 'lossless-json'
-import { Block } from 'hypersdk-client/src/client/apiTransformers';
+import { Block } from 'hypersdk-client/dist/apiTransformers';
 
 import TimeAgo from 'javascript-time-ago'
 import timeAgoEn from 'javascript-time-ago/locale/en'

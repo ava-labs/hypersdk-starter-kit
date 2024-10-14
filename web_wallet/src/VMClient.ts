@@ -1,5 +1,5 @@
 import { API_HOST, FAUCET_HOST, VM_NAME, VM_RPC_PREFIX } from "./const";
-import { HyperSDKClient } from "hypersdk-client/src/client"
+import { HyperSDKClient } from "hypersdk-client/dist/"
 
 
 export const vmClient = new HyperSDKClient(API_HOST, VM_NAME, VM_RPC_PREFIX);
