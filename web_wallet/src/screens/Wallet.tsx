@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useReducer } from 'react'
 import { vmClient } from '../VMClient'
-import { addressHexFromPubKey, VMABI } from 'hypersdk-client/dist/Marshaler';
+import { addressHexFromPubKey, VMABI } from 'hypersdk-client/src/Marshaler';
 import { ArrowPathIcon, ClipboardIcon } from '@heroicons/react/24/outline'
 import { stringify } from 'lossless-json'
 import { Block } from 'hypersdk-client/dist/apiTransformers';
