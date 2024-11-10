@@ -78,7 +78,7 @@ export default function ConnectWallet() {
                             onClick={() => isFlaskInstalled && connectWallet("metamask-snap", "npm")}
                             disabled={!isFlaskInstalled}
                         >
-                            {isFlaskInstalled ? "Connect with Snap" : "Mo MetaMask Flask detected"}
+                            {isFlaskInstalled ? "Connect with Snap" : "No MetaMask Flask detected"}
                         </button>
                         <button
                             type="button"

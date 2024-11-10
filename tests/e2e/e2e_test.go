@@ -4,11 +4,13 @@
 package e2e_test
 
 import (
-	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/ava-labs/avalanchego/tests/fixture/e2e"
 	"github.com/stretchr/testify/require"
+
+	_ "github.com/ava-labs/hypersdk-starter-kit/tests" // include the tests that are shared between the integration and e2e
 
 	"github.com/ava-labs/hypersdk-starter-kit/consts"
 	"github.com/ava-labs/hypersdk-starter-kit/tests/workload"
@@ -38,16 +40,10 @@ func init() {
 var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	require := require.New(ginkgo.GinkgoT())
 
-	gen, workloadFactory, spamKey, err := workload.New(100 /* minBlockGap: 100ms */)
-	require.NoError(err)
-
-	genesisBytes, err := json.Marshal(gen)
+	testingNetworkConfig, err := workload.NewTestNetworkConfig(100 * time.Millisecond)
 	require.NoError(err)
 
 	expectedABI, err := abi.NewABI(vm.ActionParser.GetRegisteredTypes(), vm.OutputParser.GetRegisteredTypes())
-	require.NoError(err)
-
-	parser, err := vm.CreateParser(genesisBytes)
 	require.NoError(err)
 
 	// Import HyperSDK e2e test coverage and inject MorpheusVM name
@@ -56,10 +52,16 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 		KeyType: auth.ED25519Key,
 	}
 
+	firstKey := testingNetworkConfig.Keys()[0]
+	generator := workload.NewTxGenerator(firstKey)
+	spamKey := &auth.PrivateKey{
+		Address: auth.NewED25519Address(firstKey.PublicKey()),
+		Bytes:   firstKey[:],
+	}
 	tc := e2e.NewTestContext()
-	he2e.SetWorkload(consts.Name, workloadFactory, expectedABI, parser, &spamHelper, spamKey)
+	he2e.SetWorkload(testingNetworkConfig, generator, expectedABI, &spamHelper, spamKey)
 
-	return fixture.NewTestEnvironment(tc, flagVars, owner, consts.Name, consts.ID, genesisBytes).Marshal()
+	return fixture.NewTestEnvironment(tc, flagVars, owner, testingNetworkConfig, consts.ID).Marshal()
 }, func(envBytes []byte) {
 	// Run in every ginkgo process
 

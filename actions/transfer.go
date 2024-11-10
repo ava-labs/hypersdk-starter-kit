@@ -43,7 +43,7 @@ func (*Transfer) GetTypeID() uint8 {
 	return mconsts.TransferID
 }
 
-func (t *Transfer) StateKeys(actor codec.Address) state.Keys {
+func (t *Transfer) StateKeys(actor codec.Address, _ ids.ID) state.Keys {
 	return state.Keys{
 		string(storage.BalanceKey(actor)): state.Read | state.Write,
 		string(storage.BalanceKey(t.To)):  state.All,
@@ -68,7 +68,7 @@ func (t *Transfer) Execute(
 	if err != nil {
 		return nil, err
 	}
-	receiverBalance, err := storage.AddBalance(ctx, mu, t.To, t.Value, true)
+	receiverBalance, err := storage.AddBalance(ctx, mu, t.To, t.Value)
 	if err != nil {
 		return nil, err
 	}
