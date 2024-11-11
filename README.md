@@ -98,7 +98,7 @@ func (*Greeting) GetTypeID() uint8 {
 
 // All database keys that could be touched during execution.
 // Will fail if a key is missing or has wrong permissions
-func (g *Greeting) StateKeys(actor codec.Address) state.Keys {
+func (g *Greeting) StateKeys(actor codec.Address, _ ids.ID) state.Keys {
 	return state.Keys{
 		string(storage.BalanceKey(actor)): state.Read,
 	}
@@ -155,6 +155,18 @@ func (g *GreetingResult) GetTypeID() uint8 {
 	return consts.HiID
 }
 ```
+
+Also, we would need to define the `HiID` constant in the `consts/types.go`:
+```go
+package consts
+
+const (
+	// Action TypeIDs
+	TransferID uint8 = 0
+	HiID       uint8 = 1//Add this line
+)
+```
+
 ### 3.2 Register the Action
 
 Now, you need to make both the VM and clients (via ABI) aware of this action.
