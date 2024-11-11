@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useReducer } from 'react'
 import { vmClient } from '../VMClient'
-import { addressHexFromPubKey, VMABI } from 'hypersdk-client/dist/Marshaler';
+import { addressHexFromPubKey, decodeAddress, VMABI } from 'hypersdk-client/src/Marshaler';
 import { ArrowPathIcon, ClipboardIcon } from '@heroicons/react/24/outline'
 import { stringify } from 'lossless-json'
 import { Block } from 'hypersdk-client/dist/apiTransformers';
@@ -12,7 +12,9 @@ TimeAgo.addDefaultLocale(timeAgoEn)
 const ago = new TimeAgo('en-US')
 
 const getDefaultValue = (fieldType: string) => {
-    if (fieldType === 'Address') return "00" + "00".repeat(27) + "00deadc0de"
+    const sampleAddressBytes = new Uint8Array([0xde, 0xad, 0xc0, 0xde, ...Array(29).fill(0)])
+
+    if (fieldType === 'Address') return decodeAddress(sampleAddressBytes)[0]
     if (fieldType === '[]uint8') return btoa('Luigi');
     if (fieldType === 'string') return 'Hello';
     if (fieldType === 'uint64') return '123456789';

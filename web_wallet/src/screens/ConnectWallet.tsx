@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { isFaucetReady, vmClient } from '../VMClient'
+import { decodeAddress } from "hypersdk-client/src/Marshaler"
 
 type SignerType = "metamask-snap" | "ephemeral";
 
@@ -78,7 +79,7 @@ export default function ConnectWallet() {
                             onClick={() => isFlaskInstalled && connectWallet("metamask-snap", "npm")}
                             disabled={!isFlaskInstalled}
                         >
-                            {isFlaskInstalled ? "Connect with Snap" : "Mo MetaMask Flask detected"}
+                            {isFlaskInstalled ? "Connect with Snap" : "No MetaMask Flask detected"}
                         </button>
                         <button
                             type="button"
@@ -115,7 +116,8 @@ function IsReadyWidget() {
 
             // Check VM API
             try {
-                await vmClient.getBalance('0x0000000000000000000000000000000000000000');
+                const [zeroAddr,] = decodeAddress(new Uint8Array(Array(33).fill(0)))
+                await vmClient.getBalance(zeroAddr);
                 setVmApiStatus('ready');
             } catch {
                 setVmApiStatus('error');
