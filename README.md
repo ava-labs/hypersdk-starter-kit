@@ -210,3 +210,42 @@ Learn more from [npm:hypersdk-client](https://www.npmjs.com/package/hypersdk-cli
 - If the frontend works with an ephemeral private key but doesn't work with the Snap, delete the Snap, refresh the page, and try again. The Snap might be outdated.
 - Instead of using `./build/morpheus-cli` commands, please directly use `go run ./cmd/morpheus-cli/` for the CLI.
 - Always ensure that you have the `hypersdk-client` npm version and the golang `github.com/ava-labs/hypersdk` version from the same commit of the starter kit. HyperSDK evolves rapidly.
+
+## Using CLI
+
+**Install CLI with a version matching `go.mod`:**
+```bash
+go install github.com/ava-labs/hypersdk/cmd/hypersdk-cli@fb8b6bf17264
+```
+
+**Set the endpoint to your local instance of the HyperSDK app:**
+```bash
+hypersdk-cli endpoint set --endpoint http://localhost:9650/ext/bc/morpheusvm/
+```
+
+**Import the faucet key**:
+```bash
+hypersdk-cli key set --key ./demo.pk 
+```
+
+**Check the balance**:
+```bash
+hypersdk-cli balance
+```
+
+**Execute a read-only action**:
+```bash
+hypersdk-cli read Transfer --data to=0x000000000000000000000000000000000000000000000000000000000000000000a7396ce9,value=12,memo=0xdeadc0de
+```
+
+**Execute a transaction action**:
+```bash
+hypersdk-cli tx Transfer --data to=0x000000000000000000000000000000000000000000000000000000000000000000a7396ce9,value=12,memo=0x001234
+```
+
+**Check the new balance**:
+```bash
+hypersdk-cli balance --sender 0x000000000000000000000000000000000000000000000000000000000000000000a7396ce9
+```
+
+Read more at [github.com/ava-labs/hypersdk/tree/main/cmd/hypersdk-cli](https://github.com/ava-labs/hypersdk/tree/main/cmd/hypersdk-cli)
