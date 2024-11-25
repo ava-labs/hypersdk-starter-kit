@@ -1,21 +1,41 @@
 import { useEffect, useState } from 'react'
 import { isFaucetReady, vmClient } from '../VMClient'
 
-type SignerType = "metamask-snap" | "ephemeral";
+type SignerType = "metamask-snap" | "ephemeral" | "core";
+
+const checkFlask = (clientVersion: string) => {
+    return String(clientVersion).indexOf("flask") !== -1
+}
 
 export default function ConnectWallet() {
     const [loading, setLoading] = useState(0)
     const [errors, setErrors] = useState<string[]>([])
     const [isFlaskInstalled, setIsFlaskInstalled] = useState(false)
+    const [isCoreInstalled, setIsCoreInstalled] = useState(false)
+
 
     useEffect(() => {
+        const setCoreInstalled = async () => {
+            if (window.ethereum.coreProvider) {
+                setIsCoreInstalled(true)
+                return true
+            }
+            return false
+        }
         const checkFlaskInstallation = async () => {
+
+
             if (window.ethereum) {
-                try {
-                    const clientVersion = await window.ethereum.request({ method: "web3_clientVersion" });
-                    setIsFlaskInstalled(String(clientVersion).indexOf("flask") !== -1);
-                } catch (error) {
-                    console.error("Error checking Flask installation:", error);
+                if (await setCoreInstalled()) {
+                    setIsFlaskInstalled(false);
+                    return;
+                }
+
+                const clientVersion = await window.ethereum.request({ method: "web3_clientVersion" });
+                if (checkFlask(clientVersion)) {
+                    setIsFlaskInstalled(true)
+                }
+                else {
                     setIsFlaskInstalled(false);
                 }
             } else {
@@ -24,19 +44,25 @@ export default function ConnectWallet() {
         };
 
         checkFlaskInstallation();
+        setCoreInstalled()
     }, []);
 
     async function connectWallet(signerType: SignerType, snapSource: "npm" | "local" = "npm") {
+        console.log('signerType: ', signerType);
         try {
             setLoading((prevLoading) => prevLoading + 1);
             if (signerType === "metamask-snap") {
                 const snapId = snapSource === "local" ? "local:http://localhost:8989" : undefined;
                 await vmClient.connectWallet({ type: "metamask-snap", snapId });
+            }
+            else if (signerType === "core") { 
+                await vmClient.connectWallet({ type: "core"});
             } else {
                 await vmClient.connectWallet({ type: "ephemeral" });
             }
         } catch (e) {
-            console.error(e);
+            console.error('connectWallet error: ', e);
+
             setErrors((prevErrors) => [...prevErrors, (e as Error)?.message || String(e)]);
         } finally {
             setLoading((prevLoading) => prevLoading - 1);
@@ -72,13 +98,21 @@ export default function ConnectWallet() {
                 <p className="mt-4 text-sm">Connect with Metamask Flask development signer via a Snap, or create a signer in memory.</p>
                 <div className="mt-8 flex flex-col space-y-4">
                     <div className="flex flex-row justify-between space-x-4">
-                        <button
+                        {!isCoreInstalled && <button
                             type="button"
                             className={`flex-1 px-4 py-2 ${isFlaskInstalled ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-600 cursor-not-allowed'} text-white font-semibold rounded transition-colors duration-200 transform ${isFlaskInstalled ? 'hover:scale-105' : ''}`}
                             onClick={() => isFlaskInstalled && connectWallet("metamask-snap", "npm")}
                             disabled={!isFlaskInstalled}
                         >
-                            {isFlaskInstalled ? "Connect with Snap" : "Mo MetaMask Flask detected"}
+                            {isFlaskInstalled ? "Connect with Snap" : "No MetaMask Flask detected"}
+                        </button>}
+                        <button
+                            type="button"
+                            className={`flex-1 px-4 py-2 ${isCoreInstalled ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-600 cursor-not-allowed'} text-white font-semibold rounded transition-colors duration-200 transform ${isCoreInstalled ? 'hover:scale-105' : ''}`}
+                            onClick={() => isCoreInstalled && connectWallet("core")}
+                            disabled={!isCoreInstalled}
+                        >
+                            {isCoreInstalled ? "Connect with Core" : "No Core detected"}
                         </button>
                         <button
                             type="button"
