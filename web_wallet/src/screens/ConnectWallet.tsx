@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { isFaucetReady, vmClient } from '../VMClient'
+import { decodeAddress } from "hypersdk-client/src/Marshaler"
 
 type SignerType = "metamask-snap" | "ephemeral" | "core";
 
@@ -16,7 +17,7 @@ export default function ConnectWallet() {
 
     useEffect(() => {
         const setCoreInstalled = async () => {
-            if (window.ethereum.coreProvider) {
+            if (window.ethereum?.coreProvider) {
                 setIsCoreInstalled(true)
                 return true
             }
@@ -31,7 +32,7 @@ export default function ConnectWallet() {
                     return;
                 }
 
-                const clientVersion = await window.ethereum.request({ method: "web3_clientVersion" });
+                const clientVersion = await window.ethereum.request({ method: "web3_clientVersion" }) as string;
                 if (checkFlask(clientVersion)) {
                     setIsFlaskInstalled(true)
                 }
@@ -149,7 +150,8 @@ function IsReadyWidget() {
 
             // Check VM API
             try {
-                await vmClient.getBalance('0x0000000000000000000000000000000000000000');
+                const [zeroAddr,] = decodeAddress(new Uint8Array(Array(33).fill(0)))
+                await vmClient.getBalance(zeroAddr);
                 setVmApiStatus('ready');
             } catch {
                 setVmApiStatus('error');

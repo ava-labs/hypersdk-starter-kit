@@ -66,6 +66,8 @@ github.com/ava-labs/hypersdk v0.0.18-0.20241004152358-fee360ff9631 h1:P99kT40yQ/
 github.com/ava-labs/hypersdk v0.0.18-0.20241004152358-fee360ff9631/go.mod h1:zotc+Wj24yOWfMt4sL+nbg0A9HToFM46NRgAwqkBbOE=
 github.com/ava-labs/hypersdk v0.0.18-0.20241011004749-6f15b2f26e77 h1:J64LuO7NBcRe/pNHq3QAemL6JlMRdi8trx+rDdVunAU=
 github.com/ava-labs/hypersdk v0.0.18-0.20241011004749-6f15b2f26e77/go.mod h1:tB6QfnNlWmbNj6erbYkAnqzZNNy4ETRpAlPtm7sTwio=
+github.com/ava-labs/hypersdk v0.0.18-0.20241108203825-fb8b6bf17264 h1:g/tNhI9JOpCDCAE0P2n+rfNa5uGX4v1myOhUK9+jEVI=
+github.com/ava-labs/hypersdk v0.0.18-0.20241108203825-fb8b6bf17264/go.mod h1:8VtL+0+7gg/XA/tHWcoCYE9E3fBP5uCu8rZiMTdNb2M=
 github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=

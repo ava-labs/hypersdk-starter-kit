@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/ava-labs/hypersdk-starter-kit/consts"
-	"github.com/ava-labs/hypersdk-starter-kit/storage"
 	"github.com/ava-labs/hypersdk/api/jsonrpc"
 	"github.com/ava-labs/hypersdk/chain"
 	"github.com/ava-labs/hypersdk/codec"
@@ -116,10 +115,6 @@ func (*Parser) OutputCodec() *codec.TypeParser[codec.Typed] {
 
 func (*Parser) AuthCodec() *codec.TypeParser[chain.Auth] {
 	return AuthParser
-}
-
-func (*Parser) StateManager() chain.StateManager {
-	return &storage.StateManager{}
 }
 
 func NewParser(genesis *genesis.DefaultGenesis) chain.Parser {
