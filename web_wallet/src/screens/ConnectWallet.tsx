@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { isFaucetReady, vmClient } from '../VMClient'
 import { decodeAddress } from "hypersdk-client/src/Marshaler"
+import { API_HOST, VM_NAME, VM_RPC_PREFIX } from '../const';
 
 type SignerType = "metamask-snap" | "ephemeral" | "core";
 
@@ -17,6 +18,8 @@ export default function ConnectWallet() {
 
     useEffect(() => {
         const setCoreInstalled = async () => {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            //@ts-expect-error
             if (window.ethereum?.coreProvider) {
                 setIsCoreInstalled(true)
                 return true
@@ -56,8 +59,8 @@ export default function ConnectWallet() {
                 const snapId = snapSource === "local" ? "local:http://localhost:8989" : undefined;
                 await vmClient.connectWallet({ type: "metamask-snap", snapId });
             }
-            else if (signerType === "core") { 
-                await vmClient.connectWallet({ type: "core"});
+            else if (signerType === "core") {
+                await vmClient.connectWallet({ type: "core", name: VM_NAME, rpcUrl: API_HOST, vmRpcPrefix: VM_RPC_PREFIX });
             } else {
                 await vmClient.connectWallet({ type: "ephemeral" });
             }
