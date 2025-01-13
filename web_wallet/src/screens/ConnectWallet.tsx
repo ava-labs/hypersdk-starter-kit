@@ -52,7 +52,6 @@ export default function ConnectWallet() {
     }, []);
 
     async function connectWallet(signerType: SignerType, snapSource: "npm" | "local" = "npm") {
-        console.log('signerType: ', signerType);
         try {
             setLoading((prevLoading) => prevLoading + 1);
             if (signerType === "metamask-snap") {
@@ -75,7 +74,9 @@ export default function ConnectWallet() {
 
     if (loading > 0) {
         return (<div className="flex items-center justify-center min-h-screen">
-            <div className="text-2xl font-bold">Please confirm the connection in Metamask Flask signer</div>
+            <div className="text-2xl font-bold">
+                {isFlaskInstalled && (<>Please confirm the connection in Metamask Flask signer</>)}
+                {isCoreInstalled && (<>Please confirm the connection in Core Extension</>)}</div>
         </div>)
     }
 
